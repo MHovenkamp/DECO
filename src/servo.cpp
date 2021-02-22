@@ -2,11 +2,11 @@
 
 void Servo::servoTask(){
     digitalWrite(servo_pin, LOW);
-    delayMicroseconds(2);
+    wait_us(2);
     digitalWrite(servo_pin, HIGH);
-    delayMicroseconds(current_degree_wait);
+    wait_us(current_degree_wait);
     digitalWrite(servo_pin, LOW);
-    delay(5);
+    rtos::ThisThread::sleep_for(MS(50));
 };
 
 void Servo::turnToDegree(int degree){
