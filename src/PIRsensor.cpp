@@ -4,8 +4,7 @@ void PIRSensor::PIRTask(){
     if( digitalRead(pir_pin) == HIGH){
         last_movement_time = millis();
     }
-    rtos::ThisThread::sleep_for(MS(50));
-    rtos::ThisThread::yield();
+    rtos::ThisThread::sleep_for(MS(5));
 };
 
 int PIRSensor::getLastMovement(){
