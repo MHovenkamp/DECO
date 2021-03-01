@@ -1,0 +1,41 @@
+# ifndef OLEDSCREEN_HPP
+# define OLEDSCREEN_HPP
+
+#include "support.hpp"
+#include "animations.hpp"
+
+class OledScreen{
+private:
+    int screen_with = 128;
+    int screen_heigth = 64;
+    int oled_reset = 4;
+    int screen_address = 0x3C;
+    Adafruit_SSD1306 display;
+public:
+    OledScreen():
+    display(Adafruit_SSD1306(screen_with, screen_heigth, &Wire, oled_reset))
+    {}
+
+    void setup(){
+        if(!display.begin(SSD1306_SWITCHCAPVCC, screen_address)) {
+            Serial.println(F("SSD1306 allocation failed"));
+            for(;;);
+        }
+        display.display();
+        delay(200);
+        display.clearDisplay();
+    };
+
+    template <unsigned int T>
+    void showAnimation(Animation<T>& animation){
+        for( unsigned int i = 0; i<animation.getAmountOfFrames(); i++){
+            display.clearDisplay();
+            display.drawBitmap(0,0, animation.getFrame(i), animation.getAnimationWidth(), animation.getAnimationHeight(), WHITE);
+            display.display();
+            rtos::ThisThread::sleep_for(MS(1000));
+        }
+    }
+
+};
+
+#endif //OLEDSCREEN_HPP
