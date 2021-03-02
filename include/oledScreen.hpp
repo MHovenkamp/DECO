@@ -29,10 +29,17 @@ public:
     template <unsigned int T>
     void showAnimation(Animation<T>& animation){
         for( unsigned int i = 0; i<animation.getAmountOfFrames(); i++){
+            const unsigned int amount_of_pixels = 1024;
+            unsigned char bitmap_new[amount_of_pixels] = {};
+            std::array<unsigned char, amount_of_pixels> bitmap = animation.getFrame(i);            
+            for(unsigned int j = 0; j < amount_of_pixels; j++){
+                bitmap_new[j] = bitmap[j];
+            }
             display.clearDisplay();
-            display.drawBitmap(0,0, animation.getFrame(i), animation.getAnimationWidth(), animation.getAnimationHeight(), WHITE);
+            display.drawBitmap(0,0, bitmap_new, animation.getAnimationWidth(), animation.getAnimationHeight(), WHITE);
             display.display();
-            rtos::ThisThread::sleep_for(MS(1000));
+            delay(1);
+            rtos::ThisThread::sleep_for(MS(333));
         }
     }
 

@@ -19,18 +19,12 @@ public:
     {
         bitmaps = bitmaps_outer;
     };
-    unsigned char * getFrame(unsigned int i){
-        std::array<unsigned char, 1024> temp;
-        uint8_t* return_map = new uint8_t[1024];
+    std::array<unsigned char, 1024> getFrame(unsigned int i){
         if( i >= amount_of_frames){
-            temp = bitmaps[amount_of_frames-1];
+            return bitmaps[amount_of_frames-1];
         } else {
-            temp = bitmaps[i];
+            return bitmaps[i];
         }
-        for(unsigned int i = 0; i < 1024; i++){
-            return_map[i] = temp[i];
-        }
-        return return_map;
     }
 
     uint8_t getAmountOfFrames(){
@@ -48,8 +42,15 @@ public:
 
 struct Animations{
 	// std::array<std::array<unsigned char, 1024>, 2> face_array = {{face::face_bits, face::face_blink_bits}};
-    std::array<std::array<unsigned char, 1024>, 2> face_array = {{face::face_bits, face::face_blink_bits}};
+    std::array<std::array<unsigned char, 1024>, 2> face_array = {{face::face_0, face::face_1}};
     Animation<2> face_idle = Animation<2>(face_array, 2, 128, 64);
+
+    std::array<std::array<unsigned char, 1024>, 5> face_blink_array = {{face_blink::face_blink_0,
+                                                                    face_blink::face_blink_1,
+                                                                    face_blink::face_blink_2,
+                                                                    face_blink::face_blink_3,
+                                                                    face_blink::face_blink_4}};
+    Animation<5> face_blink = Animation<5>(face_blink_array, 5, 128, 64);
 };
 
 
