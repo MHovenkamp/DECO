@@ -7,6 +7,11 @@
 #include "../bitmaps/water.hpp"
 #include "../bitmaps/bigBreak.hpp"
 
+/**
+ * @brief Animation class, class with saved bitmaps containing animations
+ * 
+ * @tparam T amount of frames in animation
+ */
 template <unsigned int T>
 class Animation{
 private:
@@ -15,6 +20,14 @@ private:
     unsigned int animation_width;
     unsigned int animation_height;
 public:
+    /**
+     * @brief Construct a new Animation object
+     * 
+     * @param bitmaps_outer, std::array<std::array<unsigned char, 1024>, T> arrays containing bitmaps
+     * @param amount_of_frames, unsigned int 
+     * @param animation_width, unsigned int in pixels
+     * @param animation_height, unsigned int in pixels
+     */
     Animation(std::array<std::array<unsigned char, 1024>, T> bitmaps_outer,unsigned int amount_of_frames, unsigned int animation_width, unsigned int animation_height):
         amount_of_frames( amount_of_frames ),
         animation_width( animation_width ),
@@ -30,21 +43,39 @@ public:
         }
     }
 
+    /**
+     * @brief Get the Amount Of Frames
+     * 
+     * @return uint8_t 
+     */
     uint8_t getAmountOfFrames(){
         return amount_of_frames;
     }
 
+    /**
+     * @brief Get the Animation Width
+     * 
+     * @return uint8_t 
+     */
     uint8_t getAnimationWidth(){
         return animation_width;
     }
 
+    /**
+     * @brief Get the Animation Height
+     * 
+     * @return uint8_t 
+     */
     uint8_t getAnimationHeight(){
         return animation_height;
     }
 };
 
+/**
+ * @brief struct Animations containing all animations that can be played.
+ * 
+ */
 struct Animations{
-	// std::array<std::array<unsigned char, 1024>, 2> face_array = {{face::face_bits, face::face_blink_bits}};
     std::array<std::array<unsigned char, 1024>, 2> face_array = {{face::face_0, face::face_1}};
     Animation<2> face_idle = Animation<2>(face_array, 2, 128, 64);
 

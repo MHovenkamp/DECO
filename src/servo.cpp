@@ -1,6 +1,14 @@
 #include <../include/servo.hpp>
 
 void Servo::servoTask(){
+    if( current_degree_goal > current_degree){
+        current_degree += 1;
+    } else if( current_degree_goal < current_degree ){
+        current_degree -= 1;
+    }
+    int steps = 2000/180;
+    current_degree_wait = 500 + ( current_degree * steps );
+    
     digitalWrite(servo_pin, LOW);
     wait_us(2);
     digitalWrite(servo_pin, HIGH);
@@ -15,6 +23,5 @@ void Servo::turnToDegree(int degree){
     }else if(degree > 180 ){
         degree = 180;
     }
-    int steps = 2000/180;
-    current_degree_wait = 500 + ( degree * steps );
+    current_degree_goal = degree;
 };

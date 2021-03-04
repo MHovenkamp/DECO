@@ -5,6 +5,7 @@
 #include "mbed.h"
 #include "rtos.h"
 #include <array>
+#include <time.h>
 
 //Oled screen
 #include <SPI.h>
@@ -12,6 +13,12 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
+//Internal humidity and temperature sensor
+#include <Arduino_HTS221.h>
+//internal baro sensor
+#include <Arduino_LPS22HB.h>
+
+// used in thread delays.
 #define MS(x) std::chrono::milliseconds(x)
 #define US(x) std::chrono::microseconds(x)
 

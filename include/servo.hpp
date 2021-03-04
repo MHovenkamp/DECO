@@ -11,6 +11,8 @@ class Servo{
 private:
     int servo_pin;
     int current_degree_wait;
+    int current_degree_goal;
+    int current_degree;
 public:
     /**
      * @brief Construct a new Servo object

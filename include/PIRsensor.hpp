@@ -3,18 +3,36 @@
 
 #include "support.hpp"
 
+/**
+ * @brief control class for PIR Sensor
+ * 
+ */
 class PIRSensor{
 private:
     int pir_pin;
     int last_movement_time; 
 public:
+    /**
+     * @brief Construct a new PIRSensor object
+     * 
+     * @param pir_pin, int digital pin
+     */
     PIRSensor(int pir_pin):
     pir_pin(pir_pin){
         pinMode(pir_pin, INPUT);
     }
 
+    /**
+     * @brief continiues polling of the PIR sensor
+     * 
+     */
     void PIRTask();
 
+    /**
+     * @brief Get timedifference between last sensor detection and current time in seconds.
+     * 
+     * @return int 
+     */
     int getLastMovement();
 };
 

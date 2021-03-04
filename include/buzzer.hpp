@@ -1,9 +1,20 @@
 # ifndef BUZZER_HPP
 # define BUZZER_HPP
 
+
+// DEPRECATED
+
+/**
+ * @brief struct Songs containing al playable tunes, currently not in use since tone() not functional in platformio.
+ * 
+ */
 struct Songs{
-    // std::array<std::array<int, 2>, X> attention_please = {};
-    // std::array<std::array<int, 2>, X> goodmorning = {};
+    std::array<std::array<int, 2>, 24> goodmorning = {{
+                                                        {NOTE_FS5,8}, {NOTE_FS5,8}, {NOTE_D5,8}, {NOTE_B4,4}, {NOTE_B4,4}, {NOTE_E5,4}, 
+                                                        {NOTE_E5,4}, {NOTE_E5,5}, {NOTE_GS5,8}, {NOTE_GS5,8}, {NOTE_A5,8}, {NOTE_B5,8}, 
+                                                        {NOTE_A5,8}, {NOTE_A5,8}, {NOTE_A5,8}, {NOTE_E5,4}, {NOTE_D5,4}, {NOTE_FS5,4}, 
+                                                        {NOTE_FS5,4}, {NOTE_FS5,5}, {NOTE_E5,8}, {NOTE_E5,8}, {NOTE_FS5,8}, {NOTE_E5,8}
+                                                    }};
     std::array<std::array<int, 2>, 8> going_to_sleep = {{ 
                                                             {NOTE_C4,4}, 
                                                             {NOTE_G3,8}, 
@@ -31,7 +42,7 @@ public:
         int noteDuration = 0;
         int pauseBetweenNotes = 0;
         for (int thisNote = 0; thisNote < T; thisNote++) {
-            Serial.println(melody[thisNote][0]);
+            Serial.println(thisNote);
             noteDuration = 1000 / melody[thisNote][1];
             tone(buzzer_pin, melody[thisNote][0], noteDuration);
 

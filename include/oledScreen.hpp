@@ -4,6 +4,10 @@
 #include "support.hpp"
 #include "animations.hpp"
 
+/**
+ * @brief OledScreen driver
+ * 
+ */
 class OledScreen{
 private:
     int screen_with = 128;
@@ -11,11 +15,20 @@ private:
     int oled_reset = 4;
     int screen_address = 0x3C;
     Adafruit_SSD1306 display;
+    
 public:
+    /**
+     * @brief Construct a new Oled Screen object
+     * 
+     */
     OledScreen():
     display(Adafruit_SSD1306(screen_with, screen_heigth, &Wire, oled_reset))
     {}
 
+    /**
+     * @brief setup function for display, call before use.
+     * 
+     */
     void setup(){
         if(!display.begin(SSD1306_SWITCHCAPVCC, screen_address)) {
             Serial.println(F("SSD1306 allocation failed"));
@@ -26,6 +39,12 @@ public:
         display.clearDisplay();
     };
 
+    /**
+     * @brief showAnimation function that shows a given Animation on the screen
+     * 
+     * @tparam T amount of frames
+     * @param animation Animation object containing animation bitmaps.
+     */
     template <unsigned int T>
     void showAnimation(Animation<T>& animation){
         for( unsigned int i = 0; i<animation.getAmountOfFrames(); i++){
