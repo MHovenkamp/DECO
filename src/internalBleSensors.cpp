@@ -1,6 +1,6 @@
 #include "../include/internalBleSensors.hpp"
 
-void setup(){
+void InternalBLESensors::setup(){
     if (!HTS.begin() || !BARO.begin() ) {
         Serial.println("Failed to initialize humidity temperature sensor!");
         while (1);

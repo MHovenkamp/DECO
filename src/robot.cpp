@@ -1,51 +1,67 @@
 #include "../include/robot.hpp"
 
-// TODO alle dingen die taak zijn global maken voor MBED OS
-
-rtos::Thread head_servo_task;
-rtos::Thread neck_servo_task;
-rtos::Thread Pir_task;
-
 void Robot::setup(){
     internal_sensors.setup();
     face_screen.setup();
-    head_servo_task.start(headServoTask);
-    neck_servo_task.start(neckServoTask);
-    Pir_task.start(PIRTask);
 }
 
-void Robot::robotTask(){
-    setup();
-    while(true){
-        idleState();
+void Robot::run(){
+    internal_sensors.updateSensors();
+    switch(current_state){
+        case ROBOT_STATES::IDLE:
+            idleState();
+            break;
+        case ROBOT_STATES::RNG_MOVEMENT:
+            rngMovementState();
+            break;
+        case ROBOT_STATES::REMINDER_BREAK:
+            reminderBreak();
+            break;
+        case ROBOT_STATES::REMINDER_WATER:
+            reminderWater();
+            break;
+        case ROBOT_STATES::REMINDER_WALK:
+            reminderWalk();
+            break;
+        default:
+            break;
     }
 }
 
-void Robot::headServoTask(){
-    while(true){
-        head_servo.servoTask();
-    }
+unsigned int Robot::getBreakTime(){
+    return break_time;
+}
+unsigned int Robot::getWalkTime(){
+    return walk_time;
+}
+unsigned int Robot::getWaterTime(){
+    return water_time;
 }
 
-void Robot::neckServoTask(){
-    while(true){
-        neck_servo.servoTask();
-    }
+void Robot::setBreakTime(unsigned long time){
+    break_time = time;
+}
+void Robot::setWalkTime(unsigned long time){
+    break_time = time;
+}
+void Robot::setWaterTime(unsigned long time){
+    break_time = time;
 }
 
-void Robot::PIRTask(){
-    while(true){
-        pir_sensor.PIRTask();
-    }
+void Robot::setState(ROBOT_STATES state){
+    current_state = state;
+}
+ROBOT_STATES Robot::getState(){
+    return current_state;
 }
 
 void Robot::idleState(){
     unsigned int amount_of_idle_face_rotations = 5;
     // play the idle animation
     for(unsigned int i = 0; i < amount_of_idle_face_rotations; i++){
-        face_screen.showAnimation<animations.face_idle.size()>(animations.face_idle);
+        face_screen.showAnimation<2>(animations.face_idle);
     }
-    face_screen.showAnimation<animations.face_blink.size()>(animations.face_blink)
+    face_screen.showAnimation<5>(animations.face_blink);
 }
 
 void Robot::rngMovementState(){
@@ -58,35 +74,34 @@ void Robot::rngMovementState(){
 }
 
 void Robot::reminderBreak(){
-    int minutes_of_break_time = 15;
+    long unsigned int minutes_of_break_time = 15;
     head_servo.turnToDegree(120);
     delay(500);
     head_servo.turnToDegree(60);
-    int start_time = millis();
+    long unsigned int start_time = millis();
     while( (millis() - start_time)/1000 >= minutes_of_break_time*60 ){
-        face_screen.showAnimation<animations.big_break.size()>(animations.big_break);
+        face_screen.showAnimation<4>(animations.big_break);
     }
 }
 
 void Robot::reminderWalk(){
-    int minutes_of_break_time = 5;
+    long unsigned int minutes_of_break_time = 5;
     head_servo.turnToDegree(120);
     delay(500);
     head_servo.turnToDegree(60);
-    int start_time = millis();
+    long unsigned int start_time = millis();
     while( (millis() - start_time)/1000 >= minutes_of_break_time*60 ){
-        face_screen.showAnimation<animations.walk.size()>(animations.walk);
+        face_screen.showAnimation<3>(animations.walk);
     }
 }
 
-void Robot::reminderWalk(){
+void Robot::reminderWater(){
     unsigned int amount_of_idle_face_rotations = 5;
     head_servo.turnToDegree(120);
     delay(500);
     head_servo.turnToDegree(60);
-    int start_time = millis();
     for(unsigned int i = 0; i < amount_of_idle_face_rotations; i++){
-        face_screen.showAnimation<animations.water.size()>(animations.water);
+        face_screen.showAnimation<3>(animations.water);
     }
 }
 

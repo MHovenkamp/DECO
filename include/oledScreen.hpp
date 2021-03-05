@@ -58,7 +58,7 @@ public:
             display.drawBitmap(0,0, bitmap_new, animation.getAnimationWidth(), animation.getAnimationHeight(), WHITE);
             display.display();
             delay(1);
-            rtos::ThisThread::sleep_for(MS(333));
+            rtos::ThisThread::sleep_for(MS(1000/animation.getAmountOfFramesPerSecond()));
         }
     }
 

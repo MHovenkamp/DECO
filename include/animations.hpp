@@ -19,6 +19,7 @@ private:
     unsigned int amount_of_frames;
     unsigned int animation_width;
     unsigned int animation_height;
+    unsigned int amount_of_frames_per_second;
 public:
     /**
      * @brief Construct a new Animation object
@@ -28,10 +29,11 @@ public:
      * @param animation_width, unsigned int in pixels
      * @param animation_height, unsigned int in pixels
      */
-    Animation(std::array<std::array<unsigned char, 1024>, T> bitmaps_outer,unsigned int amount_of_frames, unsigned int animation_width, unsigned int animation_height):
+    Animation(std::array<std::array<unsigned char, 1024>, T> bitmaps_outer,unsigned int amount_of_frames, unsigned int animation_width, unsigned int animation_height, unsigned int amount_of_frames_per_second):
         amount_of_frames( amount_of_frames ),
         animation_width( animation_width ),
-        animation_height( animation_height )
+        animation_height( animation_height ),
+        amount_of_frames_per_second( amount_of_frames_per_second )
     {
         bitmaps = bitmaps_outer;
     };
@@ -69,6 +71,15 @@ public:
     uint8_t getAnimationHeight(){
         return animation_height;
     }
+
+    /**
+     * @brief Get the Amount Of Frames Per Second 
+     * 
+     * @return uint8_t 
+     */
+    uint8_t getAmountOfFramesPerSecond(){
+        return amount_of_frames_per_second;
+    }
 };
 
 /**
@@ -77,23 +88,19 @@ public:
  */
 struct Animations{
     std::array<std::array<unsigned char, 1024>, 2> face_array = {{face::face_0, face::face_1}};
-    Animation<2> face_idle = Animation<2>(face_array, 2, 128, 64);
+    Animation<2> face_idle = Animation<2>(face_array, 2, 128, 64, 3);
 
-    std::array<std::array<unsigned char, 1024>, 5> face_blink_array = {{face_blink::face_blink_0,
-                                                                    face_blink::face_blink_1,
-                                                                    face_blink::face_blink_2,
-                                                                    face_blink::face_blink_3,
-                                                                    face_blink::face_blink_4}};
-    Animation<5> face_blink = Animation<5>(face_blink_array, 5, 128, 64);
+    std::array<std::array<unsigned char, 1024>, 5> face_blink_array = {{face_blink::face_blink_0,face_blink::face_blink_1,face_blink::face_blink_2,face_blink::face_blink_3,face_blink::face_blink_4}};
+    Animation<5> face_blink = Animation<5>(face_blink_array, 5, 128, 64, 6);
 
     std::array<std::array<unsigned char, 1024>, 3> walk_array = {{walk::walk_0, walk::walk_1, walk::walk_2}};
-    Animation<3> walk = Animation<3>(walk_array, 3, 128, 64);
+    Animation<3> walk = Animation<3>(walk_array, 3, 128, 64, 3);
 
     std::array<std::array<unsigned char, 1024>, 3> water_array = {{water::water_0, water::water_1, water::water_2}};
-    Animation<3> water = Animation<3>(water_array, 3, 128, 64);
+    Animation<3> water = Animation<3>(water_array, 3, 128, 64, 3);
 
     std::array<std::array<unsigned char, 1024>, 4> big_break_array = {{big_break::break_0,big_break::break_0, big_break::break_1, big_break::break_1}};
-    Animation<4> big_break = Animation<4>(big_break_array, 4, 128, 64);
+    Animation<4> big_break = Animation<4>(big_break_array, 4, 128, 64, 3);
 };
 
 

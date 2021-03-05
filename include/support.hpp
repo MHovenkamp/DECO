@@ -22,6 +22,12 @@
 #define MS(x) std::chrono::milliseconds(x)
 #define US(x) std::chrono::microseconds(x)
 
+#define HOUR 3600000
+#define MINUTE 60000
+#define SECOND 1000
+#define MIllI_SECOND 1
+
+
 // notes for buzzer
 #define NOTE_B0  31
 #define NOTE_C1  33
