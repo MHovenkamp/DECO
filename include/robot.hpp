@@ -16,9 +16,9 @@ enum class ROBOT_STATES{
 
 class Robot{
 private:
-    Servo head_servo;
-    Servo neck_servo;
-    PIRSensor pir_sensor;
+    Servo &head_servo;
+    Servo &neck_servo;
+    PIRSensor &pir_sensor;
     InternalBLESensors internal_sensors;
     OledScreen face_screen;
     Animations animations;
@@ -58,6 +58,9 @@ public:
 
     void setState(ROBOT_STATES state);
     ROBOT_STATES getState();
+
+    void moveHead( int pos );
+    void moveNeck( int pos );
 
     void setup();
 };

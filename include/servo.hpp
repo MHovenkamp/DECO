@@ -3,6 +3,18 @@
 
 #include "support.hpp"
 
+struct ServoPositions{
+    int left_half = 135;
+    int left_full = 180;
+    int right_hal = 45;
+    int right_full = 0;
+    int up_half = 135;
+    int up_full = 180;
+    int down_half = 45;
+    int down_full = 0;
+};
+
+
 /**
  * @brief Servo class, driver class to support servo SG92 and sg92R
  * 
@@ -10,9 +22,9 @@
 class Servo{
 private:
     int servo_pin;
-    int current_degree_wait;
-    int current_degree_goal;
-    int current_degree;
+    unsigned int current_degree_wait;
+    unsigned int current_degree_goal;
+    unsigned int current_degree;
 public:
     /**
      * @brief Construct a new Servo object
@@ -23,6 +35,12 @@ public:
     servo_pin(servo_pin){
         pinMode(servo_pin, OUTPUT);
     }
+
+    /**
+     * @brief setup servo
+     * 
+     */
+    void setup();
 
     /**
      * @brief continues sending of servo commands to servo, run in task scheduler loop
@@ -36,6 +54,7 @@ public:
      * @param degree, degree you want servo to turn to between 0 and 180
      */
     void turnToDegree(int degree);
+
 };
 
 #endif //SERVO_HPP
