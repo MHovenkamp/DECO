@@ -50,10 +50,7 @@ void robotTask(){
 
 void robotControlTask(){
   while (true){
-    robot_test.moveNeck(servo_positions.left_full);
-    rtos::ThisThread::sleep_for(MS(5000));
-    robot_test.moveNeck(servo_positions.right_full);
-    rtos::ThisThread::sleep_for(MS(5000));
+    robot_test.setState(ROBOT_STATES::WEATHER_STATION);
   }
 }
 
@@ -61,6 +58,7 @@ void setup() {
   Serial.begin(9600);
   delay(2000);
   robot_test.setup();
+  delay(2000);
 
   servo_task.start(servoTask);
   robot_task.start(robotTask);

@@ -62,6 +62,39 @@ public:
         }
     }
 
+    template <unsigned int T>
+    void showText( char* text, std::array<unsigned int, T> amount_of_symbols, unsigned int amount_of_lines){
+        display.setFont(&FreeSans9pt7b);
+        display.clearDisplay();
+        display.setTextSize(1);      
+        display.setTextColor(SSD1306_WHITE); 
+        display.cp437(true);         
+        unsigned int current_y = 12;
+        unsigned int current_x;
+        unsigned int current_symbol = 0;
+        unsigned int line_width = 0;
+        float temp; 
+        for( unsigned int j = 0; j < amount_of_lines; j++){
+            line_width = (9 * amount_of_symbols[j]);
+            temp = (float(screen_with) - float(line_width)) / float(2);
+            current_x = int(temp) - 1;
+            if(line_width > 80){
+                current_x = 0;
+            }
+            display.setCursor(current_x, current_y);
+            for( unsigned int i = 0; i < amount_of_symbols[j]; i++){
+                if( text[i] == '\n'){
+                    current_y += 20;
+                    display.setCursor(current_x,current_y);
+                } else {
+                    display.write(text[current_symbol]);
+                }
+                current_symbol++;
+            }  
+        }
+        display.display();
+    }
+
 };
 
 #endif //OLEDSCREEN_HPP

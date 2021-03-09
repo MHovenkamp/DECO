@@ -11,7 +11,8 @@ enum class ROBOT_STATES{
     RNG_MOVEMENT,
     REMINDER_BREAK,
     REMINDER_WATER,
-    REMINDER_WALK
+    REMINDER_WALK,
+    WEATHER_STATION
 };
 
 class Robot{
@@ -37,6 +38,7 @@ private:
 
     void reminderWater();
 
+    void showWeatherStation();
 public:
     Robot(  Servo & head_servo,
             Servo & neck_servo,
@@ -63,6 +65,7 @@ public:
     void moveNeck( int pos );
 
     void setup();
+
 };
 
 #endif

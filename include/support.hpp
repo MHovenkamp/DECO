@@ -12,6 +12,8 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <Fonts/FreeSans9pt7b.h>
+
 
 //Internal humidity and temperature sensor
 #include <Arduino_HTS221.h>

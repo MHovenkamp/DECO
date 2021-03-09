@@ -31,6 +31,9 @@ void Robot::run(){
             Serial.println("REMINDER_WALK");
             reminderWalk();
             break;
+        case ROBOT_STATES::WEATHER_STATION:
+            showWeatherStation();
+            break;
         default:
             break;
     }
@@ -119,4 +122,17 @@ void Robot::reminderWater(){
         face_screen.showAnimation<3>(animations.water);
     }
 };
+
+void Robot::showWeatherStation(){
+    String weather_message_temp = String(internal_sensors.getTemperature()) + " C\n";
+    String weather_message_hum = String(internal_sensors.getHumidity()) + " %\n";
+    String weather_message_baro = String(int(internal_sensors.getBarometric())) + " hPa\n";
+    String weather_message = weather_message_temp +weather_message_hum + weather_message_baro;
+    int str_len = weather_message.length() + 1;
+    char message[str_len];
+    weather_message.toCharArray(message, str_len);
+    std::array<unsigned int, 3> line_lengths = {(weather_message_temp.length()), (weather_message_hum.length()), (weather_message_baro.length())};
+    face_screen.showText<3>(message, line_lengths, 3);
+
+}
 
