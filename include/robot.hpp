@@ -8,7 +8,6 @@
 
 enum class ROBOT_STATES{
     IDLE,
-    RNG_MOVEMENT,
     REMINDER_BREAK,
     REMINDER_WATER,
     REMINDER_WALK,
@@ -29,8 +28,6 @@ private:
     ROBOT_STATES current_state = ROBOT_STATES::IDLE;
 
     void idleState();
-
-    void rngMovementState();
 
     void reminderBreak();
 
@@ -64,6 +61,8 @@ public:
     void moveHead( int pos );
     void moveNeck( int pos );
 
+    void rngMovement();
+    void returnToStartPos();
     void setup();
 
 };

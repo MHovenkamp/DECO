@@ -9,7 +9,7 @@
  */
 class PIRSensor{
 private:
-    int pir_pin;
+    const int pir_pin;
     int last_movement_time; 
 public:
     /**

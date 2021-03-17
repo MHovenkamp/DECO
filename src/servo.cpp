@@ -11,6 +11,7 @@ void Servo::setup(){
         digitalWrite(servo_pin, LOW);
     }
     current_degree = 90;
+    current_degree_goal = 90;
 }
 
 void Servo::servoTask(){
@@ -38,3 +39,7 @@ void Servo::turnToDegree(int degree){
     }
     current_degree_goal = degree;
 };
+
+unsigned int Servo::getCurrentDegree(){
+    return current_degree;
+}

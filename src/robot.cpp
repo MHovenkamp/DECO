@@ -9,15 +9,11 @@ void Robot::setup(){
 
 void Robot::run(){
     internal_sensors.updateSensors();
-    rtos::ThisThread::sleep_for(MS(500));
+    rtos::ThisThread::sleep_for(MS(1000));
     switch(current_state){
         case ROBOT_STATES::IDLE:
             Serial.println("IDLE");
             idleState();
-            break;
-        case ROBOT_STATES::RNG_MOVEMENT:
-            Serial.println("RNG_MOVEMENT");
-            rngMovementState();
             break;
         case ROBOT_STATES::REMINDER_BREAK:
             Serial.println("REMINDER_BREAK");
@@ -32,6 +28,7 @@ void Robot::run(){
             reminderWalk();
             break;
         case ROBOT_STATES::WEATHER_STATION:
+            Serial.println("WEATHER_STATION");
             showWeatherStation();
             break;
         default:
@@ -82,14 +79,37 @@ void Robot::idleState(){
     face_screen.showAnimation<5>(animations.face_blink);
 };
 
-void Robot::rngMovementState(){
+void Robot::rngMovement(){
     // robot looks around
     srand( (unsigned)time(NULL) );
-    unsigned int neck_servo_direction = (rand() % 180) + 1;
-    unsigned int head_servo_direction = (rand() % 180) + 1;
+    unsigned int neck_servo_direction = (rand() % 30) + 1;
+    unsigned int head_servo_direction = (rand() % 30) + 1;
+
+    unsigned int neck_servo_direction_plus_or_minus = rand() > (RAND_MAX / 2);
+    unsigned int head_servo_direction_plus_or_minus = rand() > (RAND_MAX / 2);
+    
+    if(neck_servo_direction_plus_or_minus){
+        neck_servo_direction = neck_servo.getCurrentDegree() - neck_servo_direction;
+    } else{
+        neck_servo_direction = neck_servo.getCurrentDegree() + neck_servo_direction;
+    }
+
+    if(head_servo_direction_plus_or_minus){
+        head_servo_direction = head_servo.getCurrentDegree() - head_servo_direction;
+    } else{
+        head_servo_direction = head_servo.getCurrentDegree() + head_servo_direction;
+    }
+    if(head_servo_direction < 50){ head_servo_direction = 50; };
+    if(head_servo_direction > 130){ head_servo_direction = 130; };
+
     neck_servo.turnToDegree(neck_servo_direction);
     head_servo.turnToDegree(head_servo_direction);
 };
+
+void Robot::returnToStartPos(){
+    neck_servo.turnToDegree(90);
+    head_servo.turnToDegree(90);
+}
 
 void Robot::reminderBreak(){
     long unsigned int minutes_of_break_time = 15;

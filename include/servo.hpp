@@ -21,7 +21,7 @@ struct ServoPositions{
  */
 class Servo{
 private:
-    int servo_pin;
+    const int servo_pin;
     unsigned int current_degree_wait;
     unsigned int current_degree_goal;
     unsigned int current_degree;
@@ -54,6 +54,8 @@ public:
      * @param degree, degree you want servo to turn to between 0 and 180
      */
     void turnToDegree(int degree);
+
+    unsigned int getCurrentDegree();
 
 };
 

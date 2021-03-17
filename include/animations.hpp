@@ -16,10 +16,10 @@ template <unsigned int T>
 class Animation{
 private:
     std::array<std::array<unsigned char, 1024>, T> bitmaps;
-    unsigned int amount_of_frames;
-    unsigned int animation_width;
-    unsigned int animation_height;
-    unsigned int amount_of_frames_per_second;
+    const unsigned int amount_of_frames;
+    const unsigned int animation_width;
+    const unsigned int animation_height;
+    const unsigned int amount_of_frames_per_second;
 public:
     /**
      * @brief Construct a new Animation object

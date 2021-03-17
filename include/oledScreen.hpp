@@ -10,10 +10,10 @@
  */
 class OledScreen{
 private:
-    int screen_with = 128;
-    int screen_heigth = 64;
-    int oled_reset = 4;
-    int screen_address = 0x3C;
+    const int screen_with = 128;
+    const int screen_heigth = 64;
+    const int oled_reset = 4;
+    const int screen_address = 0x3C;
     Adafruit_SSD1306 display;
     
 public:
