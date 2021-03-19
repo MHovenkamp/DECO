@@ -22,6 +22,7 @@ struct ServoPositions{
 class Servo{
 private:
     const int servo_pin;
+    unsigned int speed = 1;
     unsigned int current_degree_wait;
     unsigned int current_degree_goal;
     unsigned int current_degree;

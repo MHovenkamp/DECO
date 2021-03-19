@@ -16,9 +16,9 @@ void Servo::setup(){
 
 void Servo::servoTask(){
     if( current_degree_goal > current_degree){
-        current_degree += 1;
+        current_degree += speed;
     } else if( current_degree_goal < current_degree ){
-        current_degree -= 1;
+        current_degree -= speed;
     }
     int steps = 2000/180;
     current_degree_wait = 500 + ( current_degree * steps );

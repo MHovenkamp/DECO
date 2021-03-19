@@ -56,6 +56,19 @@ void Robot::setWaterTime(unsigned long time){
     break_time = time;
 };
 
+void Robot::setBreakTimeDuration(unsigned long time){
+    break_time_duration = time;
+}
+
+void Robot::setWalkTimeDuration(unsigned long time){
+    walk_time_duration = time;
+}
+
+void Robot::setWaterTimeDuration(unsigned long time){
+    water_time_duration = time;
+}
+
+
 void Robot::setState(ROBOT_STATES state){
     current_state = state;
 };
@@ -112,35 +125,39 @@ void Robot::returnToStartPos(){
 }
 
 void Robot::reminderBreak(){
-    long unsigned int minutes_of_break_time = 15;
     head_servo.turnToDegree(120);
-    rtos::ThisThread::sleep_for(MS(500));
     head_servo.turnToDegree(60);
     long unsigned int start_time = millis();
-    while( (millis() - start_time)/1000 >= minutes_of_break_time*60 ){
+    while( (millis() - start_time)/SECOND <= break_time_duration/SECOND){
+        rtos::ThisThread::sleep_for(MS(500));
         face_screen.showAnimation<4>(animations.big_break);
     }
+    returnToStartPos();
+    setState(ROBOT_STATES::IDLE);
 };
 
 void Robot::reminderWalk(){
-    long unsigned int minutes_of_break_time = 5;
     head_servo.turnToDegree(120);
-    rtos::ThisThread::sleep_for(MS(500));
     head_servo.turnToDegree(60);
     long unsigned int start_time = millis();
-    while( (millis() - start_time)/1000 >= minutes_of_break_time*60 ){
+    while( (millis() - start_time)/SECOND <= walk_time_duration/SECOND ){
+        rtos::ThisThread::sleep_for(MS(500));
         face_screen.showAnimation<3>(animations.walk);
     }
+    returnToStartPos();
+    setState(ROBOT_STATES::IDLE);
 };
 
 void Robot::reminderWater(){
-    unsigned int amount_of_idle_face_rotations = 5;
     head_servo.turnToDegree(120);
-    rtos::ThisThread::sleep_for(MS(500));
     head_servo.turnToDegree(60);
-    for(unsigned int i = 0; i < amount_of_idle_face_rotations; i++){
+    long unsigned int start_time = millis();
+    while( (millis() - start_time)/SECOND <= water_time_duration/SECOND ){
+        rtos::ThisThread::sleep_for(MS(500));
         face_screen.showAnimation<3>(animations.water);
     }
+    returnToStartPos();
+    setState(ROBOT_STATES::IDLE);
 };
 
 void Robot::showWeatherStation(){
@@ -155,4 +172,3 @@ void Robot::showWeatherStation(){
     face_screen.showText<3>(message, line_lengths, 3);
 
 }
-
