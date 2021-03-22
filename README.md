@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Welcome to the Github page for the social robot under 50 euros. This robot is the result of a student project by the name PINNO, personal innovation project. Thsi robot is to be possibly used by the minor social robotics from Hoheschool Utrecht.
+Welcome to the Github page for the social robot under 50 euros. This robot is the result of a student project by the name PINNO, personal innovation project. Thsi robot is to be possibly used by the minor social robotics from Hogeschool Utrecht.
 
 ## What can the robot do?
 
@@ -39,3 +39,18 @@ doxygen Doxyfile
 ### Fritzing
 ![Fritzing Model](https://github.com/MHovenkamp/PINNO/blob/main/images/Hardware_model.png)
 
+## Building and running
+This robot is compiled and flashed by [PlatformIO](https://platformio.org/). Install platformIO core to work with this project. Then run the folowing commands in the directory. The directory will build the robot and flash to your arduino.
+
+```
+platformio run -t upload
+```
+If the right port cant be found change port to correct port with this command:
+``` 
+platformio run -t upload --upload-port <port>
+```
+You can find the correc tport with:
+```
+pio device list
+```
+After flashing the robot will instanly start working. If the robot loses power and is then reconnected it will restart the program.
