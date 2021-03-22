@@ -1,0 +1,140 @@
+\hypertarget{classInternalBLESensors}{}\doxysection{Internal\+BLESensors Class Reference}
+\label{classInternalBLESensors}\index{InternalBLESensors@{InternalBLESensors}}
+
+
+in\+Internal\+BLESensors class cotnaining code for internal arduino nano 33 ble sense sensors\+: humidity, temperature, baro.  
+
+
+
+
+{\ttfamily \#include $<$internal\+Ble\+Sensors.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classInternalBLESensors_a73309cc6306b8bad90e1abe543d15eb6}{Internal\+BLESensors}} ()
+\begin{DoxyCompactList}\small\item\em Construct a new Internal B L E Sensors object. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classInternalBLESensors_af705bbd65313534d0b4ab2715744e976}{setup}} ()
+\begin{DoxyCompactList}\small\item\em setup the internal sensors \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classInternalBLESensors_ae0a574a523500655379bbdd15b261c6e}{update\+Sensors}} ()
+\begin{DoxyCompactList}\small\item\em update sensor data, call every once in a while for accurate data \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{classInternalBLESensors_a2c1d639fe0e7ff87a0339dce34417069}{get\+Temperature}} ()
+\begin{DoxyCompactList}\small\item\em Get the Temperature. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{classInternalBLESensors_a6ca14a0e1c75ada33b4c797c0fd8f89d}{get\+Humidity}} ()
+\begin{DoxyCompactList}\small\item\em Get the Humidity. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{classInternalBLESensors_a57e11146ba03bdae8774d5d9df15770d}{get\+Barometric}} ()
+\begin{DoxyCompactList}\small\item\em Get the Barometric. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+float \mbox{\hyperlink{classInternalBLESensors_abb26572f40e593fd25b927746e2f3fe1}{temperature}}
+\item 
+float \mbox{\hyperlink{classInternalBLESensors_a5bd9d39df7345285153bdb37a0c3d6d5}{humidity}}
+\item 
+float \mbox{\hyperlink{classInternalBLESensors_a98567562f7f7b41e16b8e61fd6e0645d}{baro\+\_\+pressure}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+in\+Internal\+BLESensors class cotnaining code for internal arduino nano 33 ble sense sensors\+: humidity, temperature, baro. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classInternalBLESensors_a73309cc6306b8bad90e1abe543d15eb6}\label{classInternalBLESensors_a73309cc6306b8bad90e1abe543d15eb6}} 
+\index{InternalBLESensors@{InternalBLESensors}!InternalBLESensors@{InternalBLESensors}}
+\index{InternalBLESensors@{InternalBLESensors}!InternalBLESensors@{InternalBLESensors}}
+\doxysubsubsection{\texorpdfstring{InternalBLESensors()}{InternalBLESensors()}}
+{\footnotesize\ttfamily Internal\+BLESensors\+::\+Internal\+BLESensors (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Construct a new Internal B L E Sensors object. 
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classInternalBLESensors_a57e11146ba03bdae8774d5d9df15770d}\label{classInternalBLESensors_a57e11146ba03bdae8774d5d9df15770d}} 
+\index{InternalBLESensors@{InternalBLESensors}!getBarometric@{getBarometric}}
+\index{getBarometric@{getBarometric}!InternalBLESensors@{InternalBLESensors}}
+\doxysubsubsection{\texorpdfstring{getBarometric()}{getBarometric()}}
+{\footnotesize\ttfamily float Internal\+BLESensors\+::get\+Barometric (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Get the Barometric. 
+
+\begin{DoxyReturn}{Returns}
+float 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classInternalBLESensors_a6ca14a0e1c75ada33b4c797c0fd8f89d}\label{classInternalBLESensors_a6ca14a0e1c75ada33b4c797c0fd8f89d}} 
+\index{InternalBLESensors@{InternalBLESensors}!getHumidity@{getHumidity}}
+\index{getHumidity@{getHumidity}!InternalBLESensors@{InternalBLESensors}}
+\doxysubsubsection{\texorpdfstring{getHumidity()}{getHumidity()}}
+{\footnotesize\ttfamily float Internal\+BLESensors\+::get\+Humidity (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Get the Humidity. 
+
+\begin{DoxyReturn}{Returns}
+float 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classInternalBLESensors_a2c1d639fe0e7ff87a0339dce34417069}\label{classInternalBLESensors_a2c1d639fe0e7ff87a0339dce34417069}} 
+\index{InternalBLESensors@{InternalBLESensors}!getTemperature@{getTemperature}}
+\index{getTemperature@{getTemperature}!InternalBLESensors@{InternalBLESensors}}
+\doxysubsubsection{\texorpdfstring{getTemperature()}{getTemperature()}}
+{\footnotesize\ttfamily float Internal\+BLESensors\+::get\+Temperature (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Get the Temperature. 
+
+\begin{DoxyReturn}{Returns}
+float 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classInternalBLESensors_af705bbd65313534d0b4ab2715744e976}\label{classInternalBLESensors_af705bbd65313534d0b4ab2715744e976}} 
+\index{InternalBLESensors@{InternalBLESensors}!setup@{setup}}
+\index{setup@{setup}!InternalBLESensors@{InternalBLESensors}}
+\doxysubsubsection{\texorpdfstring{setup()}{setup()}}
+{\footnotesize\ttfamily void Internal\+BLESensors\+::setup (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+setup the internal sensors 
+
+\mbox{\Hypertarget{classInternalBLESensors_ae0a574a523500655379bbdd15b261c6e}\label{classInternalBLESensors_ae0a574a523500655379bbdd15b261c6e}} 
+\index{InternalBLESensors@{InternalBLESensors}!updateSensors@{updateSensors}}
+\index{updateSensors@{updateSensors}!InternalBLESensors@{InternalBLESensors}}
+\doxysubsubsection{\texorpdfstring{updateSensors()}{updateSensors()}}
+{\footnotesize\ttfamily void Internal\+BLESensors\+::update\+Sensors (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+update sensor data, call every once in a while for accurate data 
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classInternalBLESensors_a98567562f7f7b41e16b8e61fd6e0645d}\label{classInternalBLESensors_a98567562f7f7b41e16b8e61fd6e0645d}} 
+\index{InternalBLESensors@{InternalBLESensors}!baro\_pressure@{baro\_pressure}}
+\index{baro\_pressure@{baro\_pressure}!InternalBLESensors@{InternalBLESensors}}
+\doxysubsubsection{\texorpdfstring{baro\_pressure}{baro\_pressure}}
+{\footnotesize\ttfamily float Internal\+BLESensors\+::baro\+\_\+pressure\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classInternalBLESensors_a5bd9d39df7345285153bdb37a0c3d6d5}\label{classInternalBLESensors_a5bd9d39df7345285153bdb37a0c3d6d5}} 
+\index{InternalBLESensors@{InternalBLESensors}!humidity@{humidity}}
+\index{humidity@{humidity}!InternalBLESensors@{InternalBLESensors}}
+\doxysubsubsection{\texorpdfstring{humidity}{humidity}}
+{\footnotesize\ttfamily float Internal\+BLESensors\+::humidity\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classInternalBLESensors_abb26572f40e593fd25b927746e2f3fe1}\label{classInternalBLESensors_abb26572f40e593fd25b927746e2f3fe1}} 
+\index{InternalBLESensors@{InternalBLESensors}!temperature@{temperature}}
+\index{temperature@{temperature}!InternalBLESensors@{InternalBLESensors}}
+\doxysubsubsection{\texorpdfstring{temperature}{temperature}}
+{\footnotesize\ttfamily float Internal\+BLESensors\+::temperature\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/\mbox{\hyperlink{internalBleSensors_8hpp}{internal\+Ble\+Sensors.\+hpp}}\item 
+src/\mbox{\hyperlink{internalBleSensors_8cpp}{internal\+Ble\+Sensors.\+cpp}}\end{DoxyCompactItemize}

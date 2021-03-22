@@ -1,0 +1,70 @@
+\hypertarget{structSongs}{}\doxysection{Songs Struct Reference}
+\label{structSongs}\index{Songs@{Songs}}
+
+
+struct \mbox{\hyperlink{structSongs}{Songs}} containing al playable tunes, currently not in use since tone() not functional in platformio.  
+
+
+
+
+{\ttfamily \#include $<$buzzer.\+hpp$>$}
+
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std\+::array$<$ std\+::array$<$ int, 2 $>$, 4 $>$ \mbox{\hyperlink{structSongs_a87e3789d1532ea0348f34b9e9e4a13c8}{start\+\_\+up}}
+\item 
+std\+::array$<$ std\+::array$<$ int, 2 $>$, 4 $>$ \mbox{\hyperlink{structSongs_a8b0a6f6526c5f50e00846285d9bee2dd}{shut\+\_\+down}}
+\item 
+std\+::array$<$ std\+::array$<$ int, 2 $>$, 2 $>$ \mbox{\hyperlink{structSongs_a0c53c2c3e9aba4ee0aadc1e1b9792729}{notification}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+struct \mbox{\hyperlink{structSongs}{Songs}} containing al playable tunes, currently not in use since tone() not functional in platformio. 
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{structSongs_a0c53c2c3e9aba4ee0aadc1e1b9792729}\label{structSongs_a0c53c2c3e9aba4ee0aadc1e1b9792729}} 
+\index{Songs@{Songs}!notification@{notification}}
+\index{notification@{notification}!Songs@{Songs}}
+\doxysubsubsection{\texorpdfstring{notification}{notification}}
+{\footnotesize\ttfamily std\+::array$<$std\+::array$<$int, 2$>$, 2$>$ Songs\+::notification}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{= \{\{}
+\DoxyCodeLine{                                                        \{\mbox{\hyperlink{support_8hpp_a4ede898d3fa744ffb02d5e9b66994ef3}{NOTE\_A4}}, 4\}, \{\mbox{\hyperlink{support_8hpp_a6162f78ec6fc3457a077602a77e36992}{NOTE\_D4}}, 4\}}
+\DoxyCodeLine{                                                    \}\}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structSongs_a8b0a6f6526c5f50e00846285d9bee2dd}\label{structSongs_a8b0a6f6526c5f50e00846285d9bee2dd}} 
+\index{Songs@{Songs}!shut\_down@{shut\_down}}
+\index{shut\_down@{shut\_down}!Songs@{Songs}}
+\doxysubsubsection{\texorpdfstring{shut\_down}{shut\_down}}
+{\footnotesize\ttfamily std\+::array$<$std\+::array$<$int, 2$>$, 4$>$ Songs\+::shut\+\_\+down}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{= \{\{ }
+\DoxyCodeLine{                                                        \{\mbox{\hyperlink{support_8hpp_a934b0ccc182054ca8da5c67c0e78a04c}{NOTE\_A3}},4\}, \{\mbox{\hyperlink{support_8hpp_a2533a6044529da9ea46ea98e76ee50ad}{NOTE\_F3}},4\}, \{\mbox{\hyperlink{support_8hpp_a31913cf742bcbe91a39a47e819ac289c}{NOTE\_E3}},4\}, \{\mbox{\hyperlink{support_8hpp_a2533a6044529da9ea46ea98e76ee50ad}{NOTE\_F3}},4\}}
+\DoxyCodeLine{                                                    \}\}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structSongs_a87e3789d1532ea0348f34b9e9e4a13c8}\label{structSongs_a87e3789d1532ea0348f34b9e9e4a13c8}} 
+\index{Songs@{Songs}!start\_up@{start\_up}}
+\index{start\_up@{start\_up}!Songs@{Songs}}
+\doxysubsubsection{\texorpdfstring{start\_up}{start\_up}}
+{\footnotesize\ttfamily std\+::array$<$std\+::array$<$int, 2$>$, 4$>$ Songs\+::start\+\_\+up}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{= \{\{}
+\DoxyCodeLine{                                                        \{\mbox{\hyperlink{support_8hpp_a4ede898d3fa744ffb02d5e9b66994ef3}{NOTE\_A4}},4\}, \{\mbox{\hyperlink{support_8hpp_aff20d9abb2ef6f25afeb44245129eba6}{NOTE\_F4}},4\}, \{\mbox{\hyperlink{support_8hpp_a147e4663d8161df841c418859a70f66f}{NOTE\_E4}},4\}, \{\mbox{\hyperlink{support_8hpp_aff20d9abb2ef6f25afeb44245129eba6}{NOTE\_F4}},4\}}
+\DoxyCodeLine{                                                    \}\}}
+
+\end{DoxyCode}
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/\mbox{\hyperlink{buzzer_8hpp}{buzzer.\+hpp}}\end{DoxyCompactItemize}

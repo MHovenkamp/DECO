@@ -56,6 +56,11 @@ public:
      */
     void turnToDegree(int degree);
 
+    /**
+     * @brief Get the Current Degree 
+     * 
+     * @return unsigned int 
+     */
     unsigned int getCurrentDegree();
 
 };

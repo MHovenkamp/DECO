@@ -9,6 +9,6 @@ void PIRSensor::PIRTask(){
 
 int PIRSensor::getLastMovement(){
     int time = millis() - last_movement_time;
-    int seconds = time/1000;
+    int seconds = time/SECOND;
     return seconds;
 };

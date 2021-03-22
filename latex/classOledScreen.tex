@@ -1,0 +1,160 @@
+\hypertarget{classOledScreen}{}\doxysection{Oled\+Screen Class Reference}
+\label{classOledScreen}\index{OledScreen@{OledScreen}}
+
+
+\mbox{\hyperlink{classOledScreen}{Oled\+Screen}} driver.  
+
+
+
+
+{\ttfamily \#include $<$oled\+Screen.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classOledScreen_a62d707cb1f1731eeb9c884e7253a0dd2}{Oled\+Screen}} ()
+\begin{DoxyCompactList}\small\item\em Construct a new Oled Screen object. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classOledScreen_adad9f205703aaccc846e1331210a1489}{setup}} ()
+\begin{DoxyCompactList}\small\item\em setup function for display, call before use. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classOledScreen_a29ceabb5d94e499c312bc09dc60a7ae1}{clear\+Screen}} ()
+\begin{DoxyCompactList}\small\item\em clear display \end{DoxyCompactList}\item 
+{\footnotesize template$<$unsigned int T$>$ }\\void \mbox{\hyperlink{classOledScreen_a7df9ee50348a84f0d5e8d7ae8ff004d0}{show\+Animation}} (\mbox{\hyperlink{classAnimation}{Animation}}$<$ T $>$ \&animation)
+\begin{DoxyCompactList}\small\item\em show\+Animation function that shows a given \mbox{\hyperlink{classAnimation}{Animation}} on the screen \end{DoxyCompactList}\item 
+{\footnotesize template$<$unsigned int T$>$ }\\void \mbox{\hyperlink{classOledScreen_ac25dc7f0bbd4d7c4332ae9905a8e067c}{show\+Text}} (char $\ast$text, std\+::array$<$ unsigned int, T $>$ amount\+\_\+of\+\_\+symbols, unsigned int amount\+\_\+of\+\_\+lines)
+\begin{DoxyCompactList}\small\item\em show\+Text function thats show given string on screen \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+const int \mbox{\hyperlink{classOledScreen_a1ed8c245f3b99ce632ad896c7321290e}{screen\+\_\+with}} = 128
+\item 
+const int \mbox{\hyperlink{classOledScreen_a94727d705418e9e507747507782c0e00}{screen\+\_\+heigth}} = 64
+\item 
+const int \mbox{\hyperlink{classOledScreen_a9656d8eb4dc6ebf1d4d90347a06bd135}{oled\+\_\+reset}} = 4
+\item 
+const int \mbox{\hyperlink{classOledScreen_a5a3dd47c52fa24637f069f2dd6edc756}{screen\+\_\+address}} = 0x3C
+\item 
+Adafruit\+\_\+\+SSD1306 \mbox{\hyperlink{classOledScreen_a6233833b3e5857897590f4da50655a38}{display}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\mbox{\hyperlink{classOledScreen}{Oled\+Screen}} driver. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classOledScreen_a62d707cb1f1731eeb9c884e7253a0dd2}\label{classOledScreen_a62d707cb1f1731eeb9c884e7253a0dd2}} 
+\index{OledScreen@{OledScreen}!OledScreen@{OledScreen}}
+\index{OledScreen@{OledScreen}!OledScreen@{OledScreen}}
+\doxysubsubsection{\texorpdfstring{OledScreen()}{OledScreen()}}
+{\footnotesize\ttfamily Oled\+Screen\+::\+Oled\+Screen (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Construct a new Oled Screen object. 
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classOledScreen_a29ceabb5d94e499c312bc09dc60a7ae1}\label{classOledScreen_a29ceabb5d94e499c312bc09dc60a7ae1}} 
+\index{OledScreen@{OledScreen}!clearScreen@{clearScreen}}
+\index{clearScreen@{clearScreen}!OledScreen@{OledScreen}}
+\doxysubsubsection{\texorpdfstring{clearScreen()}{clearScreen()}}
+{\footnotesize\ttfamily void Oled\+Screen\+::clear\+Screen (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+clear display 
+
+\mbox{\Hypertarget{classOledScreen_adad9f205703aaccc846e1331210a1489}\label{classOledScreen_adad9f205703aaccc846e1331210a1489}} 
+\index{OledScreen@{OledScreen}!setup@{setup}}
+\index{setup@{setup}!OledScreen@{OledScreen}}
+\doxysubsubsection{\texorpdfstring{setup()}{setup()}}
+{\footnotesize\ttfamily void Oled\+Screen\+::setup (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+setup function for display, call before use. 
+
+\mbox{\Hypertarget{classOledScreen_a7df9ee50348a84f0d5e8d7ae8ff004d0}\label{classOledScreen_a7df9ee50348a84f0d5e8d7ae8ff004d0}} 
+\index{OledScreen@{OledScreen}!showAnimation@{showAnimation}}
+\index{showAnimation@{showAnimation}!OledScreen@{OledScreen}}
+\doxysubsubsection{\texorpdfstring{showAnimation()}{showAnimation()}}
+{\footnotesize\ttfamily template$<$unsigned int T$>$ \\
+void Oled\+Screen\+::show\+Animation (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classAnimation}{Animation}}$<$ T $>$ \&}]{animation }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+show\+Animation function that shows a given \mbox{\hyperlink{classAnimation}{Animation}} on the screen 
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em T} & amount of frames \\
+\hline
+\end{DoxyTemplParams}
+
+\begin{DoxyParams}{Parameters}
+{\em animation} & \mbox{\hyperlink{classAnimation}{Animation}} object containing animation bitmaps. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classOledScreen_ac25dc7f0bbd4d7c4332ae9905a8e067c}\label{classOledScreen_ac25dc7f0bbd4d7c4332ae9905a8e067c}} 
+\index{OledScreen@{OledScreen}!showText@{showText}}
+\index{showText@{showText}!OledScreen@{OledScreen}}
+\doxysubsubsection{\texorpdfstring{showText()}{showText()}}
+{\footnotesize\ttfamily template$<$unsigned int T$>$ \\
+void Oled\+Screen\+::show\+Text (\begin{DoxyParamCaption}\item[{char $\ast$}]{text,  }\item[{std\+::array$<$ unsigned int, T $>$}]{amount\+\_\+of\+\_\+symbols,  }\item[{unsigned int}]{amount\+\_\+of\+\_\+lines }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+show\+Text function thats show given string on screen 
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em T} & \+: unsigned int \\
+\hline
+\end{DoxyTemplParams}
+
+\begin{DoxyParams}{Parameters}
+{\em text} & \+: char$\ast$, text to show on screen \\
+\hline
+{\em amount\+\_\+of\+\_\+symbols} & \+: std\+::array$<$unsigned int, T$>$, amount of symbols per line \\
+\hline
+{\em amount\+\_\+of\+\_\+lines} & \+: unsigned int, amount of lines \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classOledScreen_a6233833b3e5857897590f4da50655a38}\label{classOledScreen_a6233833b3e5857897590f4da50655a38}} 
+\index{OledScreen@{OledScreen}!display@{display}}
+\index{display@{display}!OledScreen@{OledScreen}}
+\doxysubsubsection{\texorpdfstring{display}{display}}
+{\footnotesize\ttfamily Adafruit\+\_\+\+SSD1306 Oled\+Screen\+::display\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classOledScreen_a9656d8eb4dc6ebf1d4d90347a06bd135}\label{classOledScreen_a9656d8eb4dc6ebf1d4d90347a06bd135}} 
+\index{OledScreen@{OledScreen}!oled\_reset@{oled\_reset}}
+\index{oled\_reset@{oled\_reset}!OledScreen@{OledScreen}}
+\doxysubsubsection{\texorpdfstring{oled\_reset}{oled\_reset}}
+{\footnotesize\ttfamily const int Oled\+Screen\+::oled\+\_\+reset = 4\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classOledScreen_a5a3dd47c52fa24637f069f2dd6edc756}\label{classOledScreen_a5a3dd47c52fa24637f069f2dd6edc756}} 
+\index{OledScreen@{OledScreen}!screen\_address@{screen\_address}}
+\index{screen\_address@{screen\_address}!OledScreen@{OledScreen}}
+\doxysubsubsection{\texorpdfstring{screen\_address}{screen\_address}}
+{\footnotesize\ttfamily const int Oled\+Screen\+::screen\+\_\+address = 0x3C\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classOledScreen_a94727d705418e9e507747507782c0e00}\label{classOledScreen_a94727d705418e9e507747507782c0e00}} 
+\index{OledScreen@{OledScreen}!screen\_heigth@{screen\_heigth}}
+\index{screen\_heigth@{screen\_heigth}!OledScreen@{OledScreen}}
+\doxysubsubsection{\texorpdfstring{screen\_heigth}{screen\_heigth}}
+{\footnotesize\ttfamily const int Oled\+Screen\+::screen\+\_\+heigth = 64\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classOledScreen_a1ed8c245f3b99ce632ad896c7321290e}\label{classOledScreen_a1ed8c245f3b99ce632ad896c7321290e}} 
+\index{OledScreen@{OledScreen}!screen\_with@{screen\_with}}
+\index{screen\_with@{screen\_with}!OledScreen@{OledScreen}}
+\doxysubsubsection{\texorpdfstring{screen\_with}{screen\_with}}
+{\footnotesize\ttfamily const int Oled\+Screen\+::screen\+\_\+with = 128\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/\mbox{\hyperlink{oledScreen_8hpp}{oled\+Screen.\+hpp}}\end{DoxyCompactItemize}

@@ -17,16 +17,30 @@ struct Songs{
                                                     }};
 };
 
-
+/**
+ * @brief Buzzer class to support Piezo type buzzer
+ * 
+ */
 class Buzzer{
 private:
     int buzzer_pin;
 public:
+    /**
+     * @brief Construct a new Buzzer object
+     * 
+     * @param buzzer_pin : int
+     */
     Buzzer( int buzzer_pin ):
     buzzer_pin( buzzer_pin ){
         pinMode(buzzer_pin, OUTPUT);
     }
 
+    /**
+     * @brief playSong function, plays a song on buzzer
+     * 
+     * @tparam T : int, amount of notes
+     * @param melody std::array<std::array<int, 2>, T> &, song to play
+     */
     template <int T>
     void playSong( std::array<std::array<int, 2>, T> &melody ){
         int noteDuration = 0;

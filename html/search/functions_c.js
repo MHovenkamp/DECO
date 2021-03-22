@@ -1,0 +1,20 @@
+var searchData=
+[
+  ['servo_355',['Servo',['../classServo.html#a39041751056b579a0551832fb8a5f35f',1,'Servo']]],
+  ['servoheadtask_356',['servoHeadTask',['../robot_8cpp.html#a53d5fa4df0ddae9d7bb1c0d7a635d32e',1,'servoHeadTask():&#160;main.cpp'],['../src_2main_8cpp.html#a53d5fa4df0ddae9d7bb1c0d7a635d32e',1,'servoHeadTask():&#160;main.cpp']]],
+  ['servonecktask_357',['servoNeckTask',['../robot_8cpp.html#a9c0d4bfe61d8c8a51e9ec9d8f8224ce9',1,'servoNeckTask():&#160;main.cpp'],['../src_2main_8cpp.html#a9c0d4bfe61d8c8a51e9ec9d8f8224ce9',1,'servoNeckTask():&#160;main.cpp']]],
+  ['servotask_358',['servoTask',['../classServo.html#a6ca8558048ee56d13a8e0c841056a372',1,'Servo']]],
+  ['setbreaktime_359',['setBreakTime',['../classRobot.html#aa506473469059c0d1ad31efd4213ed91',1,'Robot']]],
+  ['setbreaktimeduration_360',['setBreakTimeDuration',['../classRobot.html#a56df7abf790c4cb204c90a3e156198d2',1,'Robot']]],
+  ['setshutdownafter_361',['setShutdownAfter',['../classRobot.html#a6178f4a18e2d8b9e19af37314201be99',1,'Robot']]],
+  ['setstate_362',['setState',['../classRobot.html#ac9976eb0147d647e9218c726ba9cd25e',1,'Robot']]],
+  ['setup_363',['setup',['../test_2main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d',1,'setup():&#160;main.cpp'],['../src_2main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d',1,'setup():&#160;main.cpp'],['../classServo.html#a944b58a20ad7dcbd57657474cf3bf52c',1,'Servo::setup()'],['../classRobot.html#a1fc37e3c329d59795f6adf44199d4df9',1,'Robot::setup()'],['../classOledScreen.html#adad9f205703aaccc846e1331210a1489',1,'OledScreen::setup()'],['../classInternalBLESensors.html#af705bbd65313534d0b4ab2715744e976',1,'InternalBLESensors::setup()']]],
+  ['setwalktime_364',['setWalkTime',['../classRobot.html#a7a72290f1e77162ffea4921f4d9a51d8',1,'Robot']]],
+  ['setwalktimeduration_365',['setWalkTimeDuration',['../classRobot.html#a1aa37642494657d54641e3edfaec6ee9',1,'Robot']]],
+  ['setwatertime_366',['setWaterTime',['../classRobot.html#a4b020441aa413c222b3b901952c8de58',1,'Robot']]],
+  ['setwatertimeduration_367',['setWaterTimeDuration',['../classRobot.html#a01cd698e8b651e206b7b69c0ebab3f22',1,'Robot']]],
+  ['showanimation_368',['showAnimation',['../classOledScreen.html#a7df9ee50348a84f0d5e8d7ae8ff004d0',1,'OledScreen']]],
+  ['showtext_369',['showText',['../classOledScreen.html#ac25dc7f0bbd4d7c4332ae9905a8e067c',1,'OledScreen']]],
+  ['showweatherstation_370',['showWeatherStation',['../classRobot.html#ae21eaf70d154015aea7aa8ddd236021b',1,'Robot']]],
+  ['shutdown_371',['shutDown',['../classRobot.html#ada4d8f2625a664252d35336a68f1cda6',1,'Robot']]]
+];

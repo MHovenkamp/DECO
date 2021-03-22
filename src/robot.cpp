@@ -1,10 +1,26 @@
 #include "../include/robot.hpp"
 
+extern rtos::Thread servo_neck_task;
+extern rtos::Thread servo_head_task;
+extern rtos::Thread robot_task;
+extern rtos::Thread robot_control_task;
+extern rtos::Thread timer_robot_task;
+
+extern void servoHeadTask();
+extern void servoNeckTask();
+extern void timerRobotTask();
+extern void robotTask();
+extern void robotControlTask();
+
+extern ROBOT_STATES global_state;
+
 void Robot::setup(){
     head_servo.setup();
     neck_servo.setup();
     internal_sensors.setup();
     face_screen.setup();
+    Songs songs;
+    playSound<songs.start_up.size()>(songs.start_up);
 };
 
 void Robot::run(){
@@ -16,20 +32,36 @@ void Robot::run(){
             idleState();
             break;
         case ROBOT_STATES::REMINDER_BREAK:
-            Serial.println("REMINDER_BREAK");
-            reminderBreak();
+            if(break_time_active){
+                Serial.println("REMINDER_BREAK");
+                reminderBreak();
+            } else {
+                setState(ROBOT_STATES::IDLE);
+            }
             break;
         case ROBOT_STATES::REMINDER_WATER:
-            Serial.println("REMINDER_WATER");
-            reminderWater();
+            if(water_time_active){
+                Serial.println("REMINDER_WATER");
+                reminderWater();
+            } else {
+                setState(ROBOT_STATES::IDLE);
+            }
             break;
         case ROBOT_STATES::REMINDER_WALK:
-            Serial.println("REMINDER_WALK");
-            reminderWalk();
+            if(walk_time_active){
+                Serial.println("REMINDER_WALK");
+                reminderWalk();
+            } else {
+                setState(ROBOT_STATES::IDLE);
+            }
             break;
         case ROBOT_STATES::WEATHER_STATION:
             Serial.println("WEATHER_STATION");
             showWeatherStation();
+            break;
+        case ROBOT_STATES::OFF:
+            Serial.println("OFF");
+            shutDown();
             break;
         default:
             break;
@@ -46,15 +78,22 @@ unsigned int Robot::getWaterTime(){
     return water_time;
 };
 
-void Robot::setBreakTime(unsigned long time){
+void Robot::setBreakTime(unsigned long time, bool active){
     break_time = time;
+    break_time_active = active;
 };
-void Robot::setWalkTime(unsigned long time){
+void Robot::setWalkTime(unsigned long time, bool active){
     break_time = time;
+    walk_time_active = active;
 };
-void Robot::setWaterTime(unsigned long time){
+void Robot::setWaterTime(unsigned long time, bool active){
     break_time = time;
+    water_time_active = active;
 };
+
+void Robot::setShutdownAfter(unsigned long time){
+    shutdown_after = time;
+}
 
 void Robot::setBreakTimeDuration(unsigned long time){
     break_time_duration = time;
@@ -81,6 +120,20 @@ void Robot::moveHead( int pos ){
 };
 void Robot::moveNeck( int pos ){
     neck_servo.turnToDegree(pos);
+};
+
+void Robot::shutDown(){
+    returnToStartPos();
+    global_state = ROBOT_STATES::OFF;
+    face_screen.clearScreen();
+    while(pir_sensor.getLastMovement() >= shutdown_after){
+        rtos::ThisThread::sleep_for(MS(500));
+        Serial.println("shutdown acitve");
+
+    }
+    Serial.println("restart");
+    global_state = ROBOT_STATES::IDLE;
+    setState(ROBOT_STATES::IDLE);
 };
 
 void Robot::idleState(){
@@ -125,38 +178,47 @@ void Robot::returnToStartPos(){
 }
 
 void Robot::reminderBreak(){
+    Songs songs;
+    playSound<songs.notification.size()>(songs.notification);
     head_servo.turnToDegree(120);
     head_servo.turnToDegree(60);
+    rtos::ThisThread::sleep_for(MS(2000));
+    returnToStartPos();
     long unsigned int start_time = millis();
     while( (millis() - start_time)/SECOND <= break_time_duration/SECOND){
         rtos::ThisThread::sleep_for(MS(500));
         face_screen.showAnimation<4>(animations.big_break);
     }
-    returnToStartPos();
     setState(ROBOT_STATES::IDLE);
 };
 
 void Robot::reminderWalk(){
+    Songs songs;
+    playSound<songs.notification.size()>(songs.notification);
     head_servo.turnToDegree(120);
     head_servo.turnToDegree(60);
+    rtos::ThisThread::sleep_for(MS(2000));
+    returnToStartPos();
     long unsigned int start_time = millis();
     while( (millis() - start_time)/SECOND <= walk_time_duration/SECOND ){
         rtos::ThisThread::sleep_for(MS(500));
         face_screen.showAnimation<3>(animations.walk);
     }
-    returnToStartPos();
     setState(ROBOT_STATES::IDLE);
 };
 
 void Robot::reminderWater(){
+    Songs songs;
+    playSound<songs.notification.size()>(songs.notification);
     head_servo.turnToDegree(120);
     head_servo.turnToDegree(60);
+    rtos::ThisThread::sleep_for(MS(2000));
+    returnToStartPos();
     long unsigned int start_time = millis();
     while( (millis() - start_time)/SECOND <= water_time_duration/SECOND ){
         rtos::ThisThread::sleep_for(MS(500));
         face_screen.showAnimation<3>(animations.water);
     }
-    returnToStartPos();
     setState(ROBOT_STATES::IDLE);
 };
 

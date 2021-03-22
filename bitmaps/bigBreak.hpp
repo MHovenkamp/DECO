@@ -1,6 +1,10 @@
 # ifndef BIG_BREAK_HPP
 # define BIG_BREAK_HPP
 
+/**
+ * @brief namespace containing seperate bitmaps for frames in break reminder animation
+ * 
+ */
 namespace big_break{
 	const std::array<unsigned char, 1024> break_0 = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 

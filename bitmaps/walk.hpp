@@ -1,6 +1,10 @@
 # ifndef WALK_HPP
 # define WALK_HPP
 
+/**
+ * @brief namespace containing seperate bitmaps for frames in walk reminder animation
+ * 
+ */
 namespace walk{
 	const std::array<unsigned char, 1024> walk_0 = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 

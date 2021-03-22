@@ -1,0 +1,130 @@
+\hypertarget{robot_8cpp}{}\doxysection{src/robot.cpp File Reference}
+\label{robot_8cpp}\index{src/robot.cpp@{src/robot.cpp}}
+{\ttfamily \#include \char`\"{}../include/robot.\+hpp\char`\"{}}\newline
+Include dependency graph for robot.\+cpp\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{robot_8cpp__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{robot_8cpp_a53d5fa4df0ddae9d7bb1c0d7a635d32e}{servo\+Head\+Task}} ()
+\begin{DoxyCompactList}\small\item\em servo\+Head\+Task, continues loop supporting the head servo of the robot. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{robot_8cpp_a9c0d4bfe61d8c8a51e9ec9d8f8224ce9}{servo\+Neck\+Task}} ()
+\begin{DoxyCompactList}\small\item\em servo\+Neck\+Task, continues loop supporting the neck servo of the robot. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{robot_8cpp_af06c6f495981263aa408a1f3c57cc6a5}{timer\+Robot\+Task}} ()
+\begin{DoxyCompactList}\small\item\em timer\+Robot\+Task, continues loop polling time to trigger timed looped events. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{robot_8cpp_a828ed149f798085b0b4ac642de65b857}{robot\+Task}} ()
+\begin{DoxyCompactList}\small\item\em robot\+Task, continues loop runnning the robot. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{robot_8cpp_a838e8c10ee48a10dba8e9d828c914526}{robot\+Control\+Task}} ()
+\begin{DoxyCompactList}\small\item\em robot\+Control\+Task, continues loop running the control of the user over the robot. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+rtos\+::\+Thread \mbox{\hyperlink{robot_8cpp_ae8a4915900d8df0137c6cf61c94bcac5}{servo\+\_\+neck\+\_\+task}}
+\item 
+rtos\+::\+Thread \mbox{\hyperlink{robot_8cpp_a0e3d11d35c0e6e3e00bbe3435c50ebb9}{servo\+\_\+head\+\_\+task}}
+\item 
+rtos\+::\+Thread \mbox{\hyperlink{robot_8cpp_ab18718527b6477266c4e421ea0a10c3d}{robot\+\_\+task}}
+\item 
+rtos\+::\+Thread \mbox{\hyperlink{robot_8cpp_a20a22782f43ced9066c504ac934e8084}{robot\+\_\+control\+\_\+task}}
+\item 
+rtos\+::\+Thread \mbox{\hyperlink{robot_8cpp_a0133a4fbc10ab1b403fb3c6b2423753a}{timer\+\_\+robot\+\_\+task}}
+\item 
+\mbox{\hyperlink{robot_8hpp_a62c0373ab7c140271adcc0109b18d15c}{ROBOT\+\_\+\+STATES}} \mbox{\hyperlink{robot_8cpp_acb362f8a9029716737f89f850fb6525f}{global\+\_\+state}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{robot_8cpp_a838e8c10ee48a10dba8e9d828c914526}\label{robot_8cpp_a838e8c10ee48a10dba8e9d828c914526}} 
+\index{robot.cpp@{robot.cpp}!robotControlTask@{robotControlTask}}
+\index{robotControlTask@{robotControlTask}!robot.cpp@{robot.cpp}}
+\doxysubsubsection{\texorpdfstring{robotControlTask()}{robotControlTask()}}
+{\footnotesize\ttfamily void robot\+Control\+Task (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+robot\+Control\+Task, continues loop running the control of the user over the robot. 
+
+\mbox{\Hypertarget{robot_8cpp_a828ed149f798085b0b4ac642de65b857}\label{robot_8cpp_a828ed149f798085b0b4ac642de65b857}} 
+\index{robot.cpp@{robot.cpp}!robotTask@{robotTask}}
+\index{robotTask@{robotTask}!robot.cpp@{robot.cpp}}
+\doxysubsubsection{\texorpdfstring{robotTask()}{robotTask()}}
+{\footnotesize\ttfamily void robot\+Task (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+robot\+Task, continues loop runnning the robot. 
+
+\mbox{\Hypertarget{robot_8cpp_a53d5fa4df0ddae9d7bb1c0d7a635d32e}\label{robot_8cpp_a53d5fa4df0ddae9d7bb1c0d7a635d32e}} 
+\index{robot.cpp@{robot.cpp}!servoHeadTask@{servoHeadTask}}
+\index{servoHeadTask@{servoHeadTask}!robot.cpp@{robot.cpp}}
+\doxysubsubsection{\texorpdfstring{servoHeadTask()}{servoHeadTask()}}
+{\footnotesize\ttfamily void servo\+Head\+Task (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+servo\+Head\+Task, continues loop supporting the head servo of the robot. 
+
+\mbox{\Hypertarget{robot_8cpp_a9c0d4bfe61d8c8a51e9ec9d8f8224ce9}\label{robot_8cpp_a9c0d4bfe61d8c8a51e9ec9d8f8224ce9}} 
+\index{robot.cpp@{robot.cpp}!servoNeckTask@{servoNeckTask}}
+\index{servoNeckTask@{servoNeckTask}!robot.cpp@{robot.cpp}}
+\doxysubsubsection{\texorpdfstring{servoNeckTask()}{servoNeckTask()}}
+{\footnotesize\ttfamily void servo\+Neck\+Task (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+servo\+Neck\+Task, continues loop supporting the neck servo of the robot. 
+
+\mbox{\Hypertarget{robot_8cpp_af06c6f495981263aa408a1f3c57cc6a5}\label{robot_8cpp_af06c6f495981263aa408a1f3c57cc6a5}} 
+\index{robot.cpp@{robot.cpp}!timerRobotTask@{timerRobotTask}}
+\index{timerRobotTask@{timerRobotTask}!robot.cpp@{robot.cpp}}
+\doxysubsubsection{\texorpdfstring{timerRobotTask()}{timerRobotTask()}}
+{\footnotesize\ttfamily void timer\+Robot\+Task (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+timer\+Robot\+Task, continues loop polling time to trigger timed looped events. 
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{robot_8cpp_acb362f8a9029716737f89f850fb6525f}\label{robot_8cpp_acb362f8a9029716737f89f850fb6525f}} 
+\index{robot.cpp@{robot.cpp}!global\_state@{global\_state}}
+\index{global\_state@{global\_state}!robot.cpp@{robot.cpp}}
+\doxysubsubsection{\texorpdfstring{global\_state}{global\_state}}
+{\footnotesize\ttfamily \mbox{\hyperlink{robot_8hpp_a62c0373ab7c140271adcc0109b18d15c}{ROBOT\+\_\+\+STATES}} global\+\_\+state\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{robot_8cpp_a20a22782f43ced9066c504ac934e8084}\label{robot_8cpp_a20a22782f43ced9066c504ac934e8084}} 
+\index{robot.cpp@{robot.cpp}!robot\_control\_task@{robot\_control\_task}}
+\index{robot\_control\_task@{robot\_control\_task}!robot.cpp@{robot.cpp}}
+\doxysubsubsection{\texorpdfstring{robot\_control\_task}{robot\_control\_task}}
+{\footnotesize\ttfamily rtos\+::\+Thread robot\+\_\+control\+\_\+task\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{robot_8cpp_ab18718527b6477266c4e421ea0a10c3d}\label{robot_8cpp_ab18718527b6477266c4e421ea0a10c3d}} 
+\index{robot.cpp@{robot.cpp}!robot\_task@{robot\_task}}
+\index{robot\_task@{robot\_task}!robot.cpp@{robot.cpp}}
+\doxysubsubsection{\texorpdfstring{robot\_task}{robot\_task}}
+{\footnotesize\ttfamily rtos\+::\+Thread robot\+\_\+task\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{robot_8cpp_a0e3d11d35c0e6e3e00bbe3435c50ebb9}\label{robot_8cpp_a0e3d11d35c0e6e3e00bbe3435c50ebb9}} 
+\index{robot.cpp@{robot.cpp}!servo\_head\_task@{servo\_head\_task}}
+\index{servo\_head\_task@{servo\_head\_task}!robot.cpp@{robot.cpp}}
+\doxysubsubsection{\texorpdfstring{servo\_head\_task}{servo\_head\_task}}
+{\footnotesize\ttfamily rtos\+::\+Thread servo\+\_\+head\+\_\+task\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{robot_8cpp_ae8a4915900d8df0137c6cf61c94bcac5}\label{robot_8cpp_ae8a4915900d8df0137c6cf61c94bcac5}} 
+\index{robot.cpp@{robot.cpp}!servo\_neck\_task@{servo\_neck\_task}}
+\index{servo\_neck\_task@{servo\_neck\_task}!robot.cpp@{robot.cpp}}
+\doxysubsubsection{\texorpdfstring{servo\_neck\_task}{servo\_neck\_task}}
+{\footnotesize\ttfamily rtos\+::\+Thread servo\+\_\+neck\+\_\+task\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{robot_8cpp_a0133a4fbc10ab1b403fb3c6b2423753a}\label{robot_8cpp_a0133a4fbc10ab1b403fb3c6b2423753a}} 
+\index{robot.cpp@{robot.cpp}!timer\_robot\_task@{timer\_robot\_task}}
+\index{timer\_robot\_task@{timer\_robot\_task}!robot.cpp@{robot.cpp}}
+\doxysubsubsection{\texorpdfstring{timer\_robot\_task}{timer\_robot\_task}}
+{\footnotesize\ttfamily rtos\+::\+Thread timer\+\_\+robot\+\_\+task\hspace{0.3cm}{\ttfamily [extern]}}
+

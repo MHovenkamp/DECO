@@ -40,6 +40,15 @@ public:
     };
 
     /**
+     * @brief clear display
+     * 
+     */
+    void clearScreen(){
+        display.clearDisplay();
+        display.display();
+    }
+
+    /**
      * @brief showAnimation function that shows a given Animation on the screen
      * 
      * @tparam T amount of frames
@@ -62,6 +71,14 @@ public:
         }
     }
 
+    /**
+     * @brief showText function thats show given string on screen
+     * 
+     * @tparam T : unsigned int
+     * @param text : char*, text to show on screen
+     * @param amount_of_symbols : std::array<unsigned int, T>, amount of symbols per line
+     * @param amount_of_lines : unsigned int, amount of lines
+     */
     template <unsigned int T>
     void showText( char* text, std::array<unsigned int, T> amount_of_symbols, unsigned int amount_of_lines){
         display.setFont(&FreeSans9pt7b);

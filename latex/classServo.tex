@@ -1,0 +1,148 @@
+\hypertarget{classServo}{}\doxysection{Servo Class Reference}
+\label{classServo}\index{Servo@{Servo}}
+
+
+\mbox{\hyperlink{classServo}{Servo}} class, driver class to support servo SG92 and sg92R.  
+
+
+
+
+{\ttfamily \#include $<$servo.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classServo_a39041751056b579a0551832fb8a5f35f}{Servo}} (int \mbox{\hyperlink{classServo_aa8675aed7b3fa6fca3d4ccede61e1fe1}{servo\+\_\+pin}})
+\begin{DoxyCompactList}\small\item\em Construct a new \mbox{\hyperlink{classServo}{Servo}} object. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classServo_a944b58a20ad7dcbd57657474cf3bf52c}{setup}} ()
+\begin{DoxyCompactList}\small\item\em setup servo \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classServo_a6ca8558048ee56d13a8e0c841056a372}{servo\+Task}} ()
+\begin{DoxyCompactList}\small\item\em continues sending of servo commands to servo, run in task scheduler loop \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classServo_a7aa48585331b4e7651ce0ba8faf7c8b9}{turn\+To\+Degree}} (int degree)
+\begin{DoxyCompactList}\small\item\em gives the servo the command to turn to given degree. \end{DoxyCompactList}\item 
+unsigned int \mbox{\hyperlink{classServo_a137d2223fb163ca9782b52848006ee2a}{get\+Current\+Degree}} ()
+\begin{DoxyCompactList}\small\item\em Get the Current Degree. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+const int \mbox{\hyperlink{classServo_aa8675aed7b3fa6fca3d4ccede61e1fe1}{servo\+\_\+pin}}
+\item 
+unsigned int \mbox{\hyperlink{classServo_a820e9410342a7a23fe9bbe0cb2ad04f0}{speed}} = 1
+\item 
+unsigned int \mbox{\hyperlink{classServo_ace882c0ba627722f69f964b164993453}{current\+\_\+degree\+\_\+wait}}
+\item 
+unsigned int \mbox{\hyperlink{classServo_aadf2b1e38fc07d50ae53d643a687d63a}{current\+\_\+degree\+\_\+goal}}
+\item 
+unsigned int \mbox{\hyperlink{classServo_ad45ce7e72b0d718fe7e7dee41ad52903}{current\+\_\+degree}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\mbox{\hyperlink{classServo}{Servo}} class, driver class to support servo SG92 and sg92R. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classServo_a39041751056b579a0551832fb8a5f35f}\label{classServo_a39041751056b579a0551832fb8a5f35f}} 
+\index{Servo@{Servo}!Servo@{Servo}}
+\index{Servo@{Servo}!Servo@{Servo}}
+\doxysubsubsection{\texorpdfstring{Servo()}{Servo()}}
+{\footnotesize\ttfamily Servo\+::\+Servo (\begin{DoxyParamCaption}\item[{int}]{servo\+\_\+pin }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Construct a new \mbox{\hyperlink{classServo}{Servo}} object. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em servo\+\_\+pin,pin} & number for servo to be attached to, digital pin \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classServo_a137d2223fb163ca9782b52848006ee2a}\label{classServo_a137d2223fb163ca9782b52848006ee2a}} 
+\index{Servo@{Servo}!getCurrentDegree@{getCurrentDegree}}
+\index{getCurrentDegree@{getCurrentDegree}!Servo@{Servo}}
+\doxysubsubsection{\texorpdfstring{getCurrentDegree()}{getCurrentDegree()}}
+{\footnotesize\ttfamily unsigned int Servo\+::get\+Current\+Degree (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Get the Current Degree. 
+
+\begin{DoxyReturn}{Returns}
+unsigned int 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classServo_a6ca8558048ee56d13a8e0c841056a372}\label{classServo_a6ca8558048ee56d13a8e0c841056a372}} 
+\index{Servo@{Servo}!servoTask@{servoTask}}
+\index{servoTask@{servoTask}!Servo@{Servo}}
+\doxysubsubsection{\texorpdfstring{servoTask()}{servoTask()}}
+{\footnotesize\ttfamily void Servo\+::servo\+Task (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+continues sending of servo commands to servo, run in task scheduler loop 
+
+\mbox{\Hypertarget{classServo_a944b58a20ad7dcbd57657474cf3bf52c}\label{classServo_a944b58a20ad7dcbd57657474cf3bf52c}} 
+\index{Servo@{Servo}!setup@{setup}}
+\index{setup@{setup}!Servo@{Servo}}
+\doxysubsubsection{\texorpdfstring{setup()}{setup()}}
+{\footnotesize\ttfamily void Servo\+::setup (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+setup servo 
+
+\mbox{\Hypertarget{classServo_a7aa48585331b4e7651ce0ba8faf7c8b9}\label{classServo_a7aa48585331b4e7651ce0ba8faf7c8b9}} 
+\index{Servo@{Servo}!turnToDegree@{turnToDegree}}
+\index{turnToDegree@{turnToDegree}!Servo@{Servo}}
+\doxysubsubsection{\texorpdfstring{turnToDegree()}{turnToDegree()}}
+{\footnotesize\ttfamily void Servo\+::turn\+To\+Degree (\begin{DoxyParamCaption}\item[{int}]{degree }\end{DoxyParamCaption})}
+
+
+
+gives the servo the command to turn to given degree. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em degree,degree} & you want servo to turn to between 0 and 180 \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classServo_ad45ce7e72b0d718fe7e7dee41ad52903}\label{classServo_ad45ce7e72b0d718fe7e7dee41ad52903}} 
+\index{Servo@{Servo}!current\_degree@{current\_degree}}
+\index{current\_degree@{current\_degree}!Servo@{Servo}}
+\doxysubsubsection{\texorpdfstring{current\_degree}{current\_degree}}
+{\footnotesize\ttfamily unsigned int Servo\+::current\+\_\+degree\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classServo_aadf2b1e38fc07d50ae53d643a687d63a}\label{classServo_aadf2b1e38fc07d50ae53d643a687d63a}} 
+\index{Servo@{Servo}!current\_degree\_goal@{current\_degree\_goal}}
+\index{current\_degree\_goal@{current\_degree\_goal}!Servo@{Servo}}
+\doxysubsubsection{\texorpdfstring{current\_degree\_goal}{current\_degree\_goal}}
+{\footnotesize\ttfamily unsigned int Servo\+::current\+\_\+degree\+\_\+goal\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classServo_ace882c0ba627722f69f964b164993453}\label{classServo_ace882c0ba627722f69f964b164993453}} 
+\index{Servo@{Servo}!current\_degree\_wait@{current\_degree\_wait}}
+\index{current\_degree\_wait@{current\_degree\_wait}!Servo@{Servo}}
+\doxysubsubsection{\texorpdfstring{current\_degree\_wait}{current\_degree\_wait}}
+{\footnotesize\ttfamily unsigned int Servo\+::current\+\_\+degree\+\_\+wait\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classServo_aa8675aed7b3fa6fca3d4ccede61e1fe1}\label{classServo_aa8675aed7b3fa6fca3d4ccede61e1fe1}} 
+\index{Servo@{Servo}!servo\_pin@{servo\_pin}}
+\index{servo\_pin@{servo\_pin}!Servo@{Servo}}
+\doxysubsubsection{\texorpdfstring{servo\_pin}{servo\_pin}}
+{\footnotesize\ttfamily const int Servo\+::servo\+\_\+pin\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{classServo_a820e9410342a7a23fe9bbe0cb2ad04f0}\label{classServo_a820e9410342a7a23fe9bbe0cb2ad04f0}} 
+\index{Servo@{Servo}!speed@{speed}}
+\index{speed@{speed}!Servo@{Servo}}
+\doxysubsubsection{\texorpdfstring{speed}{speed}}
+{\footnotesize\ttfamily unsigned int Servo\+::speed = 1\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/\mbox{\hyperlink{servo_8hpp}{servo.\+hpp}}\item 
+src/\mbox{\hyperlink{servo_8cpp}{servo.\+cpp}}\end{DoxyCompactItemize}
