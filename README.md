@@ -28,7 +28,14 @@ This robot is a desk companion for peoplt with a desk job. The robot reminds the
     - [Arduino store](https://store.arduino.cc/usb-cable-type-a-male-to-micro-type-b-male)
 8. Soldering iron and necessary accesoires.
 
+## Documentation
+For documentation run 
+```
+doxygen Doxyfile
+```
+
 ## Models
 
 ### Fritzing
-![Fritzing Model](http://url/to/img.png)
+![Fritzing Model](https://github.com/MHovenkamp/PINNO/blob/main/images/Hardware_model.png)
+
