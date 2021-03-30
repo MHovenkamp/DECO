@@ -47,6 +47,12 @@ private:
     unsigned int walk_time_duration = 5 * MINUTE;
     unsigned int water_time_duration = 30 * SECOND;
     ROBOT_STATES current_state = ROBOT_STATES::IDLE;
+    std::array<std::array<int, 3>,9> surroundings_map;
+    std::array<std::array<int, 3>,9> old_surroundings_map;
+    unsigned int map_steps_neck = 20;
+    unsigned int map_steps_head = 45;
+    int difference_map_x;
+    int difference_map_y;
 
     /**
      * @brief Idle state of the robot; idle animation.
@@ -227,6 +233,24 @@ public:
      * 
      */
     void shutDown();
+
+    /**
+     * @brief update the surroundings map to detect a person.
+     * 
+     */
+    void scanSurroundings();
+
+    /**
+     * @brief Get the difference int the surroundings object object
+     * 
+     */
+    void DetectDifSurroundings();
+
+    /**
+     * @brief Makes the robot search out the user and look at hiim/follow him.
+     * 
+     */
+    void interactiveMode();
 };
 
 #endif

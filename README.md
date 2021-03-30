@@ -39,6 +39,8 @@ doxygen Doxyfile
 ### Fritzing
 ![Fritzing Model](https://github.com/MHovenkamp/PINNO/blob/main/images/Hardware_model.png)
 
+Al other models can be found by opening software_models.html.
+
 ## Building and running
 This robot is compiled and flashed by [PlatformIO](https://platformio.org/). Install platformIO core to work with this project. Then run the folowing commands in the directory. The directory will build the robot and flash to your arduino.
 

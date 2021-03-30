@@ -21,6 +21,11 @@ void Robot::setup(){
     face_screen.setup();
     Songs songs;
     playSound<songs.start_up.size()>(songs.start_up);
+    for(unsigned int i = 0; i<=180; i+=map_steps_neck){
+        for(unsigned int j = 45; j<=135; j+=map_steps_head){
+            surroundings_map[i][j] = -1;
+        }
+    }
 };
 
 void Robot::run(){
@@ -116,6 +121,12 @@ ROBOT_STATES Robot::getState(){
 };
 
 void Robot::moveHead( int pos ){
+    if( pos >= 140){
+        pos = 140;
+    }
+    if( pos <= 40){
+        pos = 40;
+    }
     head_servo.turnToDegree(pos);
 };
 void Robot::moveNeck( int pos ){
@@ -233,4 +244,52 @@ void Robot::showWeatherStation(){
     std::array<unsigned int, 3> line_lengths = {(weather_message_temp.length()), (weather_message_hum.length()), (weather_message_baro.length())};
     face_screen.showText<3>(message, line_lengths, 3);
 
+}
+
+void Robot::interactiveMode(){
+    scanSurroundings();
+    DetectDifSurroundings();
+    neck_servo.turnToDegree(difference_map_x*map_steps_neck);
+    head_servo.turnToDegree(difference_map_y*map_steps_head);
+}
+
+void Robot::scanSurroundings(){
+    int wait_after_movement_ms = 500;
+    old_surroundings_map = surroundings_map;
+    int current_distance = 10;
+    unsigned int first_index, second_index;
+    for(unsigned int i = 0; i <=180; i+=map_steps_neck){
+        neck_servo.turnToDegree(i+1);
+        rtos::ThisThread::sleep_for(MS(wait_after_movement_ms));
+        first_index = 9 * neck_servo.getCurrentDegree() / 180;
+        second_index = 0;
+        for(unsigned int j = 45; j<=135; j+=map_steps_head){
+            head_servo.turnToDegree(j+1);
+            rtos::ThisThread::sleep_for(MS(wait_after_movement_ms));
+            // current_distance = read value from sensor
+            Serial.println(String(first_index) + ", " + String(second_index));
+            surroundings_map[first_index][second_index] = current_distance;
+            second_index +=1;
+        }
+        for(unsigned int j = 135; j>=45; j-=map_steps_head){
+            head_servo.turnToDegree(j-1);
+            rtos::ThisThread::sleep_for(MS(wait_after_movement_ms));
+        }
+    }
+}
+
+void Robot::DetectDifSurroundings(){
+    unsigned int first_index, second_index;
+    for(unsigned int i=0; i < 180; i+=map_steps_neck){
+        first_index = 9 * neck_servo.getCurrentDegree() / 180;
+        for(unsigned int j = 45; j<=135; j+=map_steps_head){
+            second_index = 3 * head_servo.getCurrentDegree() / 180;
+            if( old_surroundings_map[first_index][second_index] != surroundings_map[first_index][second_index]){
+                if(old_surroundings_map[first_index][second_index] != -1 && surroundings_map[first_index][second_index] != -1){
+                    difference_map_x = i;
+                    difference_map_y = j;
+                }
+            }
+        }
+    }
 }

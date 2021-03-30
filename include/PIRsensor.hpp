@@ -33,7 +33,7 @@ public:
      * 
      * @return int 
      */
-    int getLastMovement();
+    unsigned int getLastMovement();
 };
 
 #endif //PIRSENSOR_HPP

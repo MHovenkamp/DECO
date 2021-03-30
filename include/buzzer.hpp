@@ -1,19 +1,22 @@
 # ifndef BUZZER_HPP
 # define BUZZER_HPP
 
+#include "notes.hpp"
+
 /**
  * @brief struct Songs containing al playable tunes, currently not in use since tone() not functional in platformio.
  * 
  */
 struct Songs{
+    Notes notes;
     std::array<std::array<int, 2>, 4> start_up = {{
-                                                        {NOTE_A4,4}, {NOTE_F4,4}, {NOTE_E4,4}, {NOTE_F4,4}
+                                                        {notes.NOTE_A4,4}, {notes.NOTE_F4,4}, {notes.NOTE_E4,4}, {notes.NOTE_F4,4}
                                                     }};
     std::array<std::array<int, 2>, 4> shut_down = {{ 
-                                                        {NOTE_A3,4}, {NOTE_F3,4}, {NOTE_E3,4}, {NOTE_F3,4}
+                                                        {notes.NOTE_A3,4}, {notes.NOTE_F3,4}, {notes.NOTE_E3,4}, {notes.NOTE_F3,4}
                                                     }};
     std::array<std::array<int, 2>, 2> notification = {{
-                                                        {NOTE_A4, 4}, {NOTE_D4, 4}
+                                                        {notes.NOTE_A4, 4}, {notes.NOTE_D4, 4}
                                                     }};
 };
 

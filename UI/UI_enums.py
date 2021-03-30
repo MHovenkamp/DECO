@@ -1,0 +1,7 @@
+from enum import Enum
+
+class ActivityEnums(Enum):
+    BREAK_REMINDER = "BREAK_REMINDER"
+    WATER_REMINDER = "WATER_REMINDER"
+    WALK_REMINDER = "WALK_REMINDER"
+    WEATHER_STATION = "WEATHER_STATION"

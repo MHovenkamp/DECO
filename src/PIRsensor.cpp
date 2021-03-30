@@ -7,7 +7,7 @@ void PIRSensor::PIRTask(){
     rtos::ThisThread::sleep_for(MS(5));
 };
 
-int PIRSensor::getLastMovement(){
+unsigned int PIRSensor::getLastMovement(){
     int time = millis() - last_movement_time;
     int seconds = time/SECOND;
     return seconds;

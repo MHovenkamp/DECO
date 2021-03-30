@@ -61,6 +61,7 @@ void timerRobotTask(){
   unsigned long start_time = millis();
   unsigned long current_time_difference;
   while(true){
+    rtos::ThisThread::sleep_for(MS(500));
     if( global_state != ROBOT_STATES::OFF ){
       current_time_difference = (millis() - start_time)/SECOND;
       int walk_time_seconds = robot_test.getWalkTime()/SECOND;
@@ -76,9 +77,8 @@ void timerRobotTask(){
       } else if(current_time_difference % break_time_seconds == 0){
         robot_test.setState(ROBOT_STATES::REMINDER_BREAK);
       }
-      rtos::ThisThread::sleep_for(MS(500));
     } else {
-      unsigned long start_time = millis();
+      start_time = millis();
     }
   }
 }
@@ -100,9 +100,8 @@ void robotTask(){
  */
 void robotControlTask(){
   Serial.println("robot control task started");
-  Songs songs;
   while (true){
-    rtos::ThisThread::sleep_for(MS(1000));
+    robot_test.interactiveMode();
   }
 }
 
@@ -120,6 +119,7 @@ void setup() {
 
   servo_head_task.start(servoHeadTask);
   servo_neck_task.start(servoNeckTask);
+
   timer_robot_task.start(timerRobotTask);
   robot_control_task.start(robotControlTask);
   robot_task.start(robotTask);
