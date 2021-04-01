@@ -1,0 +1,26 @@
+SETUP:
+
+    weatherstation = ACTIVE
+    weatherstation PERIOD = 10 MINUTE
+    weatherstation DURATION = 10 SECOND
+
+    walk_reminder = ACTIVE
+    walk_reminder PERIOD = 10 MINUTE
+    walk_reminder DURATION = 10 SECOND
+
+    weather_reminder = ACTIVE
+    weather_reminder PERIOD = 10 MINUTE
+    weather_reminder DURATION = 10 SECOND
+
+    break_reminder = ACTIVE
+    break_reminder PERIOD = 10 MINUTE
+    break_reminder DURATION = 10 SECOND
+
+    shut_down_after = 10 MINUTE
+
+LOOP:
+
+    STATE = IDLE
+    WAIT 10 MINUTE
+    scan_surroundings
+    follow_object DURATION = 2 MINUTE

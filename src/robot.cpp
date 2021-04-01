@@ -251,6 +251,13 @@ void Robot::interactiveMode(){
     DetectDifSurroundings();
     neck_servo.turnToDegree(difference_map_x*map_steps_neck);
     head_servo.turnToDegree(difference_map_y*map_steps_head);
+    // for(unsigned int x = 0; x < 9; x++){
+    //     Serial.print("\n");
+    //     for(unsigned int y = 0; y < 3; y++){
+    //         Serial.print(surroundings_map[x][y]);
+    //         Serial.print(" ");
+    //     }
+    // }
 }
 
 void Robot::scanSurroundings(){
@@ -285,11 +292,49 @@ void Robot::DetectDifSurroundings(){
         for(unsigned int j = 45; j<=135; j+=map_steps_head){
             second_index = 3 * head_servo.getCurrentDegree() / 180;
             if( old_surroundings_map[first_index][second_index] != surroundings_map[first_index][second_index]){
-                if(old_surroundings_map[first_index][second_index] != -1 && surroundings_map[first_index][second_index] != -1){
-                    difference_map_x = i;
-                    difference_map_y = j;
+                difference_map_x = i;
+                difference_map_y = j;
+                distance_found_object = old_surroundings_map[first_index][second_index];
+            }
+        }
+    }
+}
+
+void Robot::FollowClosestObject(){
+    bool found_objects;
+    int wait_after_movement_ms = 500;
+    int x_index = 9 * difference_map_x / 180;
+    int y_index = 3 * difference_map_y / 180;
+    int x_lower, x_higher, y_lower, y_higher;
+    int lowest_distance = infinity();
+    
+    if(x_index != 0){x_lower = (x_index - 1) * 20;}else{x_lower = x_index * 20;}
+    if(x_index != 9){x_higher = (x_index + 1) * 20;}else{x_higher = x_index * 20;}
+
+    if(y_index != 0){y_lower = (y_index - 1) * 45;}else{y_lower = y_index * 45;}
+    if(y_index != 9){y_higher = (y_index + 1) * 45;}else{y_higher = y_index * 45;}
+
+    if( abs(sensor_data - distance_found_object) <= 10 ){
+        found_objects = true;
+    } else{
+        found_objects = false;
+    }
+    if( found_objects == false ){
+        for(unsigned int x = x_lower; x <= x_higher; x++ ){
+            neck_servo.turnToDegree(x);
+            rtos::ThisThread::sleep_for(MS(wait_after_movement_ms));
+            for(unsigned int y = y_lower; y <= y_higher; y++){
+                head_servo.turnToDegree(y);
+                rtos::ThisThread::sleep_for(MS(wait_after_movement_ms));
+                if( sensor_data < lowest_distance ){
+                    lowest_distance = sensor_data;
+                    found_object_x = x;
+                    found_object_y = y;
                 }
             }
         }
+        found_objects = true;
+        difference_map_x = found_object_x;
+        difference_map_y = found_object_y;
     }
 }

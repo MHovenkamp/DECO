@@ -53,6 +53,9 @@ private:
     unsigned int map_steps_head = 45;
     int difference_map_x;
     int difference_map_y;
+    int distance_found_object;
+    int found_object_x;
+    int found_object_y;
 
     /**
      * @brief Idle state of the robot; idle animation.
@@ -251,6 +254,8 @@ public:
      * 
      */
     void interactiveMode();
+
+    void FollowClosestObject();
 };
 
 #endif
