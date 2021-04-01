@@ -1,4 +1,4 @@
-# PINNO
+# DECO
 
 ## Introduction
 
@@ -6,7 +6,7 @@ Welcome to the Github page for the social robot under 50 euros. This robot is th
 
 ## What can the robot do?
 
-This robot is a desk companion for peoplt with a desk job. The robot reminds the user to stay healthy and productive without being pushy. The robot reminds people to take breaks and drink enoug water. It can also inform the user of their current environment such as temperature. These are al posibilities within th erobot but the goal is that this robot can easily be programmed by someone with limited knowledge of technology. THis is so the robot can be used by the previously mentioned minor from the HU.
+DECO is a desk companion for peoplt with a desk job. The robot reminds the user to stay healthy and productive without being pushy. The robot reminds people to take breaks and drink enoug water. It can also inform the user of their current environment such as temperature. These are al posibilities within th erobot but the goal is that this robot can easily be programmed by someone with limited knowledge of technology. THis is so the robot can be used by the previously mentioned minor from the HU.
 
 ## Necessary components to build this robot.
 
