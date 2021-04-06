@@ -1,24 +1,14 @@
 #include "../include/robot.hpp"
 
-extern rtos::Thread servo_neck_task;
-extern rtos::Thread servo_head_task;
-extern rtos::Thread robot_task;
-extern rtos::Thread robot_control_task;
-extern rtos::Thread timer_robot_task;
-
-extern void servoHeadTask();
-extern void servoNeckTask();
-extern void timerRobotTask();
-extern void robotTask();
-extern void robotControlTask();
-
 extern ROBOT_STATES global_state;
 
 void Robot::setup(){
+    Serial.println("start setup robot");
     head_servo.setup();
     neck_servo.setup();
     internal_sensors.setup();
     face_screen.setup();
+    lidar.setup();
     Songs songs;
     playSound<songs.start_up.size()>(songs.start_up);
     for(unsigned int i = 0; i<=180; i+=map_steps_neck){
@@ -26,6 +16,7 @@ void Robot::setup(){
             surroundings_map[i][j] = -1;
         }
     }
+    Serial.println("finished setup robot");
 };
 
 void Robot::run(){
@@ -249,21 +240,21 @@ void Robot::showWeatherStation(){
 void Robot::interactiveMode(){
     scanSurroundings();
     DetectDifSurroundings();
-    neck_servo.turnToDegree(difference_map_x*map_steps_neck);
-    head_servo.turnToDegree(difference_map_y*map_steps_head);
-    // for(unsigned int x = 0; x < 9; x++){
-    //     Serial.print("\n");
-    //     for(unsigned int y = 0; y < 3; y++){
-    //         Serial.print(surroundings_map[x][y]);
-    //         Serial.print(" ");
-    //     }
-    // }
+    // neck_servo.turnToDegree(difference_map_x*map_steps_neck);
+    // head_servo.turnToDegree(difference_map_y*map_steps_head);
+    for(unsigned int x = 0; x < 9; x++){
+        Serial.print("\n");
+        for(unsigned int y = 0; y < 3; y++){
+            Serial.print(surroundings_map[x][y]);
+            Serial.print(" ");
+        }
+    }
 }
 
 void Robot::scanSurroundings(){
     int wait_after_movement_ms = 500;
     old_surroundings_map = surroundings_map;
-    int current_distance = 10;
+    int current_distance;
     unsigned int first_index, second_index;
     for(unsigned int i = 0; i <=180; i+=map_steps_neck){
         neck_servo.turnToDegree(i+1);
@@ -273,7 +264,7 @@ void Robot::scanSurroundings(){
         for(unsigned int j = 45; j<=135; j+=map_steps_head){
             head_servo.turnToDegree(j+1);
             rtos::ThisThread::sleep_for(MS(wait_after_movement_ms));
-            // current_distance = read value from sensor
+            current_distance = lidar.getDistandeMM();
             Serial.println(String(first_index) + ", " + String(second_index));
             surroundings_map[first_index][second_index] = current_distance;
             second_index +=1;
@@ -314,6 +305,7 @@ void Robot::FollowClosestObject(){
     if(y_index != 0){y_lower = (y_index - 1) * 45;}else{y_lower = y_index * 45;}
     if(y_index != 9){y_higher = (y_index + 1) * 45;}else{y_higher = y_index * 45;}
 
+    int sensor_data = lidar.getDistandeMM();
     if( abs(sensor_data - distance_found_object) <= 10 ){
         found_objects = true;
     } else{

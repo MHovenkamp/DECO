@@ -14,6 +14,9 @@
 #include <Adafruit_SSD1306.h>
 #include <Fonts/FreeSans9pt7b.h>
 
+//Micro LIDAR
+#include "Adafruit_VL53L0X.h"
+
 
 //Internal humidity and temperature sensor
 #include <Arduino_HTS221.h>

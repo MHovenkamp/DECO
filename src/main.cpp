@@ -48,6 +48,7 @@ void servoNeckTask(){
 void PIRTask(){
   Serial.println("PIR task started");
   while(true){ 
+    Serial.println("hello?");
     pir_sensor.PIRTask();
   }
 }
@@ -102,6 +103,7 @@ void robotControlTask(){
   Serial.println("robot control task started");
   while (true){
     robot_test.interactiveMode();
+    rtos::ThisThread::sleep_for(MS(500));
   }
 }
 
@@ -111,19 +113,20 @@ void setup() {
   robot_test.setup();
   delay(2000);
 
-  robot_test.setBreakTime(10*SECOND, false);
+  osStatus error;
+  error = pir_task.start(PIRTask);
+  if(error){Serial.println(error);}
+  error = servo_neck_task.start(servoNeckTask);
+  if(error){Serial.println(error);}
+  error = servo_head_task.start(servoHeadTask);
+  if(error){Serial.println(error);}
 
-  robot_test.setBreakTimeDuration(30*SECOND);
-  robot_test.setWalkTimeDuration(30*SECOND);
-  robot_test.setWaterTimeDuration(30*SECOND);
-
-  servo_head_task.start(servoHeadTask);
-  servo_neck_task.start(servoNeckTask);
-
-  timer_robot_task.start(timerRobotTask);
-  robot_control_task.start(robotControlTask);
-  robot_task.start(robotTask);
-  pir_task.start(PIRTask);
+  error = timer_robot_task.start(timerRobotTask);
+  if(error){Serial.println(error);}
+  error = robot_control_task.start(robotControlTask);
+  if(error){Serial.println(error);}
+  error = robot_task.start(robotTask);
+  if(error){Serial.println(error);}
 };
 
 

@@ -6,6 +6,7 @@
 #include "oledScreen.hpp"
 #include "internalBleSensors.hpp" 
 #include "buzzer.hpp"
+#include "microLidar.hpp"
 
 /**
  * @brief enum class ROBOT_STATES, all posible robot states
@@ -33,6 +34,7 @@ private:
     OledScreen face_screen;
     Animations animations;
     Buzzer buzzer;
+    MicroLidar lidar;
 
     unsigned int break_time = 2 * HOUR;
     unsigned int walk_time = 30 * MINUTE;
