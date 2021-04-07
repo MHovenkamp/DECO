@@ -11,9 +11,19 @@ void Robot::setup(){
     lidar.setup();
     Songs songs;
     playSound<songs.start_up.size()>(songs.start_up);
-    for(unsigned int i = 0; i<=180; i+=map_steps_neck){
-        for(unsigned int j = 45; j<=135; j+=map_steps_head){
+    
+    // IK VERDENK DIE FOCKING FOR LOOPS, EFFE CHECKEN
+
+    for(unsigned int i = 0; i<9; i++){
+        for(unsigned int j = 0; j < 3; j++){
             surroundings_map[i][j] = -1;
+        }
+    }
+    for(unsigned int x = 0; x < 9; x++){
+        Serial.print("\n");
+        for(unsigned int y = 0; y < 3; y++){
+            Serial.print(surroundings_map[x][y]);
+            Serial.print(" ");
         }
     }
     Serial.println("finished setup robot");
@@ -252,7 +262,7 @@ void Robot::interactiveMode(){
 }
 
 void Robot::scanSurroundings(){
-    int wait_after_movement_ms = 500;
+    int wait_after_movement_ms = 800;
     old_surroundings_map = surroundings_map;
     int current_distance;
     unsigned int first_index, second_index;
@@ -261,15 +271,16 @@ void Robot::scanSurroundings(){
         rtos::ThisThread::sleep_for(MS(wait_after_movement_ms));
         first_index = 9 * neck_servo.getCurrentDegree() / 180;
         second_index = 0;
-        for(unsigned int j = 45; j<=135; j+=map_steps_head){
+        for(unsigned int j = 90-map_steps_head; j<=90+map_steps_head; j+=map_steps_head){
             head_servo.turnToDegree(j+1);
             rtos::ThisThread::sleep_for(MS(wait_after_movement_ms));
             current_distance = lidar.getDistandeMM();
-            Serial.println(String(first_index) + ", " + String(second_index));
+            rtos::ThisThread::sleep_for(MS(500));
+            Serial.println(String(first_index) + ", " + String(second_index) + ": "+ String(current_distance));
             surroundings_map[first_index][second_index] = current_distance;
             second_index +=1;
         }
-        for(unsigned int j = 135; j>=45; j-=map_steps_head){
+        for(unsigned int j = 90+map_steps_head; j>=90-map_steps_head; j-=map_steps_head){
             head_servo.turnToDegree(j-1);
             rtos::ThisThread::sleep_for(MS(wait_after_movement_ms));
         }
@@ -277,15 +288,12 @@ void Robot::scanSurroundings(){
 }
 
 void Robot::DetectDifSurroundings(){
-    unsigned int first_index, second_index;
-    for(unsigned int i=0; i < 180; i+=map_steps_neck){
-        first_index = 9 * neck_servo.getCurrentDegree() / 180;
-        for(unsigned int j = 45; j<=135; j+=map_steps_head){
-            second_index = 3 * head_servo.getCurrentDegree() / 180;
-            if( old_surroundings_map[first_index][second_index] != surroundings_map[first_index][second_index]){
+    for(unsigned int i = 0; i < 9; i++){
+        for(unsigned int j = 0; j < 3; j++){
+            if( old_surroundings_map[i][j] != surroundings_map[i][j]){
                 difference_map_x = i;
                 difference_map_y = j;
-                distance_found_object = old_surroundings_map[first_index][second_index];
+                distance_found_object = old_surroundings_map[i][j];
             }
         }
     }
@@ -293,22 +301,26 @@ void Robot::DetectDifSurroundings(){
 
 void Robot::FollowClosestObject(){
     bool found_objects;
-    int wait_after_movement_ms = 500;
+    int wait_after_movement_ms = 800;
     int x_index = 9 * difference_map_x / 180;
     int y_index = 3 * difference_map_y / 180;
-    int x_lower, x_higher, y_lower, y_higher;
+    unsigned int x_lower, x_higher, y_lower, y_higher;
     int lowest_distance = infinity();
     
-    if(x_index != 0){x_lower = (x_index - 1) * 20;}else{x_lower = x_index * 20;}
-    if(x_index != 9){x_higher = (x_index + 1) * 20;}else{x_higher = x_index * 20;}
+    if(x_index != 0){x_lower = (x_index - 1) * map_steps_neck;}else{x_lower = x_index * map_steps_neck;}
+    if(x_index != 9){x_higher = (x_index + 1) * map_steps_neck;}else{x_higher = x_index * map_steps_neck;}
 
-    if(y_index != 0){y_lower = (y_index - 1) * 45;}else{y_lower = y_index * 45;}
-    if(y_index != 9){y_higher = (y_index + 1) * 45;}else{y_higher = y_index * 45;}
+    if(y_index != 0){y_lower = (y_index - 1) * map_steps_head;}else{y_lower = y_index * map_steps_head;}
+    if(y_index != 9){y_higher = (y_index + 1) * map_steps_head;}else{y_higher = y_index * map_steps_head;}
 
     int sensor_data = lidar.getDistandeMM();
-    if( abs(sensor_data - distance_found_object) <= 10 ){
-        found_objects = true;
-    } else{
+    if( sensor_data != -1 ){
+        if( abs(sensor_data - distance_found_object) <= 10 ){
+            found_objects = true;
+        } else{
+            found_objects = false;
+        }
+    } else {
         found_objects = false;
     }
     if( found_objects == false ){
@@ -318,10 +330,13 @@ void Robot::FollowClosestObject(){
             for(unsigned int y = y_lower; y <= y_higher; y++){
                 head_servo.turnToDegree(y);
                 rtos::ThisThread::sleep_for(MS(wait_after_movement_ms));
-                if( sensor_data < lowest_distance ){
-                    lowest_distance = sensor_data;
-                    found_object_x = x;
-                    found_object_y = y;
+                sensor_data = lidar.getDistandeMM();
+                if( sensor_data != -1 && sensor_data != 8191 ){
+                    if( sensor_data < lowest_distance ){
+                        lowest_distance = sensor_data;
+                        found_object_x = x;
+                        found_object_y = y;
+                    }
                 }
             }
         }

@@ -52,7 +52,7 @@ private:
     std::array<std::array<int, 3>,9> surroundings_map;
     std::array<std::array<int, 3>,9> old_surroundings_map;
     unsigned int map_steps_neck = 20;
-    unsigned int map_steps_head = 45;
+    unsigned int map_steps_head = 20;
     int difference_map_x;
     int difference_map_y;
     int distance_found_object;

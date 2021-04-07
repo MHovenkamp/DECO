@@ -48,7 +48,6 @@ void servoNeckTask(){
 void PIRTask(){
   Serial.println("PIR task started");
   while(true){ 
-    Serial.println("hello?");
     pir_sensor.PIRTask();
   }
 }

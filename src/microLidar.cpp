@@ -11,5 +11,10 @@ void MicroLidar::setup(){
 
 int MicroLidar::getDistandeMM(){
     lidar.rangingTest(&distance, false);
-    return distance.RangeMilliMeter;
+    Serial.println(distance.RangeStatus);
+    if( distance.RangeStatus != 4){
+        return distance.RangeMilliMeter;
+    } else{
+        return -1;
+    }
 }
