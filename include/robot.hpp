@@ -49,8 +49,7 @@ private:
     unsigned int walk_time_duration = 5 * MINUTE;
     unsigned int water_time_duration = 30 * SECOND;
     ROBOT_STATES current_state = ROBOT_STATES::IDLE;
-    std::array<std::array<int, 3>,9> surroundings_map;
-    std::array<std::array<int, 3>,9> old_surroundings_map;
+    std::array<std::array<int, 3>,10> surroundings_map;
     unsigned int map_steps_neck = 20;
     unsigned int map_steps_head = 20;
     int difference_map_x;
@@ -246,10 +245,10 @@ public:
     void scanSurroundings();
 
     /**
-     * @brief Get the difference int the surroundings object object
+     * @brief get x and y closest objec
      * 
      */
-    void DetectDifSurroundings();
+    void findClosestObject();
 
     /**
      * @brief Makes the robot search out the user and look at hiim/follow him.
@@ -257,7 +256,7 @@ public:
      */
     void interactiveMode();
 
-    void FollowClosestObject();
+    bool followClosestObject();
 };
 
 #endif

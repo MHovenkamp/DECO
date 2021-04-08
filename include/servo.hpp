@@ -54,7 +54,7 @@ public:
      * 
      * @param degree, degree you want servo to turn to between 0 and 180
      */
-    void turnToDegree(int degree);
+    void turnToDegree(const int degree);
 
     /**
      * @brief Get the Current Degree 

@@ -31,13 +31,14 @@ void Servo::servoTask(){
     rtos::ThisThread::sleep_for(MS(20)); // 20 ms standard for sg932r TowerPro, change when changing servo
 };
 
-void Servo::turnToDegree(int degree){
-    if(degree < 0){
-        degree = 0;    
-    }else if(degree > 180 ){
-        degree = 180;
+void Servo::turnToDegree(const int degree){
+    int new_degree = degree;
+    if(new_degree < 0){
+        new_degree = 0;    
+    }else if(new_degree > 180 ){
+        new_degree = 180;
     }
-    current_degree_goal = degree;
+    current_degree_goal = new_degree;
 };
 
 unsigned int Servo::getCurrentDegree(){

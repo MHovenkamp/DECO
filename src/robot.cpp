@@ -11,15 +11,13 @@ void Robot::setup(){
     lidar.setup();
     Songs songs;
     playSound<songs.start_up.size()>(songs.start_up);
-    
-    // IK VERDENK DIE FOCKING FOR LOOPS, EFFE CHECKEN
 
-    for(unsigned int i = 0; i<9; i++){
+    for(unsigned int i = 0; i<10; i++){
         for(unsigned int j = 0; j < 3; j++){
             surroundings_map[i][j] = -1;
         }
     }
-    for(unsigned int x = 0; x < 9; x++){
+    for(unsigned int x = 0; x < 10; x++){
         Serial.print("\n");
         for(unsigned int y = 0; y < 3; y++){
             Serial.print(surroundings_map[x][y]);
@@ -248,11 +246,20 @@ void Robot::showWeatherStation(){
 }
 
 void Robot::interactiveMode(){
+    Serial.println("start interactive mode");
     scanSurroundings();
-    DetectDifSurroundings();
-    // neck_servo.turnToDegree(difference_map_x*map_steps_neck);
-    // head_servo.turnToDegree(difference_map_y*map_steps_head);
-    for(unsigned int x = 0; x < 9; x++){
+    findClosestObject();
+    Serial.println("move to, x:y" + String(found_object_x*map_steps_neck)+":"+String(90 + (found_object_y*map_steps_head)));
+    neck_servo.turnToDegree(found_object_x*map_steps_neck);
+    head_servo.turnToDegree(90 + (found_object_y*map_steps_head));
+    rtos::ThisThread::sleep_for(MS(3000));
+    bool succesfull_object_detect = followClosestObject();
+    Serial.println(succesfull_object_detect);
+    while(succesfull_object_detect){
+        Serial.println("in while");
+        succesfull_object_detect = followClosestObject();
+    }
+    for(unsigned int x = 0; x < 10; x++){
         Serial.print("\n");
         for(unsigned int y = 0; y < 3; y++){
             Serial.print(surroundings_map[x][y]);
@@ -262,61 +269,84 @@ void Robot::interactiveMode(){
 }
 
 void Robot::scanSurroundings(){
-    int wait_after_movement_ms = 800;
-    old_surroundings_map = surroundings_map;
+    int wait_after_movement_ms = 300;
     int current_distance;
-    unsigned int first_index, second_index;
+    unsigned int first_index = 0;
+    unsigned int second_index;
+    bool movement_up = true;
     for(unsigned int i = 0; i <=180; i+=map_steps_neck){
-        neck_servo.turnToDegree(i+1);
-        rtos::ThisThread::sleep_for(MS(wait_after_movement_ms));
-        first_index = 9 * neck_servo.getCurrentDegree() / 180;
+        neck_servo.turnToDegree(i);
         second_index = 0;
-        for(unsigned int j = 90-map_steps_head; j<=90+map_steps_head; j+=map_steps_head){
-            head_servo.turnToDegree(j+1);
-            rtos::ThisThread::sleep_for(MS(wait_after_movement_ms));
-            current_distance = lidar.getDistandeMM();
-            rtos::ThisThread::sleep_for(MS(500));
-            Serial.println(String(first_index) + ", " + String(second_index) + ": "+ String(current_distance));
-            surroundings_map[first_index][second_index] = current_distance;
-            second_index +=1;
+        if(movement_up){
+            for(unsigned int j = 90-map_steps_head; j<=90+map_steps_head; j+=map_steps_head){
+                head_servo.turnToDegree(j);
+
+                rtos::ThisThread::sleep_for(MS(wait_after_movement_ms));
+                current_distance = lidar.getDistandeMM();
+
+                Serial.println(String(first_index) + ", " + String(second_index) + ": "+ String(current_distance));
+                
+                surroundings_map[first_index][second_index] = current_distance;
+                second_index ++;
+            }
+            movement_up = false;
+        }else{
+            for(unsigned int j = 90+map_steps_head; j>=90-map_steps_head; j-=map_steps_head){
+                head_servo.turnToDegree(j);
+
+                rtos::ThisThread::sleep_for(MS(wait_after_movement_ms));
+                current_distance = lidar.getDistandeMM();
+                
+                Serial.println(String(first_index) + ", " + String(second_index) + ": "+ String(current_distance));
+
+                surroundings_map[first_index][second_index] = current_distance;
+                second_index ++;
+            }
+            movement_up = true;
         }
-        for(unsigned int j = 90+map_steps_head; j>=90-map_steps_head; j-=map_steps_head){
-            head_servo.turnToDegree(j-1);
-            rtos::ThisThread::sleep_for(MS(wait_after_movement_ms));
-        }
+        first_index++;
+        
     }
 }
 
-void Robot::DetectDifSurroundings(){
-    for(unsigned int i = 0; i < 9; i++){
+void Robot::findClosestObject(){
+    int shortest_distance = infinity();
+    for(unsigned int i = 0; i < 10; i++){
         for(unsigned int j = 0; j < 3; j++){
-            if( old_surroundings_map[i][j] != surroundings_map[i][j]){
-                difference_map_x = i;
-                difference_map_y = j;
-                distance_found_object = old_surroundings_map[i][j];
+            Serial.println(surroundings_map[i][j]);
+            if( surroundings_map[i][j] <= shortest_distance && surroundings_map[i][j] != -1&& surroundings_map[i][j] != 8191){
+                shortest_distance = surroundings_map[i][j];
+                found_object_x = i;
+                found_object_y = j;
+                distance_found_object = surroundings_map[i][j];
             }
         }
     }
+    Serial.println("found x and y: " + String(found_object_x) + ":" + String(found_object_y));
 }
 
-void Robot::FollowClosestObject(){
+// TODO DEZE HELE HANDEL KLOTP NIET MET INDEXEN ALLES CHECKEN
+bool Robot::followClosestObject(){
+    Serial.println("start folow object");
     bool found_objects;
-    int wait_after_movement_ms = 800;
-    int x_index = 9 * difference_map_x / 180;
-    int y_index = 3 * difference_map_y / 180;
+    int wait_after_movement_ms = 300;
+    int x_index = found_object_x;
+    int y_index = found_object_y;
     unsigned int x_lower, x_higher, y_lower, y_higher;
-    int lowest_distance = infinity();
+    int lowest_distance = distance_found_object + 100;
+    bool stop = false;
     
     if(x_index != 0){x_lower = (x_index - 1) * map_steps_neck;}else{x_lower = x_index * map_steps_neck;}
     if(x_index != 9){x_higher = (x_index + 1) * map_steps_neck;}else{x_higher = x_index * map_steps_neck;}
 
-    if(y_index != 0){y_lower = (y_index - 1) * map_steps_head;}else{y_lower = y_index * map_steps_head;}
-    if(y_index != 9){y_higher = (y_index + 1) * map_steps_head;}else{y_higher = y_index * map_steps_head;}
+    if(y_index != 0){y_lower = (90-map_steps_head) + (y_index - 1) * map_steps_head;}else{y_lower = (90-map_steps_head) + y_index * map_steps_head;}
+    if(y_index != 2){y_higher =  (90-map_steps_head) + (y_index + 1) * map_steps_head;}else{y_higher = (90-map_steps_head) + y_index * map_steps_head;}
 
     int sensor_data = lidar.getDistandeMM();
     if( sensor_data != -1 ){
-        if( abs(sensor_data - distance_found_object) <= 10 ){
+        if( abs(sensor_data - distance_found_object) <= 100 ){
             found_objects = true;
+            Serial.println("object still close");
         } else{
             found_objects = false;
         }
@@ -324,24 +354,34 @@ void Robot::FollowClosestObject(){
         found_objects = false;
     }
     if( found_objects == false ){
-        for(unsigned int x = x_lower; x <= x_higher; x++ ){
+        Serial.println("start search for object");
+        for(unsigned int x = x_lower; x <= x_higher; x+=5 ){
             neck_servo.turnToDegree(x);
-            rtos::ThisThread::sleep_for(MS(wait_after_movement_ms));
-            for(unsigned int y = y_lower; y <= y_higher; y++){
+            for(unsigned int y = y_lower; y <= y_higher; y+=5){
                 head_servo.turnToDegree(y);
                 rtos::ThisThread::sleep_for(MS(wait_after_movement_ms));
                 sensor_data = lidar.getDistandeMM();
+                rtos::ThisThread::sleep_for(MS(100));
+                Serial.println("x,y " + String(x) + ":" + String(y) );
+                Serial.println(sensor_data);
                 if( sensor_data != -1 && sensor_data != 8191 ){
                     if( sensor_data < lowest_distance ){
                         lowest_distance = sensor_data;
-                        found_object_x = x;
-                        found_object_y = y;
+                        found_object_x = 10 * x /180;
+                        found_object_y = 3 * y / 180;
+                        Serial.println("new indexes, x:y " + String(found_object_x) + ":"+String(found_object_y));
+                        stop = true;
+                        break;
                     }
                 }
+            }
+            if(stop){
+                break;
             }
         }
         found_objects = true;
         difference_map_x = found_object_x;
         difference_map_y = found_object_y;
     }
+    return found_objects;
 }

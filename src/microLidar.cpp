@@ -7,11 +7,11 @@ void MicroLidar::setup(){
             while(1);
         }
     }
+    lidar.configSensor(Adafruit_VL53L0X::VL53L0X_SENSE_LONG_RANGE);
 };
 
 int MicroLidar::getDistandeMM(){
     lidar.rangingTest(&distance, false);
-    Serial.println(distance.RangeStatus);
     if( distance.RangeStatus != 4){
         return distance.RangeMilliMeter;
     } else{
