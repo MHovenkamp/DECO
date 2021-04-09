@@ -7,7 +7,7 @@ void MicroLidar::setup(){
             while(1);
         }
     }
-    lidar.configSensor(Adafruit_VL53L0X::VL53L0X_SENSE_LONG_RANGE);
+    lidar.configSensor(Adafruit_VL53L0X::VL53L0X_SENSE_HIGH_SPEED);
 };
 
 int MicroLidar::getDistandeMM(){
