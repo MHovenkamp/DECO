@@ -28,5 +28,11 @@ public:
      * @return int 
      */
     int getDistandeMM();
+    
+    /**
+     * @brief lidar task, call from continues loop
+     * 
+     */
+    void lidarTask();
 
 };

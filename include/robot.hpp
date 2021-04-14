@@ -30,11 +30,11 @@ private:
     Servo &head_servo;
     Servo &neck_servo;
     PIRSensor &pir_sensor;
+    MicroLidar &lidar;
     InternalBLESensors internal_sensors;
-    OledScreen face_screen;
+    OledScreen &face_screen;
     Animations animations;
     Buzzer buzzer;
-    MicroLidar lidar;
 
     unsigned int break_time = 2 * HOUR;
     unsigned int walk_time = 30 * MINUTE;
@@ -49,11 +49,6 @@ private:
     unsigned int walk_time_duration = 5 * MINUTE;
     unsigned int water_time_duration = 30 * SECOND;
     ROBOT_STATES current_state = ROBOT_STATES::IDLE;
-    std::array<std::array<int, 3>,10> surroundings_map;
-    unsigned int map_steps_neck = 20;
-    unsigned int map_steps_head = 20;
-    int difference_map_x;
-    int difference_map_y;
     int distance_found_object;
     int found_object_x;
     int found_object_y;
@@ -95,15 +90,20 @@ public:
      * @param head_servo : Servo
      * @param neck_servo : Servo
      * @param pir_sensor : PIRSensor
+     * @param lidar : MicroLidar
      * @param buzzer_pin : Buzzer
      */
     Robot(  Servo & head_servo,
             Servo & neck_servo,
             PIRSensor & pir_sensor,
+            MicroLidar & lidar,
+            OledScreen & face_screen,
             int buzzer_pin ):
             head_servo(head_servo),
             neck_servo(neck_servo),
             pir_sensor(pir_sensor),
+            lidar(lidar),
+            face_screen(face_screen),
             buzzer( Buzzer(buzzer_pin) )
         {}
 
@@ -237,18 +237,6 @@ public:
      * 
      */
     void shutDown();
-
-    /**
-     * @brief update the surroundings map to detect a person.
-     * 
-     */
-    void scanSurroundings();
-
-    /**
-     * @brief get x and y closest objec
-     * 
-     */
-    void findClosestObject();
 
     /**
      * @brief Makes the robot search out the user and look at hiim/follow him.

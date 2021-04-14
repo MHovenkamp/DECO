@@ -15,7 +15,7 @@ private:
     const int oled_reset = 4;
     const int screen_address = 0x3C;
     Adafruit_SSD1306 display;
-    
+    bool active = true;
 public:
     /**
      * @brief Construct a new Oled Screen object
@@ -46,6 +46,7 @@ public:
     void clearScreen(){
         display.clearDisplay();
         display.display();
+        
     }
 
     /**

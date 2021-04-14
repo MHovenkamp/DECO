@@ -10,8 +10,11 @@ void MicroLidar::setup(){
     lidar.configSensor(Adafruit_VL53L0X::VL53L0X_SENSE_HIGH_SPEED);
 };
 
-int MicroLidar::getDistandeMM(){
+void MicroLidar::lidarTask(){
     lidar.rangingTest(&distance, false);
+}
+
+int MicroLidar::getDistandeMM(){
     if( distance.RangeStatus != 4){
         return distance.RangeMilliMeter;
     } else{

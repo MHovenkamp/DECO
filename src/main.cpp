@@ -1,8 +1,10 @@
 #include "robot.hpp"
 
+// TODO mutex for multiple i2c connections
+
 rtos::Thread servo_neck_task;
 rtos::Thread servo_head_task;
-rtos::Thread pir_task;
+rtos::Thread distance_task;
 rtos::Thread robot_task;
 rtos::Thread robot_control_task;
 rtos::Thread timer_robot_task;
@@ -10,7 +12,9 @@ rtos::Thread timer_robot_task;
 Servo neck_servo(3);
 Servo head_servo(4);
 PIRSensor pir_sensor(2);
-Robot robot_test(head_servo,neck_servo,pir_sensor,5);
+MicroLidar lidar;
+OledScreen screen;
+Robot robot_test(head_servo,neck_servo,pir_sensor,lidar,screen,5);
 ServoPositions servo_positions;
 
 ROBOT_STATES global_state;
@@ -45,10 +49,12 @@ void servoNeckTask(){
  * @brief PIRTask, continues loop that polls the PIR sensor.
  * 
  */
-void PIRTask(){
+void distanceTask(){
   Serial.println("PIR task started");
   while(true){ 
     pir_sensor.PIRTask();
+    lidar.lidarTask();
+    rtos::ThisThread::sleep_for(MS(500));
   }
 }
 
@@ -101,7 +107,9 @@ void robotTask(){
 void robotControlTask(){
   Serial.println("robot control task started");
   while (true){
-    robot_test.interactiveMode();
+    if(lidar.getDistandeMM() != 8191){
+      robot_test.interactiveMode();
+    }
     rtos::ThisThread::sleep_for(MS(500));
   }
 }
@@ -113,7 +121,7 @@ void setup() {
   delay(2000);
 
   osStatus error;
-  error = pir_task.start(PIRTask);
+  error = distance_task.start(distanceTask);
   if(error){Serial.println(error);}
   error = servo_neck_task.start(servoNeckTask);
   if(error){Serial.println(error);}
