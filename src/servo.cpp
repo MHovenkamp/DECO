@@ -28,7 +28,7 @@ void Servo::servoTask(){
     digitalWrite(servo_pin, HIGH);
     wait_us(current_degree_wait);
     digitalWrite(servo_pin, LOW);
-    rtos::ThisThread::sleep_for(MS(20)); // 20 ms standard for sg932r TowerPro, change when changing servo
+    // rtos::ThisThread::sleep_for(MS(20)); // 20 ms standard for sg932r TowerPro, change when changing servo
 };
 
 void Servo::turnToDegree(const int degree){

@@ -18,6 +18,7 @@ enum class ROBOT_STATES{
     REMINDER_WATER,
     REMINDER_WALK,
     WEATHER_STATION,
+    INTERACTIVE_MODE,
     OFF
 };
 
@@ -33,7 +34,6 @@ private:
     MicroLidar &lidar;
     InternalBLESensors internal_sensors;
     OledScreen &face_screen;
-    Animations animations;
     Buzzer buzzer;
 
     unsigned int break_time = 2 * HOUR;

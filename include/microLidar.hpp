@@ -27,7 +27,7 @@ public:
      * 
      * @return int 
      */
-    int getDistandeMM();
+    int getDistanceMM();
     
     /**
      * @brief lidar task, call from continues loop

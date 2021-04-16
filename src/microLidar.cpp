@@ -14,7 +14,7 @@ void MicroLidar::lidarTask(){
     lidar.rangingTest(&distance, false);
 }
 
-int MicroLidar::getDistandeMM(){
+int MicroLidar::getDistanceMM(){
     if( distance.RangeStatus != 4){
         return distance.RangeMilliMeter;
     } else{

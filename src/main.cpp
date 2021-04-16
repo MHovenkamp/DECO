@@ -2,12 +2,13 @@
 
 // TODO mutex for multiple i2c connections
 
-rtos::Thread servo_neck_task;
-rtos::Thread servo_head_task;
-rtos::Thread distance_task;
+rtos::Thread servo_task;
+// rtos::Thread servo_head_task;
+rtos::Thread pir_task;
 rtos::Thread robot_task;
 rtos::Thread robot_control_task;
 rtos::Thread timer_robot_task;
+rtos::Thread i2c_task;
 
 Servo neck_servo(3);
 Servo head_servo(4);
@@ -20,41 +21,44 @@ ServoPositions servo_positions;
 ROBOT_STATES global_state;
 
 /**
- * @brief servoHeadTask, continues loop supporting the head servo of the robot.
+ * @brief i2c task, responsible for the oled and lidar i2c communication. 
  * 
  */
-void servoHeadTask(){
-  Serial.println("servo head task started");
+void i2cTask(){
+  Serial.println("i2c task started");
+  screen.setAnimation(ROBOT_FRAMES::FACE_IDLE);
   while(true){
-    if( global_state != ROBOT_STATES::OFF ){
-      head_servo.servoTask();
-    }
+    screen.flashOled();
+    lidar.lidarTask();
+    rtos::ThisThread::sleep_for(MS(500));
   }
 }
 
 /**
- * @brief servoNeckTask, continues loop supporting the neck servo of the robot.
+ * @brief servoTask, continues loop supporting the head and neck servo of the robot.
  * 
  */
-void servoNeckTask(){
-  Serial.println("servo neck task started");
+void servoTask(){
+  Serial.println("servo head task started");
   while(true){
     if( global_state != ROBOT_STATES::OFF ){
       neck_servo.servoTask();
+      head_servo.servoTask();
+      rtos::ThisThread::sleep_for(MS(20)); // 20 ms standard for sg932r TowerPro, change when changing servo
     }
   }
 }
+
 
 /**
  * @brief PIRTask, continues loop that polls the PIR sensor.
  * 
  */
-void distanceTask(){
+void pirTask(){
   Serial.println("PIR task started");
   while(true){ 
     pir_sensor.PIRTask();
-    lidar.lidarTask();
-    rtos::ThisThread::sleep_for(MS(500));
+    rtos::ThisThread::sleep_for(MS(1000));
   }
 }
 
@@ -67,7 +71,7 @@ void timerRobotTask(){
   unsigned long start_time = millis();
   unsigned long current_time_difference;
   while(true){
-    rtos::ThisThread::sleep_for(MS(500));
+    rtos::ThisThread::sleep_for(MS(1000));
     if( global_state != ROBOT_STATES::OFF ){
       current_time_difference = (millis() - start_time)/SECOND;
       int walk_time_seconds = robot_test.getWalkTime()/SECOND;
@@ -106,9 +110,11 @@ void robotTask(){
  */
 void robotControlTask(){
   Serial.println("robot control task started");
+  delay(5000);
   while (true){
-    if(lidar.getDistandeMM() != 8191){
+    if(lidar.getDistanceMM() != 8191 && lidar.getDistanceMM() != -1){
       robot_test.interactiveMode();
+      rtos::ThisThread::sleep_for(MS(5000));
     }
     rtos::ThisThread::sleep_for(MS(500));
   }
@@ -121,11 +127,9 @@ void setup() {
   delay(2000);
 
   osStatus error;
-  error = distance_task.start(distanceTask);
+  error = pir_task.start(pirTask);
   if(error){Serial.println(error);}
-  error = servo_neck_task.start(servoNeckTask);
-  if(error){Serial.println(error);}
-  error = servo_head_task.start(servoHeadTask);
+  error = servo_task.start(servoTask);
   if(error){Serial.println(error);}
 
   error = timer_robot_task.start(timerRobotTask);
@@ -133,6 +137,8 @@ void setup() {
   error = robot_control_task.start(robotControlTask);
   if(error){Serial.println(error);}
   error = robot_task.start(robotTask);
+  if(error){Serial.println(error);}
+  error = i2c_task.start(i2cTask);
   if(error){Serial.println(error);}
 };
 

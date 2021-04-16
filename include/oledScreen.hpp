@@ -4,6 +4,15 @@
 #include "support.hpp"
 #include "animations.hpp"
 
+enum class ROBOT_FRAMES{
+    FACE_BLINK,
+    FACE_IDLE,
+    WALK_REMINDER,
+    WATER_REMINDER,
+    BREAK_REMINDER
+};
+
+
 /**
  * @brief OledScreen driver
  * 
@@ -16,6 +25,34 @@ private:
     const int screen_address = 0x3C;
     Adafruit_SSD1306 display;
     bool active = true;
+    ROBOT_FRAMES animation_choice = ROBOT_FRAMES::FACE_IDLE;
+    bool show_animation = true;
+    Animations animation_presets;
+    
+    /**
+     * @brief sub call sending i2C commands to display
+     * 
+     * @tparam T 
+     * @param animation 
+     */
+    template <unsigned int T>
+    void showAnimationSubCall(Animation<T> &animation){
+        if(show_animation){
+            for( unsigned int i = 0; i<animation.getAmountOfFrames(); i++){
+                const unsigned int amount_of_pixels = 1024;
+                unsigned char bitmap_new[amount_of_pixels] = {};
+                std::array<unsigned char, amount_of_pixels> bitmap = animation.getFrame(i);          
+                for(unsigned int j = 0; j < amount_of_pixels; j++){
+                    bitmap_new[j] = bitmap[j];
+                }
+                display.clearDisplay();
+                display.drawBitmap(0,0, bitmap_new, animation.getAnimationWidth(), animation.getAnimationHeight(), WHITE);
+                // delay(1000/animation.getAmountOfFramesPerSecond());
+                rtos::ThisThread::sleep_for(MS(1000/animation.getAmountOfFramesPerSecond()));
+            }
+        }
+    }
+
 public:
     /**
      * @brief Construct a new Oled Screen object
@@ -40,37 +77,51 @@ public:
     };
 
     /**
+     * @brief displays the current buffer on oled, only call from I2C thread.
+     * 
+     */
+    void flashOled(){
+        display.display();
+    }
+
+    /**
      * @brief clear display
      * 
      */
     void clearScreen(){
-        display.clearDisplay();
-        display.display();
-        
+        display.clearDisplay();   
     }
 
     /**
-     * @brief showAnimation function that shows a given Animation on the screen
+     * @brief Set the Animation object
      * 
-     * @tparam T amount of frames
-     * @param animation Animation object containing animation bitmaps.
+     * @param animation_choice_p 
      */
-    template <unsigned int T>
-    void showAnimation(Animation<T>& animation){
-        for( unsigned int i = 0; i<animation.getAmountOfFrames(); i++){
-            const unsigned int amount_of_pixels = 1024;
-            unsigned char bitmap_new[amount_of_pixels] = {};
-            std::array<unsigned char, amount_of_pixels> bitmap = animation.getFrame(i);            
-            for(unsigned int j = 0; j < amount_of_pixels; j++){
-                bitmap_new[j] = bitmap[j];
-            }
-            display.clearDisplay();
-            display.drawBitmap(0,0, bitmap_new, animation.getAnimationWidth(), animation.getAnimationHeight(), WHITE);
-            display.display();
-            delay(1);
-            rtos::ThisThread::sleep_for(MS(1000/animation.getAmountOfFramesPerSecond()));
+    void setAnimation(ROBOT_FRAMES animation_choice_p){
+        show_animation = true;
+        animation_choice = animation_choice_p;
+    }
+
+    /**
+     * @brief show set animation on display
+     * 
+     */
+    void showAnimation(){
+        if( animation_choice ==  ROBOT_FRAMES::FACE_IDLE){
+            showAnimationSubCall<2>(animation_presets.face_idle);
+        } else if( animation_choice ==  ROBOT_FRAMES::FACE_BLINK){
+            showAnimationSubCall<5>(animation_presets.face_blink);
+        } else if( animation_choice ==  ROBOT_FRAMES::WALK_REMINDER){
+            showAnimationSubCall<5>(animation_presets.face_blink);
+        } else if(animation_choice ==  ROBOT_FRAMES::WATER_REMINDER){
+            showAnimationSubCall<3>(animation_presets.water);
+        } else if(animation_choice ==  ROBOT_FRAMES::BREAK_REMINDER){
+            showAnimationSubCall<4>(animation_presets.big_break);
+        } else{
+            showAnimationSubCall<2>(animation_presets.face_idle);
         }
     }
+
 
     /**
      * @brief showText function thats show given string on screen
@@ -81,7 +132,7 @@ public:
      * @param amount_of_lines : unsigned int, amount of lines
      */
     template <unsigned int T>
-    void showText( char* text, std::array<unsigned int, T> amount_of_symbols, unsigned int amount_of_lines){
+    void setDisplayText( char* text, std::array<unsigned int, T> amount_of_symbols, unsigned int amount_of_lines){
         display.setFont(&FreeSans9pt7b);
         display.clearDisplay();
         display.setTextSize(1);      
@@ -110,6 +161,14 @@ public:
                 current_symbol++;
             }  
         }
+    }
+
+    /**
+     * @brief flashes text current buffer after call setDisplayText
+     * 
+     */
+    void flashTextDisplay(){
+        show_animation = false;
         display.display();
     }
 
