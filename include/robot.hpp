@@ -41,14 +41,20 @@ private:
     unsigned int water_time = 1 * HOUR;
     unsigned int shutdown_after = 5 * MINUTE;
 
+    unsigned int break_time_duration = 15 * MINUTE;
+    unsigned int walk_time_duration = 5 * MINUTE;
+    unsigned int water_time_duration = 30 * SECOND;
+    unsigned int interactive_mode_duration = 20 * SECOND;
+
     bool break_time_active = true;
     bool walk_time_active = true;
     bool water_time_active = true;
 
-    unsigned int break_time_duration = 15 * MINUTE;
-    unsigned int walk_time_duration = 5 * MINUTE;
-    unsigned int water_time_duration = 30 * SECOND;
+    unsigned long start_time_timer;
+    unsigned long current_time_difference;
+
     ROBOT_STATES current_state = ROBOT_STATES::IDLE;
+
     int distance_found_object;
     int found_object_x;
     int found_object_y;
@@ -106,6 +112,11 @@ public:
             face_screen(face_screen),
             buzzer( Buzzer(buzzer_pin) )
         {}
+    /**
+     * @brief setup the robot, call before use of other functions
+     * 
+     */
+    void setup();
 
     /**
      * @brief main run function of the robot
@@ -169,15 +180,22 @@ public:
     /**
      * @brief Set the Walk Time Duration 
      * 
-     * @param time 
+     * @param time : unsigned long
      */
     void setWalkTimeDuration(unsigned long time);
     /**
      * @brief Set the Water Time Duration 
      * 
-     * @param time 
+     * @param time : unsigned long
      */
     void setWaterTimeDuration(unsigned long time);
+
+    /**
+     * @brief Set the Interactive Mode Duration 
+     * 
+     * @param time : unsigned long
+     */
+    void setInteractiveModeDuration(unsigned long time);
 
     /**
      * @brief Set the State of the robot
@@ -210,16 +228,13 @@ public:
      * 
      */
     void rngMovement();
+
     /**
      * @brief return robot to starting position, 90 degrees for head servo and 90 degress for neck servo.
      * 
      */
     void returnToStartPos();
-    /**
-     * @brief setup the robot, call before use of other functions
-     * 
-     */
-    void setup();
+
 
     /**
      * @brief play preprogramed song on buzzer
@@ -244,6 +259,12 @@ public:
      */
     void interactiveMode();
 
+    /**
+     * @brief tries to follow a found object by making a spiraling motion when hand is removed. 
+     * 
+     * @return true 
+     * @return false 
+     */
     bool followClosestObject();
 };
 

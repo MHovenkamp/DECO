@@ -12,10 +12,31 @@ void Robot::setup(){
     lidar.setup();
     Songs songs;
     playSound<songs.start_up.size()>(songs.start_up);
+    start_time_timer = millis();
     Serial.println("finished setup robot");
 };
 
 void Robot::run(){
+    if( pir_sensor.getLastMovement() >= 1200){
+        setState(ROBOT_STATES::OFF);
+    }
+    if( current_state != ROBOT_STATES::OFF ){
+      current_time_difference = (millis() - start_time_timer)/SECOND;
+      int walk_time_seconds = getWalkTime()/SECOND;
+      int water_time_seconds = getWaterTime()/SECOND;
+      int break_time_seconds = getBreakTime()/SECOND;
+      if( current_time_difference != 0){
+        if(current_time_difference % walk_time_seconds == 0){
+            setState(ROBOT_STATES::REMINDER_WALK);
+        } else if(current_time_difference % water_time_seconds == 0){
+            setState(ROBOT_STATES::REMINDER_WATER);
+        } else if(current_time_difference % break_time_seconds == 0){
+            setState(ROBOT_STATES::REMINDER_BREAK);
+        } 
+      }
+    } else {
+      start_time_timer = millis();
+    }
     internal_sensors.updateSensors();
     switch(current_state){
         case ROBOT_STATES::INTERACTIVE_MODE:
@@ -59,7 +80,7 @@ void Robot::run(){
         default:
             break;
     }
-    rtos::ThisThread::sleep_for(MS(1000));
+    rtos::ThisThread::sleep_for(MS(500));
 };
 
 unsigned int Robot::getBreakTime(){
@@ -99,6 +120,10 @@ void Robot::setWalkTimeDuration(unsigned long time){
 
 void Robot::setWaterTimeDuration(unsigned long time){
     water_time_duration = time;
+}
+
+void Robot::setInteractiveModeDuration(unsigned long time){
+    interactive_mode_duration = time;
 }
 
 
@@ -241,6 +266,8 @@ void Robot::showWeatherStation(){
 }
 
 void Robot::interactiveMode(){
+    Songs songs;
+    int start_time = millis();
     if( current_state == ROBOT_STATES::REMINDER_BREAK ||
         current_state == ROBOT_STATES::REMINDER_WALK ||
         current_state == ROBOT_STATES::REMINDER_WATER ||
@@ -251,7 +278,13 @@ void Robot::interactiveMode(){
         found_object_y = head_servo.getCurrentDegree();
         bool succesfull_object_detect = followClosestObject();
         Serial.println("interactive mode " + String(succesfull_object_detect));
+        if(succesfull_object_detect){
+            playSound<songs.notification.size()>(songs.notification);
+        }
         while(succesfull_object_detect){
+            if((millis() - start_time)/SECOND <= interactive_mode_duration/SECOND ){
+                break;
+            }
             setState(ROBOT_STATES::INTERACTIVE_MODE);
             face_screen.setAnimation(ROBOT_FRAMES::FACE_IDLE);
             face_screen.showAnimation();
@@ -268,7 +301,6 @@ void Robot::interactiveMode(){
 
 bool Robot::followClosestObject(){
     bool found_objects;
-    int lowest_distance = distance_found_object + 100;
     int sensor_data = lidar.getDistanceMM();
     Serial.println("follow closest object " + String(sensor_data));
     if( sensor_data != 8191 && sensor_data != -1 ){
@@ -280,26 +312,27 @@ bool Robot::followClosestObject(){
         int number_of_loops = 2;
         int radius = 40; 
         int prev_x = 0, prev_y = 0;
-        for (float t = 0.0; t <= 1.0; t += 1.0/(180.0*number_of_loops)) {
-            int X=radius*t*sin(t*2*PI*number_of_loops);
-            int Y=radius*t*cos(t*2*PI*number_of_loops);
-            if(X != prev_x && Y != prev_y){
-                Serial.println("x,y " + String(found_object_x+X) + ":" + String(found_object_y+Y));
-                neck_servo.turnToDegree(found_object_x+X);
-                head_servo.turnToDegree(found_object_y+Y);
-                prev_x = X;
-                prev_y = Y;
-                sensor_data = lidar.getDistanceMM();
-                if( sensor_data != 8191 && sensor_data != -1){
-                    if( sensor_data < lowest_distance ){
-                        lowest_distance = sensor_data;
+        bool done = false;
+        for (float t = 0.0; t <= 1.0; t += 1.0/(100.0*number_of_loops)) {
+            if(!done){
+                int X=radius*t*sin(t*2*PI*number_of_loops);
+                int Y=radius*t*cos(t*2*PI*number_of_loops);
+                if(X != prev_x && Y != prev_y){
+                    neck_servo.turnToDegree(found_object_x+X);
+                    head_servo.turnToDegree(found_object_y+Y);
+                    prev_x = X;
+                    prev_y = Y;
+                    sensor_data = lidar.getDistanceMM();
+                    if( sensor_data != 8191 && sensor_data != -1){
                         found_object_x = neck_servo.getCurrentDegree();
                         found_object_y = head_servo.getCurrentDegree();
-                        break;
+                        done = true;;
                     }
                 }
+                rtos::ThisThread::sleep_for(MS(80));
+            } else{
+                break;
             }
-            rtos::ThisThread::sleep_for(MS(50));
         }
         found_objects = true;
     }

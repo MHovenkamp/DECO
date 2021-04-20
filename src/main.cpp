@@ -1,13 +1,9 @@
 #include "robot.hpp"
 
-// TODO mutex for multiple i2c connections
-
 rtos::Thread servo_task;
-// rtos::Thread servo_head_task;
 rtos::Thread pir_task;
 rtos::Thread robot_task;
 rtos::Thread robot_control_task;
-rtos::Thread timer_robot_task;
 rtos::Thread i2c_task;
 
 Servo neck_servo(3);
@@ -28,9 +24,11 @@ void i2cTask(){
   Serial.println("i2c task started");
   screen.setAnimation(ROBOT_FRAMES::FACE_IDLE);
   while(true){
-    screen.flashOled();
-    lidar.lidarTask();
-    rtos::ThisThread::sleep_for(MS(500));
+    if( global_state != ROBOT_STATES::OFF ){
+      screen.flashOled();
+      lidar.lidarTask();
+    }
+    rtos::ThisThread::sleep_for(MS(100));
   }
 }
 
@@ -63,37 +61,6 @@ void pirTask(){
 }
 
 /**
- * @brief timerRobotTask, continues loop polling time to trigger timed looped events.
- * 
- */
-void timerRobotTask(){
-  Serial.println("timed tasks started");
-  unsigned long start_time = millis();
-  unsigned long current_time_difference;
-  while(true){
-    rtos::ThisThread::sleep_for(MS(1000));
-    if( global_state != ROBOT_STATES::OFF ){
-      current_time_difference = (millis() - start_time)/SECOND;
-      int walk_time_seconds = robot_test.getWalkTime()/SECOND;
-      int water_time_seconds = robot_test.getWaterTime()/SECOND;
-      int break_time_seconds = robot_test.getBreakTime()/SECOND;
-      if( current_time_difference == 0){
-        continue;
-      }
-      if(current_time_difference % walk_time_seconds == 0){
-        robot_test.setState(ROBOT_STATES::REMINDER_WALK);
-      } else if(current_time_difference % water_time_seconds == 0){
-        robot_test.setState(ROBOT_STATES::REMINDER_WATER);
-      } else if(current_time_difference % break_time_seconds == 0){
-        robot_test.setState(ROBOT_STATES::REMINDER_BREAK);
-      }
-    } else {
-      start_time = millis();
-    }
-  }
-}
-
-/**
  * @brief robotTask, continues loop runnning the robot.
  * 
  */
@@ -120,6 +87,10 @@ void robotControlTask(){
   }
 }
 
+/**
+ * @brief setup function containing the strat of the threads. 
+ * 
+ */
 void setup() {
   Serial.begin(9600);
   delay(2000);
@@ -132,8 +103,6 @@ void setup() {
   error = servo_task.start(servoTask);
   if(error){Serial.println(error);}
 
-  error = timer_robot_task.start(timerRobotTask);
-  if(error){Serial.println(error);}
   error = robot_control_task.start(robotControlTask);
   if(error){Serial.println(error);}
   error = robot_task.start(robotTask);
@@ -143,4 +112,8 @@ void setup() {
 };
 
 
+/**
+ * @brief loop function not in use due to use of MBED OS.
+ * 
+ */
 void loop(){}
