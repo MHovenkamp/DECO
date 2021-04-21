@@ -6,6 +6,7 @@
 #include "../bitmaps/walk.hpp"
 #include "../bitmaps/water.hpp"
 #include "../bitmaps/bigBreak.hpp"
+#include "../bitmaps/searching.hpp"
 
 /**
  * @brief Animation class, class with saved bitmaps containing animations
@@ -101,6 +102,19 @@ struct Animations{
 
     std::array<std::array<unsigned char, 1024>, 4> big_break_array = {{big_break::break_0,big_break::break_0, big_break::break_1, big_break::break_1}};
     Animation<4> big_break = Animation<4>(big_break_array, 4, 128, 64, 3);
+
+    std::array<std::array<unsigned char, 1024>, 1> searching_up_left_array = {{searching::searching_up_left}};
+    Animation<1> searching_up_left = Animation<1>(searching_up_left_array, 1, 128, 64, 1);
+
+    std::array<std::array<unsigned char, 1024>, 1> searching_up_right_array = {{searching::searching_up_right}};
+    Animation<1> searching_up_right = Animation<1>(searching_up_right_array, 1, 128, 64, 1);
+
+    std::array<std::array<unsigned char, 1024>, 1> searching_down_left_array = {{searching::searching_down_left}};
+    Animation<1> searching_down_left = Animation<1>(searching_down_left_array, 1, 128, 64, 1);
+
+    std::array<std::array<unsigned char, 1024>, 1> searching_down_right_array = {{searching::searching_down_right}};
+    Animation<1> searching_down_right = Animation<1>(searching_down_right_array, 1, 128, 64, 1);
+
 };
 
 

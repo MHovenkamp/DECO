@@ -55,10 +55,12 @@ private:
 
     ROBOT_STATES current_state = ROBOT_STATES::IDLE;
 
-    int distance_found_object;
-    int found_object_x;
-    int found_object_y;
-
+    unsigned int distance_found_object;
+    unsigned int found_object_x;
+    unsigned int found_object_y;
+    unsigned int tmp_x_coordinate;
+    unsigned int tmp_y_coordinate;
+    
     /**
      * @brief Idle state of the robot; idle animation.
      * 

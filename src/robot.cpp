@@ -20,7 +20,7 @@ void Robot::run(){
     if( pir_sensor.getLastMovement() >= 1200){
         setState(ROBOT_STATES::OFF);
     }
-    if( current_state != ROBOT_STATES::OFF ){
+    if( current_state != ROBOT_STATES::OFF){
       current_time_difference = (millis() - start_time_timer)/SECOND;
       int walk_time_seconds = getWalkTime()/SECOND;
       int water_time_seconds = getWaterTime()/SECOND;
@@ -40,6 +40,16 @@ void Robot::run(){
     internal_sensors.updateSensors();
     switch(current_state){
         case ROBOT_STATES::INTERACTIVE_MODE:
+            if(tmp_x_coordinate <= 90 && tmp_y_coordinate >= 90){ // upper left
+                face_screen.setAnimation(ROBOT_FRAMES::SEARCHING_LEFT_UP);
+            } else if(tmp_x_coordinate >= 90 && tmp_y_coordinate >= 90){ // upper right
+                face_screen.setAnimation(ROBOT_FRAMES::SEARCHING_RIGHT_UP);
+            } else if(tmp_x_coordinate <= 90 && tmp_y_coordinate <= 90){ // lower left
+                face_screen.setAnimation(ROBOT_FRAMES::SEARCHING_LEFT_DOWN);
+            } else if(tmp_x_coordinate >= 90 && tmp_y_coordinate <= 90){ // lower right
+                face_screen.setAnimation(ROBOT_FRAMES::SEARCHING_RIGHT_DOWN);
+            }
+            face_screen.showAnimation();
             break;
         case ROBOT_STATES::IDLE:
             Serial.println("IDLE");
@@ -268,6 +278,7 @@ void Robot::showWeatherStation(){
 void Robot::interactiveMode(){
     Songs songs;
     int start_time = millis();
+    Serial.println("starttime set: " + start_time);
     if( current_state == ROBOT_STATES::REMINDER_BREAK ||
         current_state == ROBOT_STATES::REMINDER_WALK ||
         current_state == ROBOT_STATES::REMINDER_WATER ||
@@ -281,11 +292,11 @@ void Robot::interactiveMode(){
         if(succesfull_object_detect){
             playSound<songs.notification.size()>(songs.notification);
         }
+        setState(ROBOT_STATES::INTERACTIVE_MODE);
         while(succesfull_object_detect){
-            if((millis() - start_time)/SECOND <= interactive_mode_duration/SECOND ){
+            if((millis() - start_time)/SECOND >= interactive_mode_duration/SECOND ){
                 break;
             }
-            setState(ROBOT_STATES::INTERACTIVE_MODE);
             face_screen.setAnimation(ROBOT_FRAMES::FACE_IDLE);
             face_screen.showAnimation();
             succesfull_object_detect = followClosestObject();
@@ -300,10 +311,11 @@ void Robot::interactiveMode(){
 }
 
 bool Robot::followClosestObject(){
+    int max_range = 300;
     bool found_objects;
     int sensor_data = lidar.getDistanceMM();
     Serial.println("follow closest object " + String(sensor_data));
-    if( sensor_data != 8191 && sensor_data != -1 ){
+    if( sensor_data != 8191 && sensor_data != -1 && sensor_data <= max_range){
         found_objects = true;
     } else {
         found_objects = false;
@@ -318,12 +330,14 @@ bool Robot::followClosestObject(){
                 int X=radius*t*sin(t*2*PI*number_of_loops);
                 int Y=radius*t*cos(t*2*PI*number_of_loops);
                 if(X != prev_x && Y != prev_y){
-                    neck_servo.turnToDegree(found_object_x+X);
-                    head_servo.turnToDegree(found_object_y+Y);
+                    tmp_x_coordinate = found_object_x+X;
+                    tmp_y_coordinate = found_object_y+Y;
+                    neck_servo.turnToDegree(tmp_x_coordinate);
+                    head_servo.turnToDegree(tmp_y_coordinate);
                     prev_x = X;
                     prev_y = Y;
                     sensor_data = lidar.getDistanceMM();
-                    if( sensor_data != 8191 && sensor_data != -1){
+                    if( sensor_data != 8191 && sensor_data != -1 && sensor_data <= max_range){
                         found_object_x = neck_servo.getCurrentDegree();
                         found_object_y = head_servo.getCurrentDegree();
                         done = true;;

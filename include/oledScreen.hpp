@@ -9,7 +9,11 @@ enum class ROBOT_FRAMES{
     FACE_IDLE,
     WALK_REMINDER,
     WATER_REMINDER,
-    BREAK_REMINDER
+    BREAK_REMINDER,
+    SEARCHING_LEFT_UP,
+    SEARCHING_RIGHT_UP,
+    SEARCHING_LEFT_DOWN,
+    SEARCHING_RIGHT_DOWN
 };
 
 
@@ -117,6 +121,14 @@ public:
             showAnimationSubCall<3>(animation_presets.water);
         } else if(animation_choice ==  ROBOT_FRAMES::BREAK_REMINDER){
             showAnimationSubCall<4>(animation_presets.big_break);
+        } else if(animation_choice ==  ROBOT_FRAMES::SEARCHING_LEFT_UP){
+            showAnimationSubCall<1>(animation_presets.searching_up_left);
+        } else if(animation_choice ==  ROBOT_FRAMES::SEARCHING_RIGHT_UP){
+            showAnimationSubCall<1>(animation_presets.searching_up_right);
+        } else if(animation_choice ==  ROBOT_FRAMES::SEARCHING_LEFT_DOWN){
+            showAnimationSubCall<1>(animation_presets.searching_down_left);
+        } else if(animation_choice ==  ROBOT_FRAMES::SEARCHING_RIGHT_UP){
+            showAnimationSubCall<1>(animation_presets.searching_up_right);
         } else{
             showAnimationSubCall<2>(animation_presets.face_idle);
         }
