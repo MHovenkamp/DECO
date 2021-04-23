@@ -181,7 +181,6 @@ public:
      */
     void flashTextDisplay(){
         show_animation = false;
-        display.display();
     }
 
 };

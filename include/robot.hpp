@@ -91,6 +91,14 @@ private:
      */
     void showWeatherStation();
 
+    /**
+     * @brief tries to follow a found object by making a spiraling motion when hand is removed. 
+     * 
+     * @return true 
+     * @return false 
+     */
+    bool followClosestObject();
+
 public:
     /**
      * @brief Construct a new Robot object
@@ -261,13 +269,6 @@ public:
      */
     void interactiveMode();
 
-    /**
-     * @brief tries to follow a found object by making a spiraling motion when hand is removed. 
-     * 
-     * @return true 
-     * @return false 
-     */
-    bool followClosestObject();
 };
 
 #endif
