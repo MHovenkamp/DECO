@@ -8,9 +8,9 @@ SETUP:
     walk_reminder PERIOD = 10 MINUTE
     walk_reminder DURATION = 10 SECOND
 
-    weather_reminder = ACTIVE
-    weather_reminder PERIOD = 10 MINUTE
-    weather_reminder DURATION = 10 SECOND
+    water_reminder = ACTIVE
+    water_reminder PERIOD = 10 MINUTE
+    water_reminder DURATION = 10 SECOND
 
     break_reminder = ACTIVE
     break_reminder PERIOD = 10 MINUTE
