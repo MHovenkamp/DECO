@@ -4,7 +4,7 @@
 enum class PARSE_WORDS{
     weatherstation,
     walk_reminder,
-    walk_reminder,
+    water_reminder,
     break_reminder,
     shut_down_after,
     STATE,
@@ -19,10 +19,10 @@ enum class PARSE_WORDS{
     NON_ACTIVE,
     PERIOD,
     DURATION,
-    MINUTE,
-    HOUR,
-    SECOND,
-    MIllI_SECOND,
+    MINUTE_,
+    HOUR_,
+    SECOND_,
+    MILLI_SECOND_,
     WAIT,
     interactive_mode,
     shutdown,
@@ -31,8 +31,11 @@ enum class PARSE_WORDS{
 }
 
 enum class NODE_TYPES{
+    STATE_SETTER
     SETTER,
     COMMAND,
+    WAIT,
+    ERROR
 }
 
 

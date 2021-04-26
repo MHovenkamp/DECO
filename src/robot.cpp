@@ -25,6 +25,7 @@ void Robot::run(){
       int walk_time_seconds = getWalkTime()/SECOND;
       int water_time_seconds = getWaterTime()/SECOND;
       int break_time_seconds = getBreakTime()/SECOND;
+      int weather_time_seconds = getWeatherStationTime()/SECOND;
       if( current_time_difference != 0){
         if(current_time_difference % walk_time_seconds == 0){
             setState(ROBOT_STATES::REMINDER_WALK);
@@ -32,6 +33,8 @@ void Robot::run(){
             setState(ROBOT_STATES::REMINDER_WATER);
         } else if(current_time_difference % break_time_seconds == 0){
             setState(ROBOT_STATES::REMINDER_BREAK);
+        } else if(current_time_difference % weather_time_seconds == 0){
+            setState(ROBOT_STATES::WEATHER_STATION);
         } 
       }
     } else {
@@ -80,8 +83,12 @@ void Robot::run(){
             }
             break;
         case ROBOT_STATES::WEATHER_STATION:
-            Serial.println("WEATHER_STATION");
-            showWeatherStation();
+            if(weather_time_active){
+                Serial.println("WEATHER_STATION");
+                showWeatherStation();
+            } else {
+                setState(ROBOT_STATES::IDLE);
+            }
             break;
         case ROBOT_STATES::OFF:
             Serial.println("OFF");
@@ -102,38 +109,53 @@ unsigned int Robot::getWalkTime(){
 unsigned int Robot::getWaterTime(){
     return water_time;
 };
+unsigned int Robot::getWeatherStationTime(){
+    return weather_station_time;
+}
 
-void Robot::setBreakTime(unsigned long time, bool active){
-    break_time = time;
+void Robot::setBreakTimeActive(bool active){
     break_time_active = active;
-};
-void Robot::setWalkTime(unsigned long time, bool active){
-    break_time = time;
+}
+void Robot::setWalkTimeActive(bool active){
     walk_time_active = active;
-};
-void Robot::setWaterTime(unsigned long time, bool active){
-    break_time = time;
+}
+void Robot::setWaterTimeActive(bool active){
     water_time_active = active;
-};
+}
+void Robot::setWeatherStationActive(bool active){
+    weather_time_active = active;
+}
 
+void Robot::setBreakTime(unsigned long time){
+    break_time = time;
+}
+void Robot::setWalkTime(unsigned long time){
+    break_time = time;
+}
+void Robot::setWaterTime(unsigned long time){
+    break_time = time;
+}
 void Robot::setShutdownAfter(unsigned long time){
     shutdown_after = time;
+}
+void Robot::setWeatherStationTime(unsigned long time){
+    weather_station_time = time;
 }
 
 void Robot::setBreakTimeDuration(unsigned long time){
     break_time_duration = time;
 }
-
 void Robot::setWalkTimeDuration(unsigned long time){
     walk_time_duration = time;
 }
-
 void Robot::setWaterTimeDuration(unsigned long time){
     water_time_duration = time;
 }
-
 void Robot::setInteractiveModeDuration(unsigned long time){
     interactive_mode_duration = time;
+}
+void Robot::setWeatherStationDuration(unsigned long time){
+    weather_station_duration = time;
 }
 
 
@@ -263,15 +285,20 @@ void Robot::reminderWater(){
 };
 
 void Robot::showWeatherStation(){
-    String weather_message_temp = String(internal_sensors.getTemperature()) + " C\n";
-    String weather_message_hum = String(internal_sensors.getHumidity()) + " %\n";
-    String weather_message_baro = String(int(internal_sensors.getBarometric())) + " hPa\n";
-    String weather_message = weather_message_temp +weather_message_hum + weather_message_baro;
-    int str_len = weather_message.length() + 1;
-    char message[str_len];
-    weather_message.toCharArray(message, str_len);
-    std::array<unsigned int, 3> line_lengths = {(weather_message_temp.length()), (weather_message_hum.length()), (weather_message_baro.length())};
-    face_screen.setDisplayText<3>(message, line_lengths, 3);
+    String weather_message_temp, weather_message_hum, weather_message_baro, weather_message;
+    int str_len;
+    long unsigned int start_time = millis();
+    while( (millis() - start_time)/SECOND <= weather_station_duration/SECOND ){
+        weather_message_temp = String(internal_sensors.getTemperature()) + " C\n";
+        weather_message_hum = String(internal_sensors.getHumidity()) + " %\n";
+        weather_message_baro = String(int(internal_sensors.getBarometric())) + " hPa\n";
+        weather_message = weather_message_temp +weather_message_hum + weather_message_baro;
+        str_len = weather_message.length() + 1;
+        char message[str_len];
+        weather_message.toCharArray(message, str_len);
+        std::array<unsigned int, 3> line_lengths = {(weather_message_temp.length()), (weather_message_hum.length()), (weather_message_baro.length())};
+        face_screen.setDisplayText<3>(message, line_lengths, 3);
+    }
 
 }
 

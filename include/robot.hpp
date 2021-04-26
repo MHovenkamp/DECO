@@ -40,15 +40,18 @@ private:
     unsigned int walk_time = 30 * MINUTE;
     unsigned int water_time = 1 * HOUR;
     unsigned int shutdown_after = 5 * MINUTE;
+    unsigned int weather_station_time = 5 * MINUTE;
 
     unsigned int break_time_duration = 15 * MINUTE;
     unsigned int walk_time_duration = 5 * MINUTE;
     unsigned int water_time_duration = 30 * SECOND;
     unsigned int interactive_mode_duration = 20 * SECOND;
+    unsigned int weather_station_duration = 5 * SECOND;
 
     bool break_time_active = true;
     bool walk_time_active = true;
     bool water_time_active = true;
+    bool weather_time_active = true;
 
     unsigned long start_time_timer;
     unsigned long current_time_difference;
@@ -152,34 +155,68 @@ public:
      * @return unsigned int 
      */
     unsigned int getWaterTime();
+    /**
+     * @brief Get the Weather Station Time object
+     * 
+     * @return unsigned int 
+     */
+    unsigned int getWeatherStationTime();
 
     /**
-     * @brief Set the Break Time loop interval and if break reminder is active
+     * @brief Set the Break Time Active object
+     * 
+     * @param active 
+     */
+    void setBreakTimeActive(bool active);
+    /**
+     * @brief Set the Walk Time Active object
+     * 
+     * @param active 
+     */
+    void setWalkTimeActive(bool active);
+    /**
+     * @brief Set the Water Time Active object
+     * 
+     * @param active 
+     */
+    void setWaterTimeActive(bool active);
+    /**
+     * @brief Set the Break Time Active object
+     * 
+     * @param active 
+     */
+    void setWeatherStationActive(bool active);
+
+    /**
+     * @brief Set the Break Time loop interval
      * 
      * @param time : unsigned long, loop interval
-     * @param active : bool
      */
-    void setBreakTime(unsigned long time, bool active);
+    void setBreakTime(unsigned long time);
     /**
-     * @brief Set the Walk Time loop interval and if walk reminder is active
+     * @brief Set the Walk Time loop interval
      * 
      * @param time : unsigned long, loop interval
-     * @param active : bool
      */
-    void setWalkTime(unsigned long time, bool active);
+    void setWalkTime(unsigned long time);
     /**
-     * @brief Set the Water Time loop interval and if water reminder is active
+     * @brief Set the Water Time loop interval
      * 
      * @param time : unsinged long, loop interal
-     * @param active : bool
      */
-    void setWaterTime(unsigned long time, bool active);
+    void setWaterTime(unsigned long time);
     /**
-     * @brief Set the Shutdown After loop interval and if water reminder is active
+     * @brief Set the Shutdown After loop interval
      * 
      * @param time : unsigned long, shut down after x time of inactivity. 
      */
     void setShutdownAfter(unsigned long time);
+    /**
+     * @brief Set the Weather station Time loop interval
+     * 
+     * @param time 
+     */
+    void setWeatherStationTime(unsigned long time);
 
     /**
      * @brief Set the Break Time Duration 
@@ -199,13 +236,18 @@ public:
      * @param time : unsigned long
      */
     void setWaterTimeDuration(unsigned long time);
-
     /**
      * @brief Set the Interactive Mode Duration 
      * 
      * @param time : unsigned long
      */
     void setInteractiveModeDuration(unsigned long time);
+    /**
+     * @brief Set the Weather Station Duration
+     * 
+     * @param time 
+     */
+    void setWeatherStationDuration(unsigned long time);
 
     /**
      * @brief Set the State of the robot
