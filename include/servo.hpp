@@ -3,6 +3,10 @@
 
 #include "support.hpp"
 
+/**
+ * @brief ServoPositions struct containing coockie cutter coordinates for servo motors
+ * 
+ */
 struct ServoPositions{
     int left_half = 135;
     int left_full = 180;
@@ -24,7 +28,7 @@ private:
     const int servo_pin;
     unsigned int speed = 1;
     unsigned int current_degree_wait;
-    unsigned int current_degree_goal;
+    unsigned int current_degree_goal = 90;
     unsigned int current_degree;
 public:
     /**

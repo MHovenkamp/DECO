@@ -1,4 +1,4 @@
-#include "robot.hpp"
+#include "robot_interpreter.hpp"
 
 rtos::Thread servo_task;
 rtos::Thread pir_task;
@@ -13,6 +13,7 @@ MicroLidar lidar;
 OledScreen screen;
 Robot robot_test(head_servo,neck_servo,pir_sensor,lidar,screen,5);
 ServoPositions servo_positions;
+Interpreter interpreter(robot_test);
 
 ROBOT_STATES global_state;
 
@@ -24,7 +25,7 @@ void i2cTask(){
   Serial.println("i2c task started");
   screen.setAnimation(ROBOT_FRAMES::FACE_IDLE);
   while(true){
-    if( global_state != ROBOT_STATES::OFF ){
+    if( global_state != ROBOT_STATES::OFF || global_state != ROBOT_STATES::PAUSE){
       screen.flashOled();
       lidar.lidarTask();
     }
@@ -39,7 +40,7 @@ void i2cTask(){
 void servoTask(){
   Serial.println("servo head task started");
   while(true){
-    if( global_state != ROBOT_STATES::OFF ){
+    if( global_state != ROBOT_STATES::OFF || global_state != ROBOT_STATES::PAUSE ){
       neck_servo.servoTask();
       head_servo.servoTask();
       rtos::ThisThread::sleep_for(MS(20)); // 20 ms standard for sg932r TowerPro, change when changing servo
@@ -55,8 +56,10 @@ void servoTask(){
 void pirTask(){
   Serial.println("PIR task started");
   while(true){ 
-    pir_sensor.PIRTask();
-    rtos::ThisThread::sleep_for(MS(1000));
+    if(global_state != ROBOT_STATES::PAUSE){
+      pir_sensor.PIRTask();
+      rtos::ThisThread::sleep_for(MS(1000));
+    }
   }
 }
 
@@ -67,7 +70,9 @@ void pirTask(){
 void robotTask(){
   Serial.println("main robot task started");
   while(true){
-    robot_test.run();
+    if(global_state != ROBOT_STATES::PAUSE){
+      robot_test.run();
+    }
   }
 }
 
@@ -79,11 +84,7 @@ void robotControlTask(){
   Serial.println("robot control task started");
   delay(5000);
   while (true){
-    if(lidar.getDistanceMM() != 8191 && lidar.getDistanceMM() != -1){
-      robot_test.interactiveMode();
-      rtos::ThisThread::sleep_for(MS(5000));
-    }
-    rtos::ThisThread::sleep_for(MS(500));
+    interpreter.run();
   }
 }
 

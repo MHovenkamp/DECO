@@ -6,6 +6,7 @@
 #include "rtos.h"
 #include <array>
 #include <time.h>
+#include <memory>
 
 //Oled screen
 #include <SPI.h>

@@ -4,7 +4,7 @@
 #include "support.hpp"
 
 /**
- * @brief control class for PIR Sensor
+ * @brief control class for PIRSensor
  * 
  */
 class PIRSensor{

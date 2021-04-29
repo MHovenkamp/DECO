@@ -1,0 +1,59 @@
+SETUP:
+
+    weatherstation = ACTIVE
+    weatherstation PERIOD = 10 MINUTE
+    weatherstation DURATION = 10 SECOND
+
+    walk_reminder = ACTIVE
+    walk_reminder PERIOD = 10 MINUTE
+    walk_reminder DURATION = 10 SECOND
+
+    water_reminder = ACTIVE
+    water_reminder PERIOD = 10 MINUTE
+    water_reminder DURATION = 10 SECOND
+
+    break_reminder = ACTIVE
+    break_reminder PERIOD = 10 MINUTE
+    break_reminder DURATION = 10 SECOND
+
+    shut_down_after = 10 MINUTE
+
+LOOP:
+
+    STATE = IDLE
+    WAIT 10 MINUTE
+    scan_surroundings
+    follow_object DURATION = 2 MINUTE
+
+
+command length:
+1. 
+shutdown
+interactive_mode
+
+2. 
+move_head 10
+move_neck 10
+
+3. 
+weatherstation = ACTIVE
+walk_reminderweatherstation = ACTIVE
+break_reminder = ACTIVE
+WAIT 10 MINUTE
+STATE = IDLE
+
+4. 
+shut_down_after = 10 MINUTE
+
+
+5. 
+interactive_mode DURATION = 5 MINUTE
+weatherstation PERIOD = 10 MINUTE
+walk_reminder PERIOD = 10 MINUTE
+water_reminder PERIOD = 10 MINUTE
+break_reminder PERIOD = 10 MINUTE
+weatherstation DURATION = 10 SECOND
+walk_reminder DURATION = 10 SECOND
+water_reminder DURATION = 10 SECOND
+break_reminder DURATION = 10 MINUTE
+follow_object DURATION = 2 MINUTE

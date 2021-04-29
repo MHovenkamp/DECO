@@ -289,6 +289,7 @@ void Robot::showWeatherStation(){
     int str_len;
     long unsigned int start_time = millis();
     while( (millis() - start_time)/SECOND <= weather_station_duration/SECOND ){
+        rtos::ThisThread::sleep_for(MS(500));
         weather_message_temp = String(internal_sensors.getTemperature()) + " C\n";
         weather_message_hum = String(internal_sensors.getHumidity()) + " %\n";
         weather_message_baro = String(int(internal_sensors.getBarometric())) + " hPa\n";
@@ -298,16 +299,17 @@ void Robot::showWeatherStation(){
         weather_message.toCharArray(message, str_len);
         std::array<unsigned int, 3> line_lengths = {(weather_message_temp.length()), (weather_message_hum.length()), (weather_message_baro.length())};
         face_screen.setDisplayText<3>(message, line_lengths, 3);
+        face_screen.flashTextDisplay();
     }
 
 }
 
-void Robot::interactiveMode(){
+bool Robot::interactiveMode(){
     Songs songs;
     int start_time = millis();
     Serial.println("starttime set: " + start_time);
     if( current_state == ROBOT_STATES::REMINDER_BREAK ||
-        current_state == ROBOT_STATES::REMINDER_WALK ||
+        current_state == ROBOT_STATES::REMINDER_WALK  ||
         current_state == ROBOT_STATES::REMINDER_WATER ||
         current_state == ROBOT_STATES::WEATHER_STATION){
             rtos::ThisThread::sleep_for(MS(500));
@@ -320,9 +322,9 @@ void Robot::interactiveMode(){
             playSound<songs.notification.size()>(songs.notification);
         }
         setState(ROBOT_STATES::INTERACTIVE_MODE);
-        while(succesfull_object_detect){
+        if(succesfull_object_detect){
             if((millis() - start_time)/SECOND >= interactive_mode_duration/SECOND ){
-                break;
+                return false;
             }
             face_screen.setAnimation(ROBOT_FRAMES::FACE_IDLE);
             face_screen.showAnimation();
@@ -334,7 +336,9 @@ void Robot::interactiveMode(){
             rtos::ThisThread::sleep_for(MS(500));
         }
         setState(ROBOT_STATES::IDLE);
+        return succesfull_object_detect;
     }
+    return false;
 }
 
 bool Robot::followClosestObject(){
@@ -363,6 +367,15 @@ bool Robot::followClosestObject(){
                     head_servo.turnToDegree(tmp_y_coordinate);
                     prev_x = X;
                     prev_y = Y;
+                    if(X <= 90 && Y <=90){
+                        face_screen.setAnimation(ROBOT_FRAMES::SEARCHING_LEFT_DOWN);
+                    } else if(X <= 90 && Y >90 ){
+                        face_screen.setAnimation(ROBOT_FRAMES::SEARCHING_LEFT_UP);
+                    } else if(X >= 90 && Y <=90){
+                        face_screen.setAnimation(ROBOT_FRAMES::SEARCHING_RIGHT_DOWN);
+                    } else if(X >= 90 && Y >90){
+                        face_screen.setAnimation(ROBOT_FRAMES::SEARCHING_RIGHT_UP);
+                    }
                     sensor_data = lidar.getDistanceMM();
                     if( sensor_data != 8191 && sensor_data != -1 && sensor_data <= max_range){
                         found_object_x = neck_servo.getCurrentDegree();

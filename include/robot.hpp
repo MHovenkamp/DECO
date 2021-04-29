@@ -19,7 +19,8 @@ enum class ROBOT_STATES{
     REMINDER_WALK,
     WEATHER_STATION,
     INTERACTIVE_MODE,
-    OFF
+    OFF,
+    PAUSE
 };
 
 /**
@@ -306,10 +307,12 @@ public:
     void shutDown();
 
     /**
-     * @brief Makes the robot search out the user and look at hiim/follow him.
+     * @brief Makes the robot search out the user and look at hiim/follow him, return true after succes.
      * 
+     * @return true 
+     * @return false 
      */
-    void interactiveMode();
+    bool interactiveMode();
 
 };
 
