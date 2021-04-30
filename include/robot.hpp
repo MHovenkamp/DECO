@@ -19,8 +19,7 @@ enum class ROBOT_STATES{
     REMINDER_WALK,
     WEATHER_STATION,
     INTERACTIVE_MODE,
-    OFF,
-    PAUSE
+    OFF
 };
 
 /**
@@ -58,6 +57,7 @@ private:
     unsigned long current_time_difference;
 
     ROBOT_STATES current_state = ROBOT_STATES::IDLE;
+    ROBOT_STATES prev_state = ROBOT_STATES::IDLE;
 
     unsigned int distance_found_object;
     unsigned int found_object_x;
@@ -65,35 +65,6 @@ private:
     unsigned int tmp_x_coordinate;
     unsigned int tmp_y_coordinate;
     
-    /**
-     * @brief Idle state of the robot; idle animation.
-     * 
-     */
-    void idleState();
-
-    /**
-     * @brief Break reminder state of the robot; attention movement, break animation
-     * 
-     */
-    void reminderBreak();
-
-    /**
-     * @brief Walk reminder state of the robot; attention movement, notification, walk animation
-     * 
-     */
-    void reminderWalk();
-
-    /**
-     * @brief Water reminder state of the robot; attention movement, notification, water animation
-     * 
-     */
-    void reminderWater();
-
-    /**
-     * @brief Weather station state of the robot; weatherStation animation
-     * 
-     */
-    void showWeatherStation();
 
     /**
      * @brief tries to follow a found object by making a spiraling motion when hand is removed. 
@@ -137,6 +108,32 @@ public:
      * 
      */
     void run();
+
+    /**
+     * @brief Idle state of the robot; idle animation.
+     * 
+     */
+    void idleState();
+    /**
+     * @brief Break reminder state of the robot; attention movement, break animation
+     * 
+     */
+    void reminderBreak();
+    /**
+     * @brief Walk reminder state of the robot; attention movement, notification, walk animation
+     * 
+     */
+    void reminderWalk();
+    /**
+     * @brief Water reminder state of the robot; attention movement, notification, water animation
+     * 
+     */
+    void reminderWater();
+    /**
+     * @brief Weather station state of the robot; weatherStation animation
+     * 
+     */
+    void showWeatherStation();
 
     /**
      * @brief Get the Break Time loop interval

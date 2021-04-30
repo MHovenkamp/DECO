@@ -20,6 +20,7 @@ enum class INTERPRETER_MODES{
  */
 class Node{
 public:
+    const PARSE_WORDS parse_words;
     String original_string;
     NODE_TYPES type;
     /**
@@ -39,6 +40,12 @@ public:
      * @param robot : Robot &
      */
     virtual void execute(Robot & robot);
+
+    /**
+     * @brief print the infromation of the node
+     * 
+     */
+    virtual void print();
 };
 
 /**
@@ -48,21 +55,21 @@ public:
 class SetterNode: public Node{
 private:
     String to_set;
-    PARSE_WORDS setter_type;
+    String setter_type;
     int time_period;
-    PARSE_WORDS time_measurements;
+    String time_measurements;
 public:
     /**
      * @brief Construct a new Setter Node object
      * 
      * @param original_string : String
      * @param to_set : String
-     * @param setter_type : PARSE_WORDS
+     * @param setter_type : String
      * @param time_period : int
-     * @param time_measurement PARSE_WORDS
+     * @param time_measurement String
      * @param type : NODE TYPES
      */
-    SetterNode(String original_string, String to_set ,PARSE_WORDS setter_type, int time_period, PARSE_WORDS time_measurement, NODE_TYPES type = NODE_TYPES::SETTER):
+    SetterNode(String original_string, String to_set ,String setter_type, int time_period, String time_measurement, NODE_TYPES type = NODE_TYPES::SETTER):
     Node(original_string, type),
     to_set(to_set),
     setter_type(setter_type),
@@ -76,11 +83,18 @@ public:
     void execute(Robot & robot) override;
 
     /**
+     * @brief print the infromation of the node
+     * 
+     */
+    void print() override;
+
+    /**
      * @brief Get the Time object
      * 
      * @return unsigned int 
      */
     unsigned int getTime();
+
 };
 
 /**
@@ -89,16 +103,16 @@ public:
  */
 class SetStateNode: public Node{
 private:
-    PARSE_WORDS state;
+    String state;
 public:
     /**
      * @brief Set the State Node object
      * 
      * @param original_string : String
-     * @param state : PARSE_WORDS
+     * @param state : String
      * @param type : NODE_TYPES
      */
-    SetStateNode(String original_string, PARSE_WORDS state, NODE_TYPES type = NODE_TYPES::STATE_SETTER):
+    SetStateNode(String original_string, String state, NODE_TYPES type = NODE_TYPES::STATE_SETTER):
     Node(original_string, type),
     state(state){}
 
@@ -108,6 +122,12 @@ public:
      * @param robot : Robot &
      */
     void execute(Robot & robot) override;
+
+    /**
+     * @brief print the infromation of the node
+     * 
+     */
+    void print() override;
 };
 
 /**
@@ -117,7 +137,7 @@ public:
 class CommandNode: public Node{
 private:
     String command;
-    int param;
+    String param;
     bool has_param = false;
 public:
     /**
@@ -125,11 +145,11 @@ public:
      * 
      * @param original_string : String
      * @param command : String
-     * @param param : int
+     * @param param : String
      * @param has_param : bool
      * @param type : NODE_TYPES
      */
-    CommandNode(String original_string, String command, int param, bool has_param = false, NODE_TYPES type = NODE_TYPES::COMMAND):
+    CommandNode(String original_string, String command, String param, bool has_param = false, NODE_TYPES type = NODE_TYPES::COMMAND):
     Node(original_string, type),
     command(command),
     param(param){}
@@ -140,6 +160,12 @@ public:
      * @param robot : Robot &
      */
     void execute(Robot & robot) override;
+
+    /**
+     * @brief print the infromation of the node
+     * 
+     */
+    void print() override;
 };
 
 /**
@@ -149,17 +175,17 @@ public:
 class WaitNode: public Node{
 private:
     int time_period;
-    PARSE_WORDS time_measurements;
+    String time_measurements;
 public:
     /**
      * @brief Construct a new Wait Node object
      * 
      * @param original_string : String
      * @param time_period : int
-     * @param time_measurements : PARSE_WORDS
+     * @param time_measurements : String
      * @param type : NODE_TYPES
      */
-    WaitNode(String original_string, int time_period, PARSE_WORDS time_measurements, NODE_TYPES type = NODE_TYPES::WAIT):
+    WaitNode(String original_string, int time_period, String time_measurements, NODE_TYPES type = NODE_TYPES::WAIT):
     Node(original_string, type),
     time_period(time_period),
     time_measurements(time_measurements){}
@@ -170,6 +196,12 @@ public:
      * @param robot : Robot &
      */
     void execute(Robot & robot) override;
+
+    /**
+     * @brief print the infromation of the node
+     * 
+     */
+    void print() override;
 };
 
 /**
@@ -197,6 +229,12 @@ public:
      * @param robot : Robot &
      */
     void execute(Robot & robot) override;
+
+    /**
+     * @brief print the infromation of the node
+     * 
+     */
+    void print() override;
 };
 
 /**
@@ -207,7 +245,14 @@ class Interpreter{
 private:
     Robot &robot;
     INTERPRETER_MODES mode =  INTERPRETER_MODES::IDLE;
+    PARSE_WORDS parse_words;
 
+    /**
+     * @brief parse a command and return correct node
+     * 
+     * @param command : String
+     * @return std::unique_ptr<Node> 
+     */
     std::unique_ptr<Node> parseCommand(String command);
 
     /**

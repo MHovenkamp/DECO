@@ -26,34 +26,50 @@ LOOP:
     follow_object DURATION = 2 MINUTE
 
 
+Available commands:
 command length:
 1. 
-shutdown
-interactive_mode
+@ shutdown
+@ interactive_mode 
+@ break_reminder
+@ walk_reminder
+@ water_reminder
+@ showWeatherStation
+@ getBreakTime
+@ getWalkTime
+@ getWaterTime
+@ getWeatherStationTime
+@ getState
+@ rngMovement
+@ returnToStartPos
 
 2. 
-move_head 10
-move_neck 10
+@ move_head 10
+@ move_neck 10
+@ playSound start_up
+@ playSound shut_down
+@ playSound notification
 
 3. 
-weatherstation = ACTIVE
-walk_reminderweatherstation = ACTIVE
-break_reminder = ACTIVE
-WAIT 10 MINUTE
-STATE = IDLE
+@ eatherstation = ACTIVE
+@ walk_reminder = ACTIVE
+@ weatherstation = ACTIVE
+@ break_reminder = ACTIVE
+@ WAIT 10 SECOND
+@ STATE = IDLE
 
 4. 
-shut_down_after = 10 MINUTE
+@ shut_down_after = 10 MINUTE
 
 
 5. 
-interactive_mode DURATION = 5 MINUTE
-weatherstation PERIOD = 10 MINUTE
-walk_reminder PERIOD = 10 MINUTE
-water_reminder PERIOD = 10 MINUTE
-break_reminder PERIOD = 10 MINUTE
-weatherstation DURATION = 10 SECOND
-walk_reminder DURATION = 10 SECOND
-water_reminder DURATION = 10 SECOND
-break_reminder DURATION = 10 MINUTE
-follow_object DURATION = 2 MINUTE
+@ interactive_mode DURATION = 5 MINUTE
+@ weatherstation PERIOD = 10 MINUTE
+@ walk_reminder PERIOD = 10 MINUTE
+@ water_reminder PERIOD = 10 MINUTE
+@ break_reminder PERIOD = 10 MINUTE
+@ weatherstation DURATION = 10 SECOND
+@ walk_reminder DURATION = 10 SECOND
+@ water_reminder DURATION = 10 SECOND
+@ break_reminder DURATION = 10 MINUTE
+@ follow_object DURATION = 2 MINUTE

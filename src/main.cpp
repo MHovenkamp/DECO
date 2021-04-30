@@ -25,7 +25,7 @@ void i2cTask(){
   Serial.println("i2c task started");
   screen.setAnimation(ROBOT_FRAMES::FACE_IDLE);
   while(true){
-    if( global_state != ROBOT_STATES::OFF || global_state != ROBOT_STATES::PAUSE){
+    if( global_state != ROBOT_STATES::OFF ){
       screen.flashOled();
       lidar.lidarTask();
     }
@@ -40,7 +40,7 @@ void i2cTask(){
 void servoTask(){
   Serial.println("servo head task started");
   while(true){
-    if( global_state != ROBOT_STATES::OFF || global_state != ROBOT_STATES::PAUSE ){
+    if( global_state != ROBOT_STATES::OFF ){
       neck_servo.servoTask();
       head_servo.servoTask();
       rtos::ThisThread::sleep_for(MS(20)); // 20 ms standard for sg932r TowerPro, change when changing servo
@@ -56,10 +56,8 @@ void servoTask(){
 void pirTask(){
   Serial.println("PIR task started");
   while(true){ 
-    if(global_state != ROBOT_STATES::PAUSE){
-      pir_sensor.PIRTask();
-      rtos::ThisThread::sleep_for(MS(1000));
-    }
+    pir_sensor.PIRTask();
+    rtos::ThisThread::sleep_for(MS(1000));
   }
 }
 
@@ -70,9 +68,7 @@ void pirTask(){
 void robotTask(){
   Serial.println("main robot task started");
   while(true){
-    if(global_state != ROBOT_STATES::PAUSE){
-      robot_test.run();
-    }
+    robot_test.run();
   }
 }
 

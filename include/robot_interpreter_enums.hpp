@@ -5,33 +5,45 @@
  * @brief PARSE_WORDS enum class for the Interpreter
  * 
  */
-enum class PARSE_WORDS{
-    weatherstation,
-    walk_reminder,
-    water_reminder,
-    break_reminder,
-    shut_down_after,
-    STATE,
-    IDLE,
-    REMINDER_BREAK,
-    REMINDER_WATER,
-    REMINDER_WALK,
-    WEATHER_STATION,
-    INTERACTIVE_MODE,
-    OFF,
-    ACTIVE,
-    NON_ACTIVE,
-    PERIOD,
-    DURATION,
-    MINUTE_,
-    HOUR_,
-    SECOND_,
-    MILLI_SECOND_,
-    WAIT,
-    interactive_mode,
-    shutdown,
-    move_head,
-    move_neck
+struct PARSE_WORDS{
+    String weatherstation = "weatherstation";
+    String walk_reminder = "walk_reminder";
+    String water_reminder = "water_reminder";
+    String break_reminder = "break_reminder";
+    String shut_down_after = "shut_down_after";
+    String STATE = "STATE";
+    String IDLE = "IDLE";
+    String REMINDER_BREAK = "REMINDER_BREAK";
+    String REMINDER_WATER = "REMINDER_WATER";
+    String REMINDER_WALK = "REMINDER_WALK";
+    String WEATHER_STATION = "WEATHER_STATION";
+    String INTERACTIVE_MODE = "INTERACTIVE_MODE";
+    String OFF = "OFF";
+    String ACTIVE = "ACTIVE";
+    String NON_ACTIVE = "NON_ACTIVE";
+    String PERIOD = "PERIOD";
+    String DURATION = "DURATION";
+    String MINUTE_ = "MINUTE";
+    String HOUR_ = "HOUR";
+    String SECOND_ = "SECOND";
+    String MILLI_SECOND_ = "MILLI_SECOND";
+    String WAIT = "WAIT";
+    String interactive_mode = "interactive_mode";
+    String shutdown = "shutdown";
+    String move_head = "move_head";
+    String move_neck = "move_neck";
+    String showWeatherStation = "showWeatherStation";
+    String getBreakTime = "getBreakTime";
+    String getWalkTime = "getWalkTime";
+    String getWaterTime = "getWaterTime";
+    String getWeatherStationTime = "getWeatherStationTime";
+    String getState = "getState";
+    String rngMovement = "rngMovement";
+    String returnToStartPos = "returnToStartPos";
+    String playSound = "playSound";
+    String start_up = "start_up";
+    String shut_down = "shut_down";
+    String notification = "notification";
 };
 
 /**

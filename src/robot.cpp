@@ -17,6 +17,7 @@ void Robot::setup(){
 };
 
 void Robot::run(){
+    prev_state = current_state;
     if( pir_sensor.getLastMovement() >= 1200){
         setState(ROBOT_STATES::OFF);
     }
@@ -55,49 +56,44 @@ void Robot::run(){
             face_screen.showAnimation();
             break;
         case ROBOT_STATES::IDLE:
-            Serial.println("IDLE");
             idleState();
             break;
         case ROBOT_STATES::REMINDER_BREAK:
             if(break_time_active){
-                Serial.println("REMINDER_BREAK");
                 reminderBreak();
             } else {
-                setState(ROBOT_STATES::IDLE);
+                setState(prev_state);
             }
             break;
         case ROBOT_STATES::REMINDER_WATER:
             if(water_time_active){
-                Serial.println("REMINDER_WATER");
                 reminderWater();
             } else {
-                setState(ROBOT_STATES::IDLE);
+                setState(prev_state);
             }
             break;
         case ROBOT_STATES::REMINDER_WALK:
             if(walk_time_active){
-                Serial.println("REMINDER_WALK");
                 reminderWalk();
             } else {
-                setState(ROBOT_STATES::IDLE);
+                setState(prev_state);
             }
             break;
         case ROBOT_STATES::WEATHER_STATION:
             if(weather_time_active){
-                Serial.println("WEATHER_STATION");
                 showWeatherStation();
             } else {
-                setState(ROBOT_STATES::IDLE);
+                setState(prev_state);
             }
             break;
         case ROBOT_STATES::OFF:
-            Serial.println("OFF");
             shutDown();
             break;
         default:
             break;
     }
     rtos::ThisThread::sleep_for(MS(500));
+    prev_state = current_state;
 };
 
 unsigned int Robot::getBreakTime(){
@@ -237,6 +233,8 @@ void Robot::returnToStartPos(){
 }
 
 void Robot::reminderBreak(){
+    setState(ROBOT_STATES::REMINDER_BREAK);
+    Serial.println("Break reminder active, duration of: " + String(break_time_duration) + "MS");
     Songs songs;
     playSound<songs.notification.size()>(songs.notification);
     head_servo.turnToDegree(120);
@@ -245,6 +243,9 @@ void Robot::reminderBreak(){
     returnToStartPos();
     long unsigned int start_time = millis();
     while( (millis() - start_time)/SECOND <= break_time_duration/SECOND){
+        if(current_state!=ROBOT_STATES::REMINDER_BREAK){
+            break;
+        }
         rtos::ThisThread::sleep_for(MS(500));
         face_screen.setAnimation(ROBOT_FRAMES::BREAK_REMINDER);
         face_screen.showAnimation();
@@ -253,6 +254,8 @@ void Robot::reminderBreak(){
 };
 
 void Robot::reminderWalk(){
+    setState(ROBOT_STATES::REMINDER_WALK);
+    Serial.println("Walk reminder active, duration of: " + String(walk_time_duration) + "MS");
     Songs songs;
     playSound<songs.notification.size()>(songs.notification);
     head_servo.turnToDegree(120);
@@ -261,6 +264,9 @@ void Robot::reminderWalk(){
     returnToStartPos();
     long unsigned int start_time = millis();
     while( (millis() - start_time)/SECOND <= walk_time_duration/SECOND ){
+        if(current_state!=ROBOT_STATES::REMINDER_WALK){
+            break;
+        }
         rtos::ThisThread::sleep_for(MS(500));
         face_screen.setAnimation(ROBOT_FRAMES::WALK_REMINDER);
         face_screen.showAnimation();
@@ -269,6 +275,8 @@ void Robot::reminderWalk(){
 };
 
 void Robot::reminderWater(){
+    setState(ROBOT_STATES::REMINDER_WATER);
+    Serial.println("Water reminder active, duration of: " + String(water_time_duration) + "MS");
     Songs songs;
     playSound<songs.notification.size()>(songs.notification);
     head_servo.turnToDegree(120);
@@ -277,6 +285,9 @@ void Robot::reminderWater(){
     returnToStartPos();
     long unsigned int start_time = millis();
     while( (millis() - start_time)/SECOND <= water_time_duration/SECOND ){
+        if(current_state!=ROBOT_STATES::REMINDER_WATER){
+            break;
+        }
         rtos::ThisThread::sleep_for(MS(500));
         face_screen.setAnimation(ROBOT_FRAMES::WATER_REMINDER);
         face_screen.showAnimation();
@@ -285,10 +296,15 @@ void Robot::reminderWater(){
 };
 
 void Robot::showWeatherStation(){
+    setState(ROBOT_STATES::WEATHER_STATION);
+    Serial.println("showing weather station, duration of: " + String(weather_station_duration) + "MS");
     String weather_message_temp, weather_message_hum, weather_message_baro, weather_message;
     int str_len;
     long unsigned int start_time = millis();
     while( (millis() - start_time)/SECOND <= weather_station_duration/SECOND ){
+        if(current_state!=ROBOT_STATES::WEATHER_STATION){
+            break;
+        }
         rtos::ThisThread::sleep_for(MS(500));
         weather_message_temp = String(internal_sensors.getTemperature()) + " C\n";
         weather_message_hum = String(internal_sensors.getHumidity()) + " %\n";
@@ -301,7 +317,7 @@ void Robot::showWeatherStation(){
         face_screen.setDisplayText<3>(message, line_lengths, 3);
         face_screen.flashTextDisplay();
     }
-
+    setState(ROBOT_STATES::IDLE);
 }
 
 bool Robot::interactiveMode(){
@@ -335,7 +351,12 @@ bool Robot::interactiveMode(){
             face_screen.showAnimation();
             rtos::ThisThread::sleep_for(MS(500));
         }
-        setState(ROBOT_STATES::IDLE);
+        if(succesfull_object_detect){
+            setState(ROBOT_STATES::INTERACTIVE_MODE);
+        } else{
+            setState(ROBOT_STATES::IDLE);
+            returnToStartPos();
+        }
         return succesfull_object_detect;
     }
     return false;
