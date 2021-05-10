@@ -1,5 +1,4 @@
 SETUP:
-
     weatherstation = ACTIVE
     weatherstation PERIOD = 10 MINUTE
     weatherstation DURATION = 10 SECOND
@@ -17,13 +16,15 @@ SETUP:
     break_reminder DURATION = 10 SECOND
 
     shut_down_after = 10 MINUTE
+    STATE = IDLE
 
 LOOP:
 
-    STATE = IDLE
-    WAIT 10 MINUTE
-    scan_surroundings
-    follow_object DURATION = 2 MINUTE
+    move_head 45
+    WAIT 10 SECOND
+    move_head 135
+
+# //neccesary for end of file read
 
 
 Available commands:
@@ -73,3 +74,15 @@ command length:
 @ water_reminder DURATION = 10 SECOND
 @ break_reminder DURATION = 10 MINUTE
 @ follow_object DURATION = 2 MINUTE
+
+test LOOP
+
+SETUP:
+    shut_down_after = 10 MINUTE
+    STATE = IDLE
+
+LOOP:
+    move_head 45
+    WAIT 10 SECOND
+    move_head 135
+

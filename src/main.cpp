@@ -89,7 +89,7 @@ void robotControlTask(){
  * 
  */
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(4800);
   delay(2000);
   robot_test.setup();
   delay(2000);

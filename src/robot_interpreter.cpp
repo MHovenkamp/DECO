@@ -45,8 +45,76 @@ void Interpreter::run(){
 };
 
 void Interpreter::file(){
+    SingleLinkedList<Node> file_loop_list;
+    String file_text = "";
     Serial.println("file");
+    Serial.println("Enter file text.");
+    while(file_text == ""){
+        if(Serial.available()>0){
+            file_text = Serial.readString();
+        }
+    }
+    String line = "";
+    String current_word="";
+    String setup = "";
+    String loop = "";
+    for(unsigned int i = 0; i < file_text.length(); i++ ){
+        if(file_text[i] == ' ' || file_text[i] == '\n'){
+            current_word.trim();
+            if(current_word == "LOOP:"){
+                Serial.println("LOOP: found");
+                setup = file_text.substring(0+parse_words.SETUP.length(),i-parse_words.LOOP.length());
+                loop = file_text.substring(i+parse_words.LOOP.length(),file_text.length()-1);
+            }
+            current_word = "";
+        }else{
+            current_word += file_text[i];
+        }
+    }
+    Serial.println("________FILE:_________");
+    Serial.println(file_text);
+    Serial.println("________SETUP:________");
+    Serial.println(setup);
+    Serial.println("________LOOP:_________");
+    Serial.println(loop);
+    Serial.println("______________________");
+
+    for(unsigned int i = 0; i < setup.length()-1; i++ ){
+        if(setup[i] == '\n'){
+            line.trim();
+            Serial.println(line);
+            std::unique_ptr<Node> node_ptr = parseCommand(line);
+            node_ptr->print(); 
+            node_ptr->execute(robot);
+            node_ptr.reset();
+            line = "";
+        } else{
+            line += setup[i];
+        }
+    }
+    for(unsigned int i = 0; i < loop.length()-1; i++ ){
+        if(loop[i] == '\n'){
+            line.trim();
+            std::unique_ptr<Node> node_ptr = parseCommand(line);
+            file_loop_list.append(*node_ptr);
+            line = "";
+        } else{
+            line += loop[i];
+        }
+    }
+    file_loop_list.setToStart();
+    // while(Serial.available() == 0){
+        if(file_loop_list.gotToNextNode()){
+            Node temp = file_loop_list.getCurrentNode();
+            temp.print();
+            temp.execute(robot);
+        } else{
+            file_loop_list.setToStart();
+        }
+    // }
+
 }
+
 
 void Interpreter::repl(){
     String command = "";

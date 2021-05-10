@@ -44,6 +44,8 @@ struct PARSE_WORDS{
     String start_up = "start_up";
     String shut_down = "shut_down";
     String notification = "notification";
+    String SETUP = "SETUP:";
+    String LOOP = "LOOP:";
 };
 
 /**
