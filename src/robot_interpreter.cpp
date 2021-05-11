@@ -13,6 +13,7 @@ void Interpreter::run(){
             while(choice == ""){
                 choice = Serial.readStringUntil('\n');
             }
+            choice.trim();
             Serial.println("chosen option: " + choice);
             if( choice == "2"){ 
                 Serial.println("FILE chosen"); 
@@ -45,32 +46,61 @@ void Interpreter::run(){
 };
 
 void Interpreter::file(){
+    String allowed_symbols = "_=: ";
     SingleLinkedList<Node> file_loop_list;
     String file_text = "";
-    Serial.println("file");
-    Serial.println("Enter file text.");
-    while(file_text == ""){
-        if(Serial.available()>0){
-            file_text = Serial.readString();
-        }
-    }
     String line = "";
     String current_word="";
     String setup = "";
     String loop = "";
+    char temp_char;
+    Serial.println("file");
+    Serial.println("Enter file text.");
+    while(Serial.available()<=0){;}
+    while(file_text.indexOf("EOF:") == -1 && Serial.available() != 0){
+        Serial.println("items in buffer: " + String(Serial.available()));
+        temp_char = Serial.read();
+        if( allowed_symbols.indexOf(temp_char) != -1 || 
+            isAlphaNumeric(temp_char) ||
+            temp_char == ' ' ||
+            temp_char == '\n'){
+            file_text += temp_char;
+            Serial.println(temp_char);
+        }
+
+    }
+    bool setup_trigger = false;
+    bool loop_trigger = false;
     for(unsigned int i = 0; i < file_text.length(); i++ ){
         if(file_text[i] == ' ' || file_text[i] == '\n'){
             current_word.trim();
-            if(current_word == "LOOP:"){
+            if(current_word == "SETUP:"){
+                Serial.println("SETUP: found");
+                setup_trigger = true;
+            } else if(current_word == "LOOP:"){
                 Serial.println("LOOP: found");
-                setup = file_text.substring(0+parse_words.SETUP.length(),i-parse_words.LOOP.length());
-                loop = file_text.substring(i+parse_words.LOOP.length(),file_text.length()-1);
+                setup = setup.substring(0,setup.length()-5);
+                setup_trigger = false;
+                loop_trigger = true;
+            } else if(current_word == "EOF:"){
+                Serial.println("EOF: found");
+                setup_trigger = false;
+                loop_trigger = false;
             }
             current_word = "";
-        }else{
-            current_word += file_text[i];
         }
+        if(setup_trigger){
+            setup += file_text[i];
+        }
+        if(loop_trigger){
+            loop += file_text[i];
+        }
+        current_word += file_text[i];
     }
+
+    setup.trim();
+    loop.trim();
+
     Serial.println("________FILE:_________");
     Serial.println(file_text);
     Serial.println("________SETUP:________");
@@ -79,40 +109,47 @@ void Interpreter::file(){
     Serial.println(loop);
     Serial.println("______________________");
 
-    for(unsigned int i = 0; i < setup.length()-1; i++ ){
-        if(setup[i] == '\n'){
-            line.trim();
-            Serial.println(line);
-            std::unique_ptr<Node> node_ptr = parseCommand(line);
-            node_ptr->print(); 
-            node_ptr->execute(robot);
-            node_ptr.reset();
-            line = "";
-        } else{
+    if(setup.length() > 0){
+        for(unsigned int i = 0; i < setup.length(); i++ ){
             line += setup[i];
+            if(setup[i] == '\n' || i == setup.length()-1){
+                line.trim();
+                Serial.println("================================");
+                Serial.println(line);
+                Serial.println("================================");
+                std::unique_ptr<Node> node_ptr = parseCommand(line);
+                node_ptr->print(); 
+                node_ptr->execute(robot);
+                node_ptr.reset();
+                line = "";
+            }
         }
     }
-    for(unsigned int i = 0; i < loop.length()-1; i++ ){
-        if(loop[i] == '\n'){
-            line.trim();
-            std::unique_ptr<Node> node_ptr = parseCommand(line);
-            file_loop_list.append(*node_ptr);
-            line = "";
-        } else{
+    if(loop.length() > 0){
+        line = "";
+        for(unsigned int i = 0; i < loop.length(); i++ ){
             line += loop[i];
+            if(loop[i] == '\n' || i == loop.length()-1){
+                line.trim();
+                std::unique_ptr<Node> node_ptr = parseCommand(line);
+                file_loop_list.append(*node_ptr);
+                line = "";
+            }
         }
     }
-    file_loop_list.setToStart();
-    // while(Serial.available() == 0){
-        if(file_loop_list.gotToNextNode()){
-            Node temp = file_loop_list.getCurrentNode();
-            temp.print();
-            temp.execute(robot);
-        } else{
-            file_loop_list.setToStart();
+    if(file_loop_list.getLength() > 0){
+        file_loop_list.setToStart();
+        while(Serial.available() == 0){
+            if(file_loop_list.gotToNextNode()){
+                Node temp = file_loop_list.getCurrentNode();
+                temp.print();
+                temp.execute(robot);
+                rtos::ThisThread::sleep_for(MS(temp.))
+            } else{
+                file_loop_list.setToStart();
+            }
         }
-    // }
-
+    }
 }
 
 

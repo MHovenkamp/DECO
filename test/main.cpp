@@ -19,7 +19,7 @@ void head_servo_loop(){
 };
 
 void setup() {
-  Serial.begin(4800);
+  Serial.begin(9600);
   neck_servo.turnToDegree(90);
   head_servo.turnToDegree(90);
   neck_servo_thread.start(neck_servo_loop);
