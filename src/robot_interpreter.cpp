@@ -129,26 +129,58 @@ void Interpreter::file(){
         line = "";
         for(unsigned int i = 0; i < loop.length(); i++ ){
             line += loop[i];
+            Serial.println(String(i) +" "+ String(loop[i]));
             if(loop[i] == '\n' || i == loop.length()-1){
                 line.trim();
                 std::unique_ptr<Node> node_ptr = parseCommand(line);
-                file_loop_list.append(*node_ptr);
+                file_loop_list.append(node_ptr);
+                node_ptr.reset();
+                Serial.println("================================");
+                Serial.println("Appended to list: "+ line);
+                std::unique_ptr<Node> test = file_loop_list.getTail();
+                test->print();
+                Serial.println("================================");
                 line = "";
             }
         }
     }
     if(file_loop_list.getLength() > 0){
+        Serial.println(file_loop_list.getLength());
         file_loop_list.setToStart();
-        while(Serial.available() == 0){
-            if(file_loop_list.gotToNextNode()){
-                Node temp = file_loop_list.getCurrentNode();
-                temp.print();
-                temp.execute(robot);
-                rtos::ThisThread::sleep_for(MS(temp.))
-            } else{
-                file_loop_list.setToStart();
+        Serial.println("after set to start;");
+        Serial.println("after temp made");
+        for(unsigned int i = 0; i < 4; i++){
+            //TODO: currently the linkedlist returns Node classes instead of dreived, fix this. 
+            std::unique_ptr<Node> temp = file_loop_list.getCurrentNode();
+            if(current_node->object->getType() == NODE_TYPES::COMMAND){
+                std::make_unique<CommandNode> node = temp;
+            } else if(current_node->object->getType() == NODE_TYPES::WAIT){
+                std::unique_ptr<WaitNode> node = temp;
+            } else if(current_node->object->getType() == NODE_TYPES::SETTER){
+                std::unique_ptr<SetterNode> node = temp;
+            } else if(current_node->object->getType() == NODE_TYPES::STATE_SETTER){
+                std::unique_ptr<SetStateNode> node = temp;
+            } else if(current_word->object->getType() == NODE_TYPES::ERROR){
+                std::unique_ptr<ErrorNode> node = temp;
             }
+            Serial.println("temp filled");
+            temp->print();
+            file_loop_list.gotToNextNode();
+            Serial.println("after next node call");
+            temp.reset();
         }
+        // while(Serial.available() == 0){
+        //     Serial.println("in loop");
+        //     if(!file_loop_list.gotToNextNode()){
+        //         file_loop_list.setToStart();
+        //     }
+        //     Serial.println("after if");
+        //     temp = file_loop_list.getCurrentNode();
+        //     temp->print();
+        //     delay(1000);
+        //     // temp->execute(robot);
+        //     // rtos::ThisThread::sleep_for(MS(temp_char));
+        // }
     }
 }
 
@@ -303,6 +335,10 @@ std::unique_ptr<Node> Interpreter::parseCommand(String command){
 
 void Node::execute(Robot & robot){
     Serial.println(original_string);
+}
+
+NODE_TYPES Node::getType(){
+    return type;
 }
 
 unsigned int SetterNode::getTime(){
@@ -505,7 +541,9 @@ void WaitNode::execute(Robot & robot){
     } else if(time_measurements == parse_words.HOUR_){
         rtos::ThisThread::sleep_for(MS( time_period * HOUR ));
     } else if(time_measurements == parse_words.SECOND_){
+        Serial.println("started wait "+ String(time_period * SECOND));
         rtos::ThisThread::sleep_for(MS( time_period * SECOND ));
+        Serial.println("ended wait");
     } else if(time_measurements == parse_words.MILLI_SECOND_){
         rtos::ThisThread::sleep_for(MS( time_period * MIllI_SECOND ));
     } else {

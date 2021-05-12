@@ -3,6 +3,7 @@
 
 #include <robot.hpp>
 #include <robot_interpreter_enums.hpp>
+#include <single_linked_list.hpp>
 
 /**
  * @brief enum class containing the interpreter nodes.
@@ -46,6 +47,8 @@ public:
      * 
      */
     virtual void print();
+
+    NODE_TYPES getType();
 };
 
 /**

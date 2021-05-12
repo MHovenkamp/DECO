@@ -85,4 +85,5 @@ LOOP:
     move_head 45
     WAIT 10 SECOND
     move_head 135
+    WAIT 15 SECOND
 EOF:
