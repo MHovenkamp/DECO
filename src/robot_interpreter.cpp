@@ -1,60 +1,67 @@
 #include <robot_interpreter.hpp>
 
+extern String program_code;
+
 void Interpreter::run(){
     // check for repl mode or full file mode.
     if(mode == INTERPRETER_MODES::IDLE){
-        String choice = "";
-        Serial.println("Enter mode to which to program robot with: ");
-        Serial.println("1. REPL, Enter a single command and instantly see the result");
-        Serial.println("2. FILE, upload a file with your written code");
-        Serial.println("3. EXIT, exit current program");
-        while(choice != "3"){
-            Serial.println("waiting for input");
-            while(choice == ""){
-                choice = Serial.readStringUntil('\n');
-            }
-            choice.trim();
-            Serial.println("chosen option: " + choice);
-            if( choice == "2"){ 
-                Serial.println("FILE chosen"); 
-                mode = INTERPRETER_MODES::FILE; 
-                choice = "";
-                break; 
-            }
-            else if( choice == "1"){
-                Serial.println("REPL chosen"); 
-                mode = INTERPRETER_MODES::REPL; 
-                choice = "";
-                break; 
-            } else{
-                Serial.println("Unknow option");
-                Serial.println("Enter mode to which to program robot with: ");
-                Serial.println("1. REPL, Enter a single command and instantly see the result");
-                Serial.println("2. FILE, upload a file with your written code");
-                Serial.println("3. EXIT, exit current program");
-                choice = "";
+        if(Serial){
+            String choice = "";
+            Serial.println("Enter mode to which to program robot with: ");
+            Serial.println("1. REPL, Enter a single command and instantly see the result");
+            Serial.println("2. FILE, upload a file with your written code");
+            Serial.println("3. PREPROGRAMMED FILE, Load in the preprogrammed file");
+            Serial.println("4. EXIT, exit current program");
+            while(choice != "4"){
+                Serial.println("waiting for input");
+                while(choice == ""){
+                    choice = Serial.readStringUntil('\n');
+                }
+                choice.trim();
+                Serial.println("chosen option: " + choice);
+                if( choice == "2"){ 
+                    mode = INTERPRETER_MODES::FILE; 
+                    choice = "";
+                    break; 
+                }
+                else if( choice == "1"){
+                    mode = INTERPRETER_MODES::REPL; 
+                    choice = "";
+                    break; 
+                } else if(choice == "3"){
+                    mode = INTERPRETER_MODES::PRECOMPILED_FILE;
+                    choice = "";
+                    break;
+                } else{
+                    Serial.println("Unknow option");
+                    Serial.println("Enter mode to which to program robot with: ");
+                    Serial.println("1. REPL, Enter a single command and instantly see the result");
+                    Serial.println("2. FILE, upload a file with your written code");
+                    Serial.println("3. EXIT, exit current program");
+                    choice = "";
+                }
             }
         }
+    }else{
+        mode = INTERPRETER_MODES::PRECOMPILED_FILE;
     }
     if(mode == INTERPRETER_MODES::REPL){
         repl();
         mode = INTERPRETER_MODES::IDLE;
     } else if(mode == INTERPRETER_MODES::FILE){
-        file();
+        file(readFileFromSerial());
+        mode = INTERPRETER_MODES::IDLE;
+    } else if( mode == INTERPRETER_MODES::PRECOMPILED_FILE){
+        code code_struct;
+        file(code_struct.program_code);
         mode = INTERPRETER_MODES::IDLE;
     }
 };
 
-void Interpreter::file(){
+String Interpreter::readFileFromSerial(){
     String allowed_symbols = "_=: ";
-    SingleLinkedList<Node> file_loop_list;
-    String file_text = "";
-    String line = "";
-    String current_word="";
-    String setup = "";
-    String loop = "";
     char temp_char;
-    Serial.println("file");
+    String file_text = "";
     Serial.println("Enter file text.");
     while(Serial.available()<=0){;}
     while(file_text.indexOf("EOF:") == -1 && Serial.available() != 0){
@@ -67,8 +74,16 @@ void Interpreter::file(){
             file_text += temp_char;
             Serial.println(temp_char);
         }
-
     }
+    return file_text;
+    }
+
+void Interpreter::file(String file_text){
+    DoubleLinkedList<Node> file_loop_list;
+    String line = "";
+    String current_word="";
+    String setup = "";
+    String loop = "";
     bool setup_trigger = false;
     bool loop_trigger = false;
     for(unsigned int i = 0; i < file_text.length(); i++ ){
@@ -117,7 +132,7 @@ void Interpreter::file(){
                 Serial.println("================================");
                 Serial.println(line);
                 Serial.println("================================");
-                std::unique_ptr<Node> node_ptr = parseCommand(line);
+                std::shared_ptr<Node> node_ptr = parseCommand(line);
                 node_ptr->print(); 
                 node_ptr->execute(robot);
                 node_ptr.reset();
@@ -129,75 +144,51 @@ void Interpreter::file(){
         line = "";
         for(unsigned int i = 0; i < loop.length(); i++ ){
             line += loop[i];
-            Serial.println(String(i) +" "+ String(loop[i]));
             if(loop[i] == '\n' || i == loop.length()-1){
                 line.trim();
-                std::unique_ptr<Node> node_ptr = parseCommand(line);
+                std::shared_ptr<Node> node_ptr = parseCommand(line);
                 file_loop_list.append(node_ptr);
-                node_ptr.reset();
-                Serial.println("================================");
-                Serial.println("Appended to list: "+ line);
-                std::unique_ptr<Node> test = file_loop_list.getTail();
-                test->print();
-                Serial.println("================================");
                 line = "";
             }
         }
     }
     if(file_loop_list.getLength() > 0){
-        Serial.println(file_loop_list.getLength());
         file_loop_list.setToStart();
-        Serial.println("after set to start;");
-        Serial.println("after temp made");
-        for(unsigned int i = 0; i < 4; i++){
-            //TODO: currently the linkedlist returns Node classes instead of dreived, fix this. 
-            std::unique_ptr<Node> temp = file_loop_list.getCurrentNode();
-            if(current_node->object->getType() == NODE_TYPES::COMMAND){
-                std::make_unique<CommandNode> node = temp;
-            } else if(current_node->object->getType() == NODE_TYPES::WAIT){
-                std::unique_ptr<WaitNode> node = temp;
-            } else if(current_node->object->getType() == NODE_TYPES::SETTER){
-                std::unique_ptr<SetterNode> node = temp;
-            } else if(current_node->object->getType() == NODE_TYPES::STATE_SETTER){
-                std::unique_ptr<SetStateNode> node = temp;
-            } else if(current_word->object->getType() == NODE_TYPES::ERROR){
-                std::unique_ptr<ErrorNode> node = temp;
+        std::shared_ptr<Node> temp = file_loop_list.getCurrentNode();
+        temp = file_loop_list.getCurrentNode();
+        temp->print();
+        temp->execute(robot);
+        temp.reset();
+        while(Serial.available() == 0){
+            if(!file_loop_list.gotToNextNode()){
+                file_loop_list.setToStart();
             }
-            Serial.println("temp filled");
+            temp = file_loop_list.getCurrentNode();
             temp->print();
-            file_loop_list.gotToNextNode();
-            Serial.println("after next node call");
+            temp->execute(robot);
             temp.reset();
         }
-        // while(Serial.available() == 0){
-        //     Serial.println("in loop");
-        //     if(!file_loop_list.gotToNextNode()){
-        //         file_loop_list.setToStart();
-        //     }
-        //     Serial.println("after if");
-        //     temp = file_loop_list.getCurrentNode();
-        //     temp->print();
-        //     delay(1000);
-        //     // temp->execute(robot);
-        //     // rtos::ThisThread::sleep_for(MS(temp_char));
-        // }
     }
 }
 
-
+//TODO repl no longer functional, probably null character in serial read. also head servo prob broken, test tomorrow.
 void Interpreter::repl(){
     String command = "";
-    while(command != "EXIT"){
-        Serial.println("Enter command. Or \"EXIT\" to quit");
-        while(command == ""){
-            command = Serial.readStringUntil('\n');
+    char character_temp;
+    while(command != "4"){
+        Serial.println("Enter command. Or 4 to quit");
+        while(Serial.available()<=0){;}
+        while(character_temp != '\n' && Serial.available() != 0){
+            // command = Serial.readStringUntil('\n');
+            character_temp = Serial.read();
+            command += character_temp;
         }
-        if(command == "EXIT"){
+        if(command == "4"){
             Serial.println(command +" "+ String(command.length()));
             break;
         }
         Serial.println("given input: " + command);
-        std::unique_ptr<Node> node_ptr = parseCommand(command);
+        std::shared_ptr<Node> node_ptr = parseCommand(command);
         node_ptr->print(); 
         node_ptr->execute(robot);
         node_ptr.reset();
@@ -206,7 +197,7 @@ void Interpreter::repl(){
     }
 }
 
-std::unique_ptr<Node> Interpreter::parseCommand(String command){
+std::shared_ptr<Node> Interpreter::parseCommand(String command){
     int amount_of_spaces = 0;
     for(unsigned int i = 0; i < command.length(); i++){
         if( command[i] == ' '){
@@ -230,36 +221,36 @@ std::unique_ptr<Node> Interpreter::parseCommand(String command){
     switch (amount_of_spaces+1)
     {
     case 1:
-        return std::unique_ptr<Node> (new CommandNode(command, string_array[0], "", false));
+        return std::shared_ptr<Node> (new CommandNode(command, string_array[0], "", false));
         break;
     case 2:
-        return std::unique_ptr<Node> (new CommandNode(command, string_array[0], string_array[1], true));
+        return std::shared_ptr<Node> (new CommandNode(command, string_array[0], string_array[1], true));
         break;
     case 3:
         if(string_array[1] == "="){
             // STATE = IDLE
             if( string_array[0] == parse_words.STATE && string_array[1] == "="){
                 if(string_array[2] == parse_words.IDLE){
-                    return std::unique_ptr<Node> (new SetStateNode(command, parse_words.IDLE));
+                    return std::shared_ptr<Node> (new SetStateNode(command, parse_words.IDLE));
                 } else if(string_array[2] == parse_words.REMINDER_BREAK){
-                    return std::unique_ptr<Node> (new SetStateNode(command, parse_words.REMINDER_BREAK));
+                    return std::shared_ptr<Node> (new SetStateNode(command, parse_words.REMINDER_BREAK));
                 } else if(string_array[2] == parse_words.REMINDER_WATER){
-                    return std::unique_ptr<Node> (new SetStateNode(command, parse_words.REMINDER_WATER));
+                    return std::shared_ptr<Node> (new SetStateNode(command, parse_words.REMINDER_WATER));
                 } else if(string_array[2] == parse_words.REMINDER_WALK){
-                    return std::unique_ptr<Node> (new SetStateNode(command, parse_words.REMINDER_WALK));
+                    return std::shared_ptr<Node> (new SetStateNode(command, parse_words.REMINDER_WALK));
                 } else if(string_array[2] == parse_words.WEATHER_STATION){
-                    return std::unique_ptr<Node> (new SetStateNode(command, parse_words.WEATHER_STATION));
+                    return std::shared_ptr<Node> (new SetStateNode(command, parse_words.WEATHER_STATION));
                 } else if(string_array[2] == parse_words.INTERACTIVE_MODE){
-                    return std::unique_ptr<Node> (new SetStateNode(command, parse_words.INTERACTIVE_MODE));
+                    return std::shared_ptr<Node> (new SetStateNode(command, parse_words.INTERACTIVE_MODE));
                 } else {
-                    return std::unique_ptr<Node> (new ErrorNode(command, "unknown state"));
+                    return std::shared_ptr<Node> (new ErrorNode(command, "unknown state"));
                 }
             }
             // weatherstation = ACTIVE
             if(string_array[2] == parse_words.ACTIVE){
-                return std::unique_ptr<Node> (new SetterNode(command, string_array[0],parse_words.ACTIVE, 0 ,parse_words.MILLI_SECOND_ ));
+                return std::shared_ptr<Node> (new SetterNode(command, string_array[0],parse_words.ACTIVE, 0 ,parse_words.MILLI_SECOND_ ));
             } else if(string_array[2] == parse_words.NON_ACTIVE){
-                return std::unique_ptr<Node> (new SetterNode(command, string_array[0],parse_words.NON_ACTIVE, 0 , parse_words.MILLI_SECOND_ ));
+                return std::shared_ptr<Node> (new SetterNode(command, string_array[0],parse_words.NON_ACTIVE, 0 , parse_words.MILLI_SECOND_ ));
             }
         } else { 
             // WAIT 10 MINUTES
@@ -268,24 +259,24 @@ std::unique_ptr<Node> Interpreter::parseCommand(String command){
                 for(unsigned int i =0 ; i < string_array[1].length()-1; i++){
                     letter = string_array[1][i];
                     if(!isDigit(letter)){
-                        return std::unique_ptr<Node> (new ErrorNode(command, "time value not a digit"));
+                        return std::shared_ptr<Node> (new ErrorNode(command, "time value not a digit"));
                         break;
                     }
                 }
                 if(string_array[2] == parse_words.MINUTE_){
-                    return std::unique_ptr<Node> (new WaitNode(command, string_array[1].toInt(), parse_words.MINUTE_));
+                    return std::shared_ptr<Node> (new WaitNode(command, string_array[1].toInt(), parse_words.MINUTE_));
                 } else if(string_array[2] == parse_words.HOUR_){
-                    return std::unique_ptr<Node> (new WaitNode(command, string_array[1].toInt(), parse_words.HOUR_));
+                    return std::shared_ptr<Node> (new WaitNode(command, string_array[1].toInt(), parse_words.HOUR_));
                 } else if (string_array[2] == parse_words.SECOND_){
-                    return std::unique_ptr<Node> (new WaitNode(command, string_array[1].toInt(), parse_words.SECOND_));
+                    return std::shared_ptr<Node> (new WaitNode(command, string_array[1].toInt(), parse_words.SECOND_));
                 } else if (string_array[2] == parse_words.MILLI_SECOND_){
-                    return std::unique_ptr<Node> (new WaitNode(command, string_array[1].toInt(), parse_words.MILLI_SECOND_));
+                    return std::shared_ptr<Node> (new WaitNode(command, string_array[1].toInt(), parse_words.MILLI_SECOND_));
                 } else {
-                    return std::unique_ptr<Node> (new ErrorNode(command, "Unknown time measurement type"));
+                    return std::shared_ptr<Node> (new ErrorNode(command, "Unknown time measurement type"));
                 }
             }
         }
-        return std::unique_ptr<Node> (new ErrorNode(command, "unknown command"));
+        return std::shared_ptr<Node> (new ErrorNode(command, "unknown command"));
     case 4:
         //shut_down_after = 10 MINUTE
         if(string_array[0] == parse_words.shut_down_after && string_array[1] == "="){
@@ -293,23 +284,23 @@ std::unique_ptr<Node> Interpreter::parseCommand(String command){
             for(unsigned int i =0 ; i < string_array[2].length()-1; i++){
                 letter = string_array[2][i];
                 if(!isDigit(letter)){
-                    return std::unique_ptr<Node> (new ErrorNode(command, "time value not a digit"));
+                    return std::shared_ptr<Node> (new ErrorNode(command, "time value not a digit"));
                     break;
                 }
             }
             if(string_array[3] == parse_words.MINUTE_){
-                    return std::unique_ptr<Node> (new SetterNode(command, string_array[0] , parse_words.shut_down_after, string_array[2].toInt(), parse_words.MINUTE_));
+                    return std::shared_ptr<Node> (new SetterNode(command, string_array[0] , parse_words.shut_down_after, string_array[2].toInt(), parse_words.MINUTE_));
                 } else if(string_array[3] == parse_words.HOUR_){
-                    return std::unique_ptr<Node> (new SetterNode(command, string_array[0] , parse_words.shut_down_after, string_array[2].toInt(), parse_words.HOUR_));
+                    return std::shared_ptr<Node> (new SetterNode(command, string_array[0] , parse_words.shut_down_after, string_array[2].toInt(), parse_words.HOUR_));
                 } else if (string_array[3] == parse_words.SECOND_){
-                    return std::unique_ptr<Node> (new SetterNode(command, string_array[0] , parse_words.shut_down_after, string_array[2].toInt(), parse_words.SECOND_));
+                    return std::shared_ptr<Node> (new SetterNode(command, string_array[0] , parse_words.shut_down_after, string_array[2].toInt(), parse_words.SECOND_));
                 } else if (string_array[3] == parse_words.MILLI_SECOND_){
-                    return std::unique_ptr<Node> (new SetterNode(command, string_array[0] , parse_words.shut_down_after, string_array[2].toInt(), parse_words.MILLI_SECOND_));
+                    return std::shared_ptr<Node> (new SetterNode(command, string_array[0] , parse_words.shut_down_after, string_array[2].toInt(), parse_words.MILLI_SECOND_));
                 } else {
-                    return std::unique_ptr<Node> (new ErrorNode(command, "Unknown time measurement type"));
+                    return std::shared_ptr<Node> (new ErrorNode(command, "Unknown time measurement type"));
                 }
         }
-        return std::unique_ptr<Node> (new ErrorNode(command, "unknown command"));
+        return std::shared_ptr<Node> (new ErrorNode(command, "unknown command"));
     case 5:
         // weatherstation PERIOD = 10 MINUTE
         if((string_array[1] == parse_words.PERIOD || string_array[1] == parse_words.DURATION) && string_array[2] == "="){
@@ -317,20 +308,20 @@ std::unique_ptr<Node> Interpreter::parseCommand(String command){
             for(unsigned int i =0 ; i < string_array[3].length()-1; i++){
                 letter = string_array[3][i];
                 if(!isDigit(letter)){
-                    return std::unique_ptr<Node> (new ErrorNode(command, "time value not a digit"));
+                    return std::shared_ptr<Node> (new ErrorNode(command, "time value not a digit"));
                     break;
                 }
             }
             
-            return std::unique_ptr<Node> (new SetterNode(command, string_array[0] , string_array[1], string_array[3].toInt(), string_array[4]));
+            return std::shared_ptr<Node> (new SetterNode(command, string_array[0] , string_array[1], string_array[3].toInt(), string_array[4]));
         }
-        return std::unique_ptr<Node> (new ErrorNode(command, "unknown command"));
+        return std::shared_ptr<Node> (new ErrorNode(command, "unknown command"));
     default:
-        return std::unique_ptr<Node> (new ErrorNode(command, "unknown command"));   
+        return std::shared_ptr<Node> (new ErrorNode(command, "unknown command"));   
         Serial.println("Unknown command: " + command);
         break;
     }
-    return std::unique_ptr<Node> (new ErrorNode(command, "unknown command"));
+    return std::shared_ptr<Node> (new ErrorNode(command, "unknown command"));
 }
 
 void Node::execute(Robot & robot){

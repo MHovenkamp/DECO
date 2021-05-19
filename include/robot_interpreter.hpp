@@ -1,9 +1,10 @@
 # ifndef ROBOT_INTERPRETER_HPP
 # define ROBOT_INTERPRETER_HPP
 
+#include <programCode.cpp>
 #include <robot.hpp>
 #include <robot_interpreter_enums.hpp>
-#include <single_linked_list.hpp>
+#include <double_linked_list.hpp>
 
 /**
  * @brief enum class containing the interpreter nodes.
@@ -12,7 +13,8 @@
 enum class INTERPRETER_MODES{
     IDLE,
     REPL,
-    FILE
+    FILE,
+    PRECOMPILED_FILE
 };
 
 /**
@@ -254,9 +256,9 @@ private:
      * @brief parse a command and return correct node
      * 
      * @param command : String
-     * @return std::unique_ptr<Node> 
+     * @return std::shared_ptr<Node> 
      */
-    std::unique_ptr<Node> parseCommand(String command);
+    std::shared_ptr<Node> parseCommand(String command);
 
     /**
      * @brief REPL functionality
@@ -268,7 +270,7 @@ private:
      * @brief FILE functionality
      * 
      */
-    void file();
+    void file(String file_text);
 public:
     /**
      * @brief Construct a new Interpreter object
@@ -283,6 +285,8 @@ public:
      * 
      */
     void run();
+
+    String readFileFromSerial();
 
 };
 

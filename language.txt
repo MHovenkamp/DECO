@@ -83,7 +83,7 @@ SETUP:
     
 LOOP:
     move_head 45
-    WAIT 10 SECOND
+    WAIT 5 SECOND
     move_head 135
-    WAIT 15 SECOND
+    WAIT 5 SECOND
 EOF:
