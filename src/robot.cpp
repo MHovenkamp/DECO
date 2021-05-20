@@ -4,12 +4,13 @@ extern ROBOT_STATES global_state;
 
 void Robot::setup(){
     Serial.println("start setup robot");
-    head_servo.setup();
-    neck_servo.setup();
-    rtos::ThisThread::sleep_for(MS(1000));
     internal_sensors.setup();
     face_screen.setup();
     lidar.setup();
+    rtos::ThisThread::sleep_for(MS(1000));
+    head_servo.setup();
+    neck_servo.setup();
+    rtos::ThisThread::sleep_for(MS(1000));
     Songs songs;
     playSound<songs.start_up.size()>(songs.start_up);
     start_time_timer = millis();
@@ -22,22 +23,22 @@ void Robot::run(){
         setState(ROBOT_STATES::OFF);
     }
     if( current_state != ROBOT_STATES::OFF){
-      current_time_difference = (millis() - start_time_timer)/SECOND;
-      int walk_time_seconds = getWalkTime()/SECOND;
-      int water_time_seconds = getWaterTime()/SECOND;
-      int break_time_seconds = getBreakTime()/SECOND;
-      int weather_time_seconds = getWeatherStationTime()/SECOND;
-      if( current_time_difference != 0){
-        if(current_time_difference % walk_time_seconds == 0){
-            setState(ROBOT_STATES::REMINDER_WALK);
-        } else if(current_time_difference % water_time_seconds == 0){
-            setState(ROBOT_STATES::REMINDER_WATER);
-        } else if(current_time_difference % break_time_seconds == 0){
-            setState(ROBOT_STATES::REMINDER_BREAK);
-        } else if(current_time_difference % weather_time_seconds == 0){
-            setState(ROBOT_STATES::WEATHER_STATION);
-        } 
-      }
+        current_time_difference = (millis() - start_time_timer)/SECOND;
+        int walk_time_seconds = getWalkTime()/SECOND;
+        int water_time_seconds = getWaterTime()/SECOND;
+        int break_time_seconds = getBreakTime()/SECOND;
+        int weather_time_seconds = getWeatherStationTime()/SECOND;
+        if( current_time_difference != 0){
+            if(current_time_difference % walk_time_seconds < 3){
+                setState(ROBOT_STATES::REMINDER_WALK);
+            } else if(current_time_difference % water_time_seconds < 3){
+                setState(ROBOT_STATES::REMINDER_WATER);
+            } else if(current_time_difference % break_time_seconds < 3){
+                setState(ROBOT_STATES::REMINDER_BREAK);
+            } else if(current_time_difference % weather_time_seconds < 3 ){
+                setState(ROBOT_STATES::WEATHER_STATION);
+            } 
+        }
     } else {
       start_time_timer = millis();
     }
@@ -92,7 +93,7 @@ void Robot::run(){
         default:
             break;
     }
-    rtos::ThisThread::sleep_for(MS(500));
+    rtos::ThisThread::sleep_for(MS(100));
     prev_state = current_state;
 };
 
@@ -302,6 +303,7 @@ void Robot::showWeatherStation(){
     int str_len;
     long unsigned int start_time = millis();
     while( (millis() - start_time)/SECOND <= weather_station_duration/SECOND ){
+        internal_sensors.updateSensors();
         if(current_state!=ROBOT_STATES::WEATHER_STATION){
             break;
         }

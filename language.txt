@@ -79,11 +79,14 @@ test LOOP
 
 SETUP:
     shut_down_after = 10 MINUTE
+    weatherstation PERIOD = 10 SECOND
     STATE = IDLE
     
 LOOP:
     move_head 45
+    move_neck 45
     WAIT 5 SECOND
     move_head 135
+    move_neck 135
     WAIT 5 SECOND
 EOF:

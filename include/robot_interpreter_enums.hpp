@@ -46,6 +46,7 @@ struct PARSE_WORDS{
     String notification = "notification";
     String SETUP = "SETUP:";
     String LOOP = "LOOP:";
+    String EOF_ = "EOF:";
 };
 
 /**

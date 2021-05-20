@@ -20,15 +20,27 @@ void Interpreter::run(){
                 choice.trim();
                 Serial.println("chosen option: " + choice);
                 if( choice == "2"){ 
+                    while(Serial.available()>0){
+                        char temp = Serial.read();
+                        temp+=1; //against unused var warning
+                    }
                     mode = INTERPRETER_MODES::FILE; 
                     choice = "";
                     break; 
                 }
                 else if( choice == "1"){
+                    while(Serial.available()>0){
+                        char temp = Serial.read();
+                        temp+=1; //against unused var warning
+                    }
                     mode = INTERPRETER_MODES::REPL; 
                     choice = "";
                     break; 
                 } else if(choice == "3"){
+                    while(Serial.available()>0){
+                        char temp = Serial.read();
+                        temp+=1; //against unused var warning
+                    }
                     mode = INTERPRETER_MODES::PRECOMPILED_FILE;
                     choice = "";
                     break;
@@ -41,9 +53,9 @@ void Interpreter::run(){
                     choice = "";
                 }
             }
-        }
-    }else{
+        } else{
         mode = INTERPRETER_MODES::PRECOMPILED_FILE;
+        }
     }
     if(mode == INTERPRETER_MODES::REPL){
         repl();
@@ -65,14 +77,12 @@ String Interpreter::readFileFromSerial(){
     Serial.println("Enter file text.");
     while(Serial.available()<=0){;}
     while(file_text.indexOf("EOF:") == -1 && Serial.available() != 0){
-        Serial.println("items in buffer: " + String(Serial.available()));
         temp_char = Serial.read();
         if( allowed_symbols.indexOf(temp_char) != -1 || 
             isAlphaNumeric(temp_char) ||
             temp_char == ' ' ||
             temp_char == '\n'){
             file_text += temp_char;
-            Serial.println(temp_char);
         }
     }
     return file_text;
@@ -116,24 +126,12 @@ void Interpreter::file(String file_text){
     setup.trim();
     loop.trim();
 
-    Serial.println("________FILE:_________");
-    Serial.println(file_text);
-    Serial.println("________SETUP:________");
-    Serial.println(setup);
-    Serial.println("________LOOP:_________");
-    Serial.println(loop);
-    Serial.println("______________________");
-
     if(setup.length() > 0){
         for(unsigned int i = 0; i < setup.length(); i++ ){
             line += setup[i];
             if(setup[i] == '\n' || i == setup.length()-1){
                 line.trim();
-                Serial.println("================================");
-                Serial.println(line);
-                Serial.println("================================");
                 std::shared_ptr<Node> node_ptr = parseCommand(line);
-                node_ptr->print(); 
                 node_ptr->execute(robot);
                 node_ptr.reset();
                 line = "";
@@ -152,19 +150,22 @@ void Interpreter::file(String file_text){
             }
         }
     }
+
     if(file_loop_list.getLength() > 0){
         file_loop_list.setToStart();
         std::shared_ptr<Node> temp = file_loop_list.getCurrentNode();
         temp = file_loop_list.getCurrentNode();
-        temp->print();
         temp->execute(robot);
         temp.reset();
+        while(Serial.available()>0){
+            char temp = Serial.read();
+            temp+=1; //against unused var warning
+        }
         while(Serial.available() == 0){
             if(!file_loop_list.gotToNextNode()){
                 file_loop_list.setToStart();
             }
             temp = file_loop_list.getCurrentNode();
-            temp->print();
             temp->execute(robot);
             temp.reset();
         }
@@ -174,26 +175,31 @@ void Interpreter::file(String file_text){
 //TODO repl no longer functional, probably null character in serial read. also head servo prob broken, test tomorrow.
 void Interpreter::repl(){
     String command = "";
-    char character_temp;
+    char character_temp = ' ';
     while(command != "4"){
         Serial.println("Enter command. Or 4 to quit");
-        while(Serial.available()<=0){;}
+        while(Serial.available()<=0){
+            rtos::ThisThread::sleep_for(MS(1000));
+        }
         while(character_temp != '\n' && Serial.available() != 0){
-            // command = Serial.readStringUntil('\n');
             character_temp = Serial.read();
             command += character_temp;
         }
+        command.trim();
         if(command == "4"){
+            while(Serial.available()>0){
+                char temp = Serial.read();
+                temp+=1; //against unused var warning
+            }
             Serial.println(command +" "+ String(command.length()));
             break;
         }
         Serial.println("given input: " + command);
         std::shared_ptr<Node> node_ptr = parseCommand(command);
-        node_ptr->print(); 
         node_ptr->execute(robot);
         node_ptr.reset();
         command = "";
-        rtos::ThisThread::sleep_for(MS(5000));
+        character_temp = ' ';
     }
 }
 
@@ -221,10 +227,14 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command){
     switch (amount_of_spaces+1)
     {
     case 1:
-        return std::shared_ptr<Node> (new CommandNode(command, string_array[0], "", false));
+        if(string_array[0] != parse_words.EOF_){
+            return std::shared_ptr<Node> (new CommandNode(command, string_array[0], "", false));
+        }
         break;
     case 2:
-        return std::shared_ptr<Node> (new CommandNode(command, string_array[0], string_array[1], true));
+        if(string_array[0] != parse_words.EOF_){
+            return std::shared_ptr<Node> (new CommandNode(command, string_array[0], string_array[1], true));
+        }
         break;
     case 3:
         if(string_array[1] == "="){
@@ -312,7 +322,6 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command){
                     break;
                 }
             }
-            
             return std::shared_ptr<Node> (new SetterNode(command, string_array[0] , string_array[1], string_array[3].toInt(), string_array[4]));
         }
         return std::shared_ptr<Node> (new ErrorNode(command, "unknown command"));
@@ -356,10 +365,10 @@ void SetterNode::execute(Robot & robot){
             Serial.println("Weather station activity set to : FALSE");
         } else if(setter_type == parse_words.DURATION){
             robot.setWeatherStationDuration(getTime());
-            Serial.println("Weather station duration set to: " + String(getTime()) + "milliseconds");
+            Serial.println("Weather station duration set to: " + String(getTime()/SECOND) + "seconds");
         } else if(setter_type == parse_words.PERIOD){
             robot.setWeatherStationTime(getTime());
-            Serial.println("Weather station loop time set to: " + String(getTime()) + "milliseconds");
+            Serial.println("Weather station loop time set to: " + String(getTime()/SECOND) + "seconds");
         }
     } else if(to_set == parse_words.walk_reminder){
         if(setter_type == parse_words.ACTIVE){
@@ -370,10 +379,10 @@ void SetterNode::execute(Robot & robot){
             Serial.println("Walk reminder activity set to : FALSE");
         } else if(setter_type == parse_words.DURATION){
             robot.setWalkTimeDuration(getTime());
-            Serial.println("Walk reminder duration set to: " + String(getTime()) + "milliseconds");
+            Serial.println("Walk reminder duration set to: " + String(getTime()/SECOND) + "seconds");
         } else if(setter_type == parse_words.PERIOD){
             robot.setWalkTime(getTime());
-            Serial.println("Walk reminder loop time set to: " + String(getTime()) + "milliseconds");
+            Serial.println("Walk reminder loop time set to: " + String(getTime()/SECOND) + "seconds");
         }
     } else if(to_set == parse_words.water_reminder){
         if(setter_type == parse_words.ACTIVE){
@@ -384,10 +393,10 @@ void SetterNode::execute(Robot & robot){
             Serial.println("Water reminder activity set to : FALSE");
         } else if(setter_type == parse_words.DURATION){
             robot.setWaterTimeDuration(getTime());
-            Serial.println("Water reminder duration set to: " + String(getTime()) + "milliseconds");
+            Serial.println("Water reminder duration set to: " + String(getTime()/SECOND) + "seconds");
         } else if(setter_type == parse_words.PERIOD){
             robot.setWaterTime(getTime());
-            Serial.println("Water reminder loop time set to: " + String(getTime()) + "milliseconds");
+            Serial.println("Water reminder loop time set to: " + String(getTime()/SECOND) + "seconds");
         }
     } else if(to_set == parse_words.break_reminder){
         if(setter_type == parse_words.ACTIVE){
@@ -398,18 +407,18 @@ void SetterNode::execute(Robot & robot){
             Serial.println("Break reminder activity set to : FALSE");
         } else if(setter_type == parse_words.DURATION){
             robot.setBreakTimeDuration(getTime());
-            Serial.println("Break reminder duration set to: " + String(getTime()) + "milliseconds");
+            Serial.println("Break reminder duration set to: " + String(getTime()/SECOND) + "seconds");
         } else if(setter_type == parse_words.PERIOD){
             robot.setBreakTime(getTime());
-            Serial.println("Break reminder loop time set to: " + String(getTime()) + "milliseconds");
+            Serial.println("Break reminder loop time set to: " + String(getTime()/SECOND) + "seconds");
         }
     } else if(to_set == parse_words.shut_down_after){
         robot.setShutdownAfter(getTime());
-        Serial.println("shut down timer set to: " + String(getTime()) + "milliseconds");
+        Serial.println("shut down timer set to: " + String(getTime()/SECOND) + "seconds");
     } else if(to_set == parse_words.interactive_mode){
         if(setter_type == parse_words.DURATION){
             robot.setInteractiveModeDuration(getTime());
-            Serial.println("Interactive mode duration time set to: " + String(getTime()) + "milliseconds");
+            Serial.println("Interactive mode duration time set to: " + String(getTime()/SECOND) + "seconds");
         }
     } else {
         Serial.println("Unknown setter: " + original_string);
@@ -441,7 +450,6 @@ void SetStateNode::execute(Robot & robot){
 }
 
 void CommandNode::execute(Robot & robot){
-    Serial.println(command);
     char letter;
     bool is_digit = true;
     for(unsigned int i =0 ; i < param.length()-1; i++){
@@ -456,7 +464,6 @@ void CommandNode::execute(Robot & robot){
     } else if(command == parse_words.interactive_mode){
         while(robot.interactiveMode()){};
     } else if(command == parse_words.break_reminder){
-        Serial.println("break_reminder");
         robot.setState(ROBOT_STATES::REMINDER_BREAK);
     } else if(command == parse_words.walk_reminder){
         robot.setState(ROBOT_STATES::REMINDER_WALK);

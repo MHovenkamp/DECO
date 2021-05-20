@@ -29,7 +29,7 @@ void i2cTask(){
       screen.flashOled();
       lidar.lidarTask();
     }
-    rtos::ThisThread::sleep_for(MS(100));
+    rtos::ThisThread::sleep_for(MS(150));
   }
 }
 
@@ -88,11 +88,10 @@ void robotControlTask(){
  * @brief setup function containing the strat of the threads. 
  * 
  */
-void setup() {
+void setup(){
   Serial.begin(9600);
   delay(2000);
   robot_test.setup();
-  delay(2000);
 
   osStatus error;
   error = pir_task.start(pirTask);

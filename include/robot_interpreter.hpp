@@ -78,6 +78,7 @@ public:
     Node(original_string, type),
     to_set(to_set),
     setter_type(setter_type),
+    time_period(time_period),
     time_measurements(time_measurement){}
 
     /**
@@ -286,6 +287,11 @@ public:
      */
     void run();
 
+    /**
+     * @brief Read the given file information from serial monitor
+     * 
+     * @return String 
+     */
     String readFileFromSerial();
 
 };

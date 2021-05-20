@@ -4,7 +4,7 @@
 struct code{
     String program_code = R"(
     SETUP:
-        shut_down_after = 10 MINUTE
+        break_reminder PERIOD = 10 SECOND
         STATE = IDLE
         
     LOOP:
