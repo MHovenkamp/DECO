@@ -23,7 +23,6 @@ ROBOT_STATES global_state;
  */
 void i2cTask(){
   Serial.println("i2c task started");
-  screen.setAnimation(ROBOT_FRAMES::FACE_IDLE);
   while(true){
     if( global_state != ROBOT_STATES::OFF ){
       screen.flashOled();

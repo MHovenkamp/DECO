@@ -24,7 +24,7 @@ LOOP:
     WAIT 10 SECOND
     move_head 135
 
-# //neccesary for end of file read
+EOF: //neccesary for end of file read
 
 
 Available commands:

@@ -18,6 +18,7 @@ void Robot::setup(){
 };
 
 void Robot::run(){
+    face_screen.clearScreen();
     prev_state = current_state;
     if( pir_sensor.getLastMovement() >= 1200){
         setState(ROBOT_STATES::OFF);
@@ -243,7 +244,7 @@ void Robot::reminderBreak(){
     rtos::ThisThread::sleep_for(MS(2000));
     returnToStartPos();
     long unsigned int start_time = millis();
-    while( (millis() - start_time)/SECOND <= break_time_duration/SECOND){
+    while( (millis() - start_time)/SECOND <= break_time_duration/SECOND && current_state == ROBOT_STATES::REMINDER_BREAK){
         if(current_state!=ROBOT_STATES::REMINDER_BREAK){
             break;
         }
@@ -251,7 +252,9 @@ void Robot::reminderBreak(){
         face_screen.setAnimation(ROBOT_FRAMES::BREAK_REMINDER);
         face_screen.showAnimation();
     }
-    setState(ROBOT_STATES::IDLE);
+    if( current_state == ROBOT_STATES::REMINDER_BREAK){
+        setState(ROBOT_STATES::IDLE);
+    }
 };
 
 void Robot::reminderWalk(){
@@ -264,7 +267,7 @@ void Robot::reminderWalk(){
     rtos::ThisThread::sleep_for(MS(2000));
     returnToStartPos();
     long unsigned int start_time = millis();
-    while( (millis() - start_time)/SECOND <= walk_time_duration/SECOND ){
+    while( (millis() - start_time)/SECOND <= walk_time_duration/SECOND && current_state == ROBOT_STATES::REMINDER_WALK){
         if(current_state!=ROBOT_STATES::REMINDER_WALK){
             break;
         }
@@ -272,7 +275,9 @@ void Robot::reminderWalk(){
         face_screen.setAnimation(ROBOT_FRAMES::WALK_REMINDER);
         face_screen.showAnimation();
     }
-    setState(ROBOT_STATES::IDLE);
+    if( current_state == ROBOT_STATES::REMINDER_WALK){
+        setState(ROBOT_STATES::IDLE);
+    }
 };
 
 void Robot::reminderWater(){
@@ -285,7 +290,7 @@ void Robot::reminderWater(){
     rtos::ThisThread::sleep_for(MS(2000));
     returnToStartPos();
     long unsigned int start_time = millis();
-    while( (millis() - start_time)/SECOND <= water_time_duration/SECOND ){
+    while( (millis() - start_time)/SECOND <= water_time_duration/SECOND && current_state == ROBOT_STATES::REMINDER_WATER ){
         if(current_state!=ROBOT_STATES::REMINDER_WATER){
             break;
         }
@@ -293,7 +298,9 @@ void Robot::reminderWater(){
         face_screen.setAnimation(ROBOT_FRAMES::WATER_REMINDER);
         face_screen.showAnimation();
     }
-    setState(ROBOT_STATES::IDLE);
+        if( current_state == ROBOT_STATES::REMINDER_WATER){
+        setState(ROBOT_STATES::IDLE);
+    }
 };
 
 void Robot::showWeatherStation(){
@@ -302,7 +309,7 @@ void Robot::showWeatherStation(){
     String weather_message_temp, weather_message_hum, weather_message_baro, weather_message;
     int str_len;
     long unsigned int start_time = millis();
-    while( (millis() - start_time)/SECOND <= weather_station_duration/SECOND ){
+    while( (millis() - start_time)/SECOND <= weather_station_duration/SECOND && current_state == ROBOT_STATES::WEATHER_STATION ){
         internal_sensors.updateSensors();
         if(current_state!=ROBOT_STATES::WEATHER_STATION){
             break;
@@ -319,7 +326,9 @@ void Robot::showWeatherStation(){
         face_screen.setDisplayText<3>(message, line_lengths, 3);
         face_screen.flashTextDisplay();
     }
-    setState(ROBOT_STATES::IDLE);
+    if( current_state == ROBOT_STATES::WEATHER_STATION){
+        setState(ROBOT_STATES::IDLE);
+    }
 }
 
 bool Robot::interactiveMode(){
@@ -388,6 +397,11 @@ bool Robot::followClosestObject(){
                     tmp_y_coordinate = found_object_y+Y;
                     neck_servo.turnToDegree(tmp_x_coordinate);
                     head_servo.turnToDegree(tmp_y_coordinate);
+                    if(abs(prev_x - X) > 5 || abs(prev_y - Y) > 5){
+                        rtos::ThisThread::sleep_for(MS(80));
+                    } else{
+                        rtos::ThisThread::sleep_for(MS(70));
+                    }
                     prev_x = X;
                     prev_y = Y;
                     if(X <= 90 && Y <=90){
@@ -399,6 +413,7 @@ bool Robot::followClosestObject(){
                     } else if(X >= 90 && Y >90){
                         face_screen.setAnimation(ROBOT_FRAMES::SEARCHING_RIGHT_UP);
                     }
+                    rtos::ThisThread::sleep_for(MS(10));
                     sensor_data = lidar.getDistanceMM();
                     if( sensor_data != 8191 && sensor_data != -1 && sensor_data <= max_range){
                         found_object_x = neck_servo.getCurrentDegree();
@@ -406,7 +421,6 @@ bool Robot::followClosestObject(){
                         done = true;;
                     }
                 }
-                rtos::ThisThread::sleep_for(MS(80));
             } else{
                 break;
             }

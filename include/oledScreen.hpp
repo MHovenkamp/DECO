@@ -116,7 +116,7 @@ public:
         } else if( animation_choice ==  ROBOT_FRAMES::FACE_BLINK){
             showAnimationSubCall<5>(animation_presets.face_blink);
         } else if( animation_choice ==  ROBOT_FRAMES::WALK_REMINDER){
-            showAnimationSubCall<5>(animation_presets.face_blink);
+            showAnimationSubCall<3>(animation_presets.walk);
         } else if(animation_choice ==  ROBOT_FRAMES::WATER_REMINDER){
             showAnimationSubCall<3>(animation_presets.water);
         } else if(animation_choice ==  ROBOT_FRAMES::BREAK_REMINDER){
