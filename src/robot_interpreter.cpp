@@ -227,9 +227,7 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command){
     switch (amount_of_spaces+1)
     {
     case 1:
-        if(string_array[0] != parse_words.EOF_){
-            return std::shared_ptr<Node> (new CommandNode(command, string_array[0], "", false));
-        }
+        return std::shared_ptr<Node> (new CommandNode(command, string_array[0], "", false));
         break;
     case 2:
         if(string_array[0] != parse_words.EOF_){
@@ -528,6 +526,7 @@ void CommandNode::execute(Robot & robot){
             }
         }
     } else{
+        if(command == parse_words.EOF_){return;}
         ErrorNode error("Unknown command: ", original_string);
         error.execute(robot);
     }

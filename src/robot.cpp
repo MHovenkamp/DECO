@@ -14,11 +14,11 @@ void Robot::setup(){
     Songs songs;
     playSound<songs.start_up.size()>(songs.start_up);
     start_time_timer = millis();
+    setState(ROBOT_STATES::IDLE);
     Serial.println("finished setup robot");
 };
 
 void Robot::run(){
-    face_screen.clearScreen();
     prev_state = current_state;
     if( pir_sensor.getLastMovement() >= 1200){
         setState(ROBOT_STATES::OFF);
@@ -43,24 +43,17 @@ void Robot::run(){
     } else {
       start_time_timer = millis();
     }
+    //TODO random swithc back to IDLE state, logic fault
     internal_sensors.updateSensors();
     switch(current_state){
         case ROBOT_STATES::INTERACTIVE_MODE:
-            if(tmp_x_coordinate <= 90 && tmp_y_coordinate >= 90){ // upper left
-                face_screen.setAnimation(ROBOT_FRAMES::SEARCHING_LEFT_UP);
-            } else if(tmp_x_coordinate >= 90 && tmp_y_coordinate >= 90){ // upper right
-                face_screen.setAnimation(ROBOT_FRAMES::SEARCHING_RIGHT_UP);
-            } else if(tmp_x_coordinate <= 90 && tmp_y_coordinate <= 90){ // lower left
-                face_screen.setAnimation(ROBOT_FRAMES::SEARCHING_LEFT_DOWN);
-            } else if(tmp_x_coordinate >= 90 && tmp_y_coordinate <= 90){ // lower right
-                face_screen.setAnimation(ROBOT_FRAMES::SEARCHING_RIGHT_DOWN);
-            }
-            face_screen.showAnimation();
             break;
         case ROBOT_STATES::IDLE:
+            Serial.println("IDLE");
             idleState();
             break;
         case ROBOT_STATES::REMINDER_BREAK:
+            Serial.println("REMINDER_BREAK");
             if(break_time_active){
                 reminderBreak();
             } else {
@@ -68,6 +61,7 @@ void Robot::run(){
             }
             break;
         case ROBOT_STATES::REMINDER_WATER:
+            Serial.println("REMINDER_WATERREMINDER_WATER");
             if(water_time_active){
                 reminderWater();
             } else {
@@ -75,6 +69,7 @@ void Robot::run(){
             }
             break;
         case ROBOT_STATES::REMINDER_WALK:
+            Serial.println("REMINDER_WALK");
             if(walk_time_active){
                 reminderWalk();
             } else {
@@ -82,6 +77,7 @@ void Robot::run(){
             }
             break;
         case ROBOT_STATES::WEATHER_STATION:
+            Serial.println("WEATHER_STATION");
             if(weather_time_active){
                 showWeatherStation();
             } else {
@@ -89,6 +85,7 @@ void Robot::run(){
             }
             break;
         case ROBOT_STATES::OFF:
+            Serial.println("OFF");
             shutDown();
             break;
         default:
@@ -334,7 +331,7 @@ void Robot::showWeatherStation(){
 bool Robot::interactiveMode(){
     Songs songs;
     int start_time = millis();
-    Serial.println("starttime set: " + start_time);
+    Serial.println("starttime set: " + String(start_time));
     if( current_state == ROBOT_STATES::REMINDER_BREAK ||
         current_state == ROBOT_STATES::REMINDER_WALK  ||
         current_state == ROBOT_STATES::REMINDER_WATER ||
@@ -353,23 +350,16 @@ bool Robot::interactiveMode(){
             if((millis() - start_time)/SECOND >= interactive_mode_duration/SECOND ){
                 return false;
             }
-            face_screen.setAnimation(ROBOT_FRAMES::FACE_IDLE);
-            face_screen.showAnimation();
             succesfull_object_detect = followClosestObject();
             neck_servo.turnToDegree(found_object_x);
             head_servo.turnToDegree(found_object_y);
-            face_screen.setAnimation(ROBOT_FRAMES::FACE_BLINK);
-            face_screen.showAnimation();
-            rtos::ThisThread::sleep_for(MS(500));
+            rtos::ThisThread::sleep_for(MS(100));
         }
-        if(succesfull_object_detect){
-            setState(ROBOT_STATES::INTERACTIVE_MODE);
-        } else{
-            setState(ROBOT_STATES::IDLE);
-            returnToStartPos();
-        }
+        returnToStartPos();
+        Serial.println("interactive loop finished");
         return succesfull_object_detect;
     }
+    Serial.println("interactive loop finished");
     return false;
 }
 
@@ -377,8 +367,8 @@ bool Robot::followClosestObject(){
     int max_range = 300;
     bool found_objects;
     int sensor_data = lidar.getDistanceMM();
-    Serial.println("follow closest object " + String(sensor_data));
     if( sensor_data != 8191 && sensor_data != -1 && sensor_data <= max_range){
+        Serial.println("follow closest object " + String(sensor_data));
         found_objects = true;
     } else {
         found_objects = false;
@@ -400,19 +390,21 @@ bool Robot::followClosestObject(){
                     if(abs(prev_x - X) > 5 || abs(prev_y - Y) > 5){
                         rtos::ThisThread::sleep_for(MS(80));
                     } else{
-                        rtos::ThisThread::sleep_for(MS(70));
+                        rtos::ThisThread::sleep_for(MS(50));
                     }
                     prev_x = X;
                     prev_y = Y;
-                    if(X <= 90 && Y <=90){
+                    // Serial.println("X: " + String(X) + " Y: " + String(Y));
+                    if(X <= 0 && Y <=0){
                         face_screen.setAnimation(ROBOT_FRAMES::SEARCHING_LEFT_DOWN);
-                    } else if(X <= 90 && Y >90 ){
+                    } else if(X <= 0 && Y >0 ){
                         face_screen.setAnimation(ROBOT_FRAMES::SEARCHING_LEFT_UP);
-                    } else if(X >= 90 && Y <=90){
+                    } else if(X >= 0 && Y <=0){
                         face_screen.setAnimation(ROBOT_FRAMES::SEARCHING_RIGHT_DOWN);
-                    } else if(X >= 90 && Y >90){
+                    } else if(X >= 0 && Y >0){
                         face_screen.setAnimation(ROBOT_FRAMES::SEARCHING_RIGHT_UP);
                     }
+                    face_screen.showAnimation();
                     rtos::ThisThread::sleep_for(MS(10));
                     sensor_data = lidar.getDistanceMM();
                     if( sensor_data != 8191 && sensor_data != -1 && sensor_data <= max_range){

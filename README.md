@@ -8,6 +8,9 @@ Welcome to the Github page for the social robot under 50 euros. This robot is th
 
 DECO is a desk companion for peoplt with a desk job. The robot reminds the user to stay healthy and productive without being pushy. The robot reminds people to take breaks and drink enoug water. It can also inform the user of their current environment such as temperature. These are al posibilities within th erobot but the goal is that this robot can easily be programmed by someone with limited knowledge of technology. THis is so the robot can be used by the previously mentioned minor from the HU.
 
+## Printing the robot
+Each part of the robot can be printed seperatly or if you have a bigger printer, be placed in one STL. Before you print you do have to add supports. This can be done easily with ultimaker Cura.
+
 ## Necessary components to build this robot.
 
 1. 3D printer
