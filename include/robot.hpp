@@ -58,6 +58,7 @@ private:
 
     ROBOT_STATES current_state;
     ROBOT_STATES prev_state;
+    ROBOT_STATES temp_state;
 
     unsigned int distance_found_object;
     unsigned int found_object_x;
@@ -259,6 +260,12 @@ public:
      * @return ROBOT_STATES
      */
     ROBOT_STATES getState();
+    /**
+     * @brief print a given state to the Serial port
+     * 
+     * @param state_to_print 
+     */
+    void printState(ROBOT_STATES state_to_print);
 
     /**
      * @brief move the head servo, head up and down

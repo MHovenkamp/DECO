@@ -5,6 +5,7 @@ rtos::Thread pir_task;
 rtos::Thread robot_task;
 rtos::Thread robot_control_task;
 rtos::Thread i2c_task;
+rtos::Thread animation_task;
 
 Servo neck_servo(3);
 Servo head_servo(4);
@@ -29,6 +30,12 @@ void i2cTask(){
       lidar.lidarTask();
     }
     rtos::ThisThread::sleep_for(MS(150));
+  }
+}
+
+void animationTask(){
+  while(true){
+    screen.showAnimation();
   }
 }
 
@@ -103,6 +110,8 @@ void setup(){
   error = robot_task.start(robotTask);
   if(error){Serial.println(error);}
   error = i2c_task.start(i2cTask);
+  if(error){Serial.println(error);}
+  error = animation_task.start(animationTask);
   if(error){Serial.println(error);}
 };
 

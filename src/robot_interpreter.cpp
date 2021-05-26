@@ -460,7 +460,7 @@ void CommandNode::execute(Robot & robot){
     if(command == parse_words.shutdown){
         robot.shutDown();
     } else if(command == parse_words.interactive_mode){
-        while(robot.interactiveMode()){};
+        robot.setState(ROBOT_STATES::INTERACTIVE_MODE);
     } else if(command == parse_words.break_reminder){
         robot.setState(ROBOT_STATES::REMINDER_BREAK);
     } else if(command == parse_words.walk_reminder){

@@ -17,6 +17,8 @@ void MicroLidar::lidarTask(){
 int MicroLidar::getDistanceMM(){
     if( distance.RangeStatus != 4){
         return distance.RangeMilliMeter;
+    } else if( distance.RangeMilliMeter != 8191 ){
+        return -1;
     } else{
         return -1;
     }
