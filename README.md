@@ -31,6 +31,8 @@ Each part of the robot can be printed seperatly or if you have a bigger printer,
     - [Arduino store](https://store.arduino.cc/usb-cable-type-a-male-to-micro-type-b-male)
 8. Soldering iron and necessary accesoires.
 
+total cost from mamazon +- 63,18, You can probably get cheaper components from your local stores.  
+
 ## Documentation
 For documentation run 
 ```

@@ -34,6 +34,7 @@ void i2cTask(){
 }
 
 void animationTask(){
+  Serial.println("animation task started");
   while(true){
     screen.showAnimation();
   }

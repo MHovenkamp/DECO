@@ -4,16 +4,24 @@ extern ROBOT_STATES global_state;
 
 void Robot::setup(){
     Serial.println("---start setup robot---");
+    // setup al peripherals
     internal_sensors.setup();
     face_screen.setup();
     lidar.setup();
     rtos::ThisThread::sleep_for(MS(1000)); // give time for i2C to get ready
     head_servo.setup();
     neck_servo.setup();
-    rtos::ThisThread::sleep_for(MS(1000)); // give time for servo's to move to strat position
+    returnToStartPos();
+    rtos::ThisThread::sleep_for(MS(2000)); // give time for servo's to move to strat position
+    // play startup sound
     Songs songs;
     playSound<songs.start_up.size()>(songs.start_up);
-    start_time_timer = millis();
+    // seperate timers for each timed event
+    start_time_timer_water = millis();
+    start_time_timer_walk = millis();
+    start_time_timer_break = millis();
+    start_time_timer_weather = millis();
+    // set states to IDLE to start robot
     current_state = ROBOT_STATES::IDLE;
     prev_state = ROBOT_STATES::IDLE;
     temp_state = ROBOT_STATES::IDLE;
@@ -25,36 +33,33 @@ void Robot::run(){ // TODO robot keeps starting up in walkreminder mode
         setState(ROBOT_STATES::OFF);
     }
     if( current_state != ROBOT_STATES::OFF){ // Check timers for timed actions
-        current_time_difference = (millis() - start_time_timer)/SECOND;
-        int walk_time_seconds = getWalkTime()/SECOND;
-        int water_time_seconds = getWaterTime()/SECOND;
-        int break_time_seconds = getBreakTime()/SECOND;
-        int weather_time_seconds = getWeatherStationTime()/SECOND;
-        if( current_time_difference != 0){
-            if(current_time_difference % walk_time_seconds < 3){
-                setState(ROBOT_STATES::REMINDER_WALK);
-            } else if(current_time_difference % water_time_seconds < 3){
-                setState(ROBOT_STATES::REMINDER_WATER);
-            } else if(current_time_difference % break_time_seconds < 3){
-                setState(ROBOT_STATES::REMINDER_BREAK);
-            } else if(current_time_difference % weather_time_seconds < 3 ){
-                setState(ROBOT_STATES::WEATHER_STATION);
-            } 
+        if( millis() - start_time_timer_water >=  getWaterTime()){
+            setState(ROBOT_STATES::REMINDER_WATER);
+            start_time_timer_water = millis();
+        } else if( millis() - start_time_timer_walk >=  getWalkTime()){
+            setState(ROBOT_STATES::REMINDER_WALK);
+            start_time_timer_walk = millis();
+        } else if( millis() - start_time_timer_break >=  getBreakTime()){
+            setState(ROBOT_STATES::REMINDER_BREAK);
+            start_time_timer_break = millis();
+        } else if( millis() - start_time_timer_weather >=  getWeatherStationTime()){
+            setState(ROBOT_STATES::WEATHER_STATION);
+            start_time_timer_weather = millis();
         }
     } else {
-      start_time_timer = millis();
+        start_time_timer_water = millis();
+        start_time_timer_walk = millis();
+        start_time_timer_break = millis();
+        start_time_timer_weather = millis();
     }
     switch(current_state){
         case ROBOT_STATES::INTERACTIVE_MODE:
-            Serial.println("INTERACTIVE_MODE");
             interactiveMode();
             break;
         case ROBOT_STATES::IDLE:
-            Serial.println("IDLE");
             idleState();
             break;
         case ROBOT_STATES::REMINDER_BREAK:
-            Serial.println("REMINDER_BREAK");
             if(break_time_active){
                 reminderBreak();
             } else {
@@ -62,7 +67,6 @@ void Robot::run(){ // TODO robot keeps starting up in walkreminder mode
             }
             break;
         case ROBOT_STATES::REMINDER_WATER:
-            Serial.println("REMINDER_WATER");
             if(water_time_active){
                 reminderWater();
             } else {
@@ -70,7 +74,6 @@ void Robot::run(){ // TODO robot keeps starting up in walkreminder mode
             }
             break;
         case ROBOT_STATES::REMINDER_WALK:
-            Serial.println("REMINDER_WALK");
             if(walk_time_active){
                 reminderWalk();
             } else { 
@@ -78,7 +81,6 @@ void Robot::run(){ // TODO robot keeps starting up in walkreminder mode
             }
             break;
         case ROBOT_STATES::WEATHER_STATION:
-            Serial.println("WEATHER_STATION");
             if(weather_time_active){
                 showWeatherStation();
             } else {
@@ -86,7 +88,6 @@ void Robot::run(){ // TODO robot keeps starting up in walkreminder mode
             }
             break;
         case ROBOT_STATES::OFF:
-            Serial.println("OFF");
             shutDown();
             break;
         default:
@@ -221,7 +222,6 @@ void Robot::shutDown(){
 };
 
 void Robot::idleState(){
-    unsigned int amount_of_idle_face_rotations = 5;
     // play the idle animation
     face_screen.setAnimation(ROBOT_FRAMES::FACE_IDLE);
     rtos::ThisThread::sleep_for(MS(2000));
@@ -249,13 +249,13 @@ void Robot::rngMovement(){
     } else{
         head_servo_direction = head_servo.getCurrentDegree() + head_servo_direction;
     }
-    neck_servo.turnToDegree(neck_servo_direction);
-    head_servo.turnToDegree(head_servo_direction);
+    moveNeck(neck_servo_direction);
+    moveHead(head_servo_direction);
 };
 
 void Robot::returnToStartPos(){
-    neck_servo.turnToDegree(90);
-    head_servo.turnToDegree(90);
+    moveHead(90);
+    moveNeck(90);
 }
 
 void Robot::reminderBreak(){
@@ -266,7 +266,7 @@ void Robot::reminderBreak(){
     rtos::ThisThread::sleep_for(MS(200));
     long unsigned int start_time = millis();
     face_screen.setAnimation(ROBOT_FRAMES::BREAK_REMINDER);
-    while( (millis() - start_time)/SECOND <= break_time_duration/SECOND && current_state == ROBOT_STATES::REMINDER_BREAK){
+    while( (millis() - start_time) <= break_time_duration && current_state == ROBOT_STATES::REMINDER_BREAK){
         if(current_state!=ROBOT_STATES::REMINDER_BREAK){
             break;
         }
@@ -285,7 +285,7 @@ void Robot::reminderWalk(){
     rtos::ThisThread::sleep_for(MS(200));
     long unsigned int start_time = millis();
     face_screen.setAnimation(ROBOT_FRAMES::WALK_REMINDER);
-    while( (millis() - start_time)/SECOND <= walk_time_duration/SECOND && current_state == ROBOT_STATES::REMINDER_WALK){
+    while( (millis() - start_time) <= walk_time_duration && current_state == ROBOT_STATES::REMINDER_WALK){
         if(current_state!=ROBOT_STATES::REMINDER_WALK){
             break;
         }
@@ -304,7 +304,7 @@ void Robot::reminderWater(){
     rtos::ThisThread::sleep_for(MS(200));
     long unsigned int start_time = millis();
     face_screen.setAnimation(ROBOT_FRAMES::WATER_REMINDER);
-    while( (millis() - start_time)/SECOND <= water_time_duration/SECOND && current_state == ROBOT_STATES::REMINDER_WATER ){
+    while( (millis() - start_time) <= water_time_duration && current_state == ROBOT_STATES::REMINDER_WATER ){
         if(current_state!=ROBOT_STATES::REMINDER_WATER){
             break;
         }
@@ -319,9 +319,8 @@ void Robot::showWeatherStation(){
     setState(ROBOT_STATES::WEATHER_STATION);
     Serial.println("showing weather station, duration of: " + String(weather_station_duration) + "MS");
     String weather_message_temp, weather_message_hum, weather_message_baro, weather_message;
-    int str_len;
     long unsigned int start_time = millis();
-    while( (millis() - start_time)/SECOND <= weather_station_duration/SECOND && current_state == ROBOT_STATES::WEATHER_STATION ){
+    while( (millis() - start_time) <= weather_station_duration && current_state == ROBOT_STATES::WEATHER_STATION ){
         internal_sensors.updateSensors();
         if(current_state!=ROBOT_STATES::WEATHER_STATION){
             break;
@@ -331,9 +330,8 @@ void Robot::showWeatherStation(){
         weather_message_baro = String(int(internal_sensors.getBarometric())) + " hPa\n";
 
         weather_message = weather_message_temp +weather_message_hum + weather_message_baro;
-        str_len = weather_message.length() + 1;
-        char message[str_len];
-        weather_message.toCharArray(message, str_len);
+        char message[255];
+        weather_message.toCharArray(message, 255);
         std::array<unsigned int, 3> line_lengths = {(weather_message_temp.length()), (weather_message_hum.length()), (weather_message_baro.length())};
         
         face_screen.setDisplayText<3>(message, line_lengths, 3);
@@ -348,14 +346,12 @@ void Robot::showWeatherStation(){
 bool Robot::interactiveMode(){
     Songs songs;
     int start_time = millis();
-    Serial.println("starttime set: " + String(start_time));
     if( current_state == ROBOT_STATES::REMINDER_BREAK ||
         current_state == ROBOT_STATES::REMINDER_WALK  ||
         current_state == ROBOT_STATES::REMINDER_WATER ||
         current_state == ROBOT_STATES::WEATHER_STATION){
             return false;
     } else {
-        setState(ROBOT_STATES::INTERACTIVE_MODE);
         //set current point as start point
         found_object_x = neck_servo.getCurrentDegree(); 
         found_object_y = head_servo.getCurrentDegree();
@@ -366,19 +362,16 @@ bool Robot::interactiveMode(){
         if(succesfull_object_detect){
             playSound<songs.notification.size()>(songs.notification);
         }
-        while(succesfull_object_detect){
-            Serial.println("Following object");
-            if((millis() - start_time)/SECOND >= interactive_mode_duration/SECOND ){
-                return false;
-            }
+        while(succesfull_object_detect && (millis() - start_time) <= interactive_mode_duration){
             // continue following object
             succesfull_object_detect = followClosestObject();
-            neck_servo.turnToDegree(found_object_x);
-            head_servo.turnToDegree(found_object_y);
+            moveHead(found_object_y);
+            moveNeck(found_object_x);
             rtos::ThisThread::sleep_for(MS(100));
         }
         returnToStartPos();
         rtos::ThisThread::sleep_for(MS(100));
+        setState(ROBOT_STATES::IDLE);
         Serial.println("interactive loop finished");
         return succesfull_object_detect;
     }
@@ -388,6 +381,7 @@ bool Robot::interactiveMode(){
 }
 
 bool Robot::followClosestObject(){
+    int min_range = 50;
     int max_range = 300; // max distance in millimeters
     bool found_objects;
     int sensor_data = lidar.getDistanceMM();
@@ -411,15 +405,9 @@ bool Robot::followClosestObject(){
                     //because loop starts from center neck and ead coordinates have to be calculated using the middle and the spiral results.
                     tmp_x_coordinate = found_object_x+X;
                     tmp_y_coordinate = found_object_y+Y;
-                    neck_servo.turnToDegree(tmp_x_coordinate);
-                    head_servo.turnToDegree(tmp_y_coordinate);
+                    moveNeck(tmp_x_coordinate);
+                    moveHead(tmp_y_coordinate);
 
-                    //The spiral takes very short steps in the beginning so we speed up the timing when small steps are taken.
-                    if(abs(prev_x - X) > 5 || abs(prev_y - Y) > 5){
-                        rtos::ThisThread::sleep_for(MS(50));
-                    } else{
-                        rtos::ThisThread::sleep_for(MS(30));
-                    }
                     // set searching for animations depending on looking directions
                     if((prev_x >= X)&&(prev_y >= Y)){
                         face_screen.setAnimation(ROBOT_FRAMES::SEARCHING_LEFT_DOWN);
@@ -430,9 +418,15 @@ bool Robot::followClosestObject(){
                     } else if((prev_x <= X) && (prev_y <= Y)){
                         face_screen.setAnimation(ROBOT_FRAMES::SEARCHING_RIGHT_UP);
                     }
-                    rtos::ThisThread::sleep_for(MS(100));
+
+                    //The spiral takes very short steps in the beginning so we speed up the timing when small steps are taken.
+                    if(abs(prev_x - X) > 5 || abs(prev_y - Y) > 5){
+                        rtos::ThisThread::sleep_for(MS(80));
+                    } else{
+                        rtos::ThisThread::sleep_for(MS(60));
+                    }
                     sensor_data = lidar.getDistanceMM();
-                    if( sensor_data > 0 && sensor_data <= max_range){
+                    if( sensor_data > 0 && sensor_data <= max_range && sensor_data >= min_range){
                         Serial.println("Found object at distance " + String(sensor_data) );
                         found_object_x = neck_servo.getCurrentDegree();
                         found_object_y = head_servo.getCurrentDegree();

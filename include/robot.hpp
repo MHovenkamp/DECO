@@ -38,7 +38,7 @@ private:
 
     unsigned int break_time = 2 * HOUR;
     unsigned int walk_time = 30 * MINUTE;
-    unsigned int water_time = 1 * HOUR;
+    unsigned int water_time = 50 * HOUR;
     unsigned int shutdown_after = 5 * MINUTE;
     unsigned int weather_station_time = 5 * MINUTE;
 
@@ -53,7 +53,10 @@ private:
     bool water_time_active = true;
     bool weather_time_active = true;
 
-    unsigned long start_time_timer;
+    unsigned long start_time_timer_water;
+    unsigned long start_time_timer_walk;
+    unsigned long start_time_timer_break;
+    unsigned long start_time_timer_weather;
     unsigned long current_time_difference;
 
     ROBOT_STATES current_state;

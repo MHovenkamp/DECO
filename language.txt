@@ -52,7 +52,7 @@ command length:
 @ playSound notification
 
 3. 
-@ eatherstation = ACTIVE
+@ weatherstation = ACTIVE
 @ walk_reminder = ACTIVE
 @ weatherstation = ACTIVE
 @ break_reminder = ACTIVE
@@ -66,6 +66,7 @@ command length:
 5. 
 @ interactive_mode DURATION = 5 MINUTE
 @ weatherstation PERIOD = 10 MINUTE
+walk_reminder PERIOD = 10 SECOND
 @ walk_reminder PERIOD = 10 MINUTE
 @ water_reminder PERIOD = 10 MINUTE
 @ break_reminder PERIOD = 10 MINUTE

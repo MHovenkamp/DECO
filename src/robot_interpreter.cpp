@@ -7,11 +7,13 @@ void Interpreter::run(){
     if(mode == INTERPRETER_MODES::IDLE){
         if(Serial){
             String choice = "";
+            Serial.println("------------------------------------------------------------");
             Serial.println("Enter mode to which to program robot with: ");
             Serial.println("1. REPL, Enter a single command and instantly see the result");
             Serial.println("2. FILE, upload a file with your written code");
             Serial.println("3. PREPROGRAMMED FILE, Load in the preprogrammed file");
             Serial.println("4. EXIT, exit current program");
+            Serial.println("------------------------------------------------------------");
             while(choice != "4"){
                 Serial.println("waiting for input");
                 while(choice == ""){
@@ -45,11 +47,13 @@ void Interpreter::run(){
                     choice = "";
                     break;
                 } else{
-                    Serial.println("Unknow option");
+                    Serial.println("------------------------------------------------------------");
                     Serial.println("Enter mode to which to program robot with: ");
                     Serial.println("1. REPL, Enter a single command and instantly see the result");
                     Serial.println("2. FILE, upload a file with your written code");
-                    Serial.println("3. EXIT, exit current program");
+                    Serial.println("3. PREPROGRAMMED FILE, Load in the preprogrammed file");
+                    Serial.println("4. EXIT, exit current program");
+                    Serial.println("------------------------------------------------------------");
                     choice = "";
                 }
             }
@@ -177,7 +181,7 @@ void Interpreter::repl(){
     String command = "";
     char character_temp = ' ';
     while(command != "4"){
-        Serial.println("Enter command. Or 4 to quit");
+        Serial.println("---Enter command. Or 4 to quit---");
         while(Serial.available()<=0){
             rtos::ThisThread::sleep_for(MS(1000));
         }
