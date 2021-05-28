@@ -35,14 +35,14 @@ command length:
 @ break_reminder
 @ walk_reminder
 @ water_reminder
-@ showWeatherStation
+@ show_weather_station
 @ getBreakTime
 @ getWalkTime
 @ getWaterTime
 @ getWeatherStationTime
 @ getState
-@ rngMovement
-@ returnToStartPos
+@ rng_movement
+@ return_to_start_pos
 
 2. 
 @ move_head 10
@@ -52,7 +52,7 @@ command length:
 @ playSound notification
 
 3. 
-@ weatherstation = ACTIVE
+@ weatherstation = NON_ACTIVE
 @ walk_reminder = ACTIVE
 @ weatherstation = ACTIVE
 @ break_reminder = ACTIVE

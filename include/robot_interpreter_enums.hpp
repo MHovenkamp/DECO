@@ -32,14 +32,14 @@ struct PARSE_WORDS{
     String shutdown = "shutdown";
     String move_head = "move_head";
     String move_neck = "move_neck";
-    String showWeatherStation = "showWeatherStation";
+    String showWeatherStation = "show_weather_station";
     String getBreakTime = "getBreakTime";
     String getWalkTime = "getWalkTime";
     String getWaterTime = "getWaterTime";
     String getWeatherStationTime = "getWeatherStationTime";
     String getState = "getState";
-    String rngMovement = "rngMovement";
-    String returnToStartPos = "returnToStartPos";
+    String rngMovement = "rng_movement";
+    String returnToStartPos = "return_to_start_pos";
     String playSound = "playSound";
     String start_up = "start_up";
     String shut_down = "shut_down";

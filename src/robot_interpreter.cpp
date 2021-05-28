@@ -446,7 +446,10 @@ void SetStateNode::execute(Robot & robot){
     } else if(state == parse_words.INTERACTIVE_MODE){
         robot.setState(ROBOT_STATES::INTERACTIVE_MODE);
         Serial.println("robot state set to : INTERACTIVE_MODE");
-    } else {
+    } else if(state == parse_words.OFF){
+        robot.setState(ROBOT_STATES::OFF);
+        Serial.println("robot state set to : OFF");
+    }else {
         Serial.println("Unknown state " + original_string);
     }
 }
