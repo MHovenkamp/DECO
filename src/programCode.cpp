@@ -7,6 +7,7 @@ struct code{
         weatherstation PERIOD = 10 SECOND
         STATE = IDLE 
     LOOP:
+        IF()
         WAIT 5 SECOND
     EOF:
 

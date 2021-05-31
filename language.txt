@@ -79,15 +79,11 @@ walk_reminder PERIOD = 10 SECOND
 test LOOP
 
 SETUP:
-    shut_down_after = 10 MINUTE
-    weatherstation PERIOD = 10 SECOND
     STATE = IDLE
+    IF(getState){
+        move_head 10
+    }
     
 LOOP:
-    move_head 45
-    move_neck 45
-    WAIT 5 SECOND
-    move_head 135
-    move_neck 135
-    WAIT 5 SECOND
+    WAIT 10 SECOND
 EOF:

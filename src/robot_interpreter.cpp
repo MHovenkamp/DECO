@@ -75,7 +75,7 @@ void Interpreter::run(){
 };
 
 String Interpreter::readFileFromSerial(){
-    String allowed_symbols = "_=: ";
+    String allowed_symbols = "_=: (){}";
     char temp_char;
     String file_text = "";
     Serial.println("Enter file text.");
@@ -130,18 +130,40 @@ void Interpreter::file(String file_text){
     setup.trim();
     loop.trim();
 
+    // Process setup
     if(setup.length() > 0){
+        std::shared_ptr<IfNode> possible_if_node;
+        bool in_if_node = false;
         for(unsigned int i = 0; i < setup.length(); i++ ){
             line += setup[i];
             if(setup[i] == '\n' || i == setup.length()-1){
                 line.trim();
-                std::shared_ptr<Node> node_ptr = parseCommand(line);
-                node_ptr->execute(robot);
-                node_ptr.reset();
-                line = "";
+                if(in_if_node){
+                    if(setup[i] != '}'){
+                        possible_if_node->addCommand(parseCommand(line));
+                    } else{
+                        Serial.println("End of possible int");
+                        possible_if_node->execute(robot);
+                        possible_if_node->print();
+                        in_if_node = false;
+                    }
+                    // add commands to if node
+                } else{
+                    possible_if_node = createPossibleIf(line);
+                    possible_if_node->print();
+                    if(possible_if_node->getType() == NODE_TYPES::ERROR){
+                        std::shared_ptr<Node> node_ptr = parseCommand(line);
+                        node_ptr->execute(robot);
+                        node_ptr.reset();
+                        line = "";
+                    } else{
+                        in_if_node = true;
+                    }
+                }
             }
         }
     }
+    // Process loop
     if(loop.length() > 0){
         line = "";
         for(unsigned int i = 0; i < loop.length(); i++ ){
@@ -154,7 +176,7 @@ void Interpreter::file(String file_text){
             }
         }
     }
-
+    // Keep processing loop until serial input is reached
     if(file_loop_list.getLength() > 0){
         file_loop_list.setToStart();
         std::shared_ptr<Node> temp = file_loop_list.getCurrentNode();
@@ -333,6 +355,35 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command){
         break;
     }
     return std::shared_ptr<Node> (new ErrorNode(command, "unknown command"));
+}
+
+//TODO last symbol weird, comment in body instantly executed.
+std::shared_ptr<IfNode> Interpreter::createPossibleIf(String command){
+    Serial.println("In create if command");
+    Serial.println(String("<") + command + String(">"));
+    char char_array[255];
+    String condition_line = "";     
+    command.toCharArray(char_array, command.length());
+    for(unsigned int i = 0; i < command.length(); i++){
+        Serial.println(String("<") + String(char_array[i]) + String(">") + " "+ String(i));
+    }
+    int index = 3;
+    if(char_array[0] == 'I' && char_array[1] == 'F'){
+        if(char_array[2] == '('){
+            char temp_char = ' ';
+            while( temp_char != ')'){
+                temp_char = char_array[index];
+                condition_line += temp_char;
+                index++;
+            }
+        }
+    }
+    if(char_array[index] == '{'){
+        Serial.println("Start of possible int");
+        return std::shared_ptr<IfNode>( new IfNode(command, condition_line));        
+    }
+    Serial.println("NON VIABLE");
+    return std::shared_ptr<IfNode>( new IfNode("NON_VIABLE", condition_line, NODE_TYPES::ERROR));        
 }
 
 void Node::execute(Robot & robot){
@@ -515,7 +566,14 @@ void CommandNode::execute(Robot & robot){
         robot.rngMovement();
     } else if(command == parse_words.returnToStartPos){
         robot.returnToStartPos();  
-    } else if(is_digit){
+    } else if(command == parse_words.getHeadPos){
+        Serial.println("Head at: " + String(robot.getHeadPos()) + " degrees");
+    } else if(command == parse_words.getNeckPos){
+        Serial.println("Neck at: " + String(robot.getNeckPos()) + " degrees");
+    } else if(command == parse_words.getLastMovementDetected){
+        Serial.println("Movement detected " + String(robot.getLastMovementDetected()) + " seconds ago");
+    }
+    else if(is_digit){
         if(command == parse_words.move_head){
             robot.moveHead(param.toInt());
         } else if(command == parse_words.move_neck){
@@ -555,6 +613,14 @@ void WaitNode::execute(Robot & robot){
     }
 }
 
+void IfNode::execute(Robot & robot){
+    Serial.println("in execute");
+}
+
+void IfNode::addCommand(std::shared_ptr<Node> command){
+    body.append(command);
+}
+
 void ErrorNode::execute(Robot & robot){
     Serial.println("ERROR: " + original_string + " -> " + error_message);
 }
@@ -581,4 +647,8 @@ void WaitNode::print(){
 
 void ErrorNode::print(){
     Serial.println("ErrorNode -> " + error_message);
+}
+
+void IfNode::print(){
+    Serial.println("IfNode - > IF(" + condition + "){" + body.getLength() + "}");
 }

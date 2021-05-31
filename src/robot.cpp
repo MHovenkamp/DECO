@@ -208,6 +208,17 @@ void Robot::moveNeck( int pos ){
     neck_servo.turnToDegree(pos);
 };
 
+int Robot::getHeadPos(){
+    return head_servo.getCurrentDegree();
+}
+int Robot::getNeckPos(){
+    return neck_servo.getCurrentDegree();
+}
+
+int Robot::getLastMovementDetected(){
+    return pir_sensor.getLastMovement();
+}
+
 void Robot::shutDown(){
     returnToStartPos();
     global_state = ROBOT_STATES::OFF;

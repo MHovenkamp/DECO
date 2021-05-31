@@ -38,6 +38,9 @@ struct PARSE_WORDS{
     String getWaterTime = "getWaterTime";
     String getWeatherStationTime = "getWeatherStationTime";
     String getState = "getState";
+    String getHeadPos = "getHeadPos";
+    String getNeckPos = "getNeckPos";
+    String getLastMovementDetected = "getLastMovementDetected";
     String rngMovement = "rng_movement";
     String returnToStartPos = "return_to_start_pos";
     String playSound = "playSound";
@@ -47,6 +50,7 @@ struct PARSE_WORDS{
     String SETUP = "SETUP:";
     String LOOP = "LOOP:";
     String EOF_ = "EOF:";
+    String IF = "IF";
 };
 
 /**
@@ -58,7 +62,8 @@ enum class NODE_TYPES{
     SETTER,
     COMMAND,
     WAIT,
-    ERROR
+    ERROR,
+    IFNODE
 };
 
 

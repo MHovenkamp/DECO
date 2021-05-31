@@ -284,6 +284,27 @@ public:
     void moveNeck( int pos );
 
     /**
+     * @brief Get the Head Position in degrees
+     * 
+     * @return int 
+     */
+    int getHeadPos();
+
+    /**
+     * @brief Get the Neck Position in degrees
+     * 
+     * @return int 
+     */
+    int getNeckPos();
+
+    /**
+     * @brief Get the Last movement detected in seconds
+     * 
+     * @return int 
+     */
+    int getLastMovementDetected();
+
+    /**
      * @brief move the robot randomly
      * 
      */

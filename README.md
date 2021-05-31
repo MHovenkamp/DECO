@@ -130,7 +130,18 @@ EOF:
     -   SECOND 
     -   MIllI_SECOND 
 
-
+### if conditions
+You can maken if statement using some of the getters describe in the next paragraph.
+```
+IF(getState = IDLE){
+    // Code to execute if statement is true.
+}
+```
+Possible commands:
+-   getState = STATE
+-   getHeadPos >/</<=/>=/==/!= int
+-   getNeckPos >/</<=/>=/==/!= int
+-   getLastMovementDetected >/</<=/>=/==/!= int
 
 ### Getters
 - ```getBreakTime```, Get the duration of the break time reminder.
@@ -145,6 +156,8 @@ EOF:
     -   WEATHER_STATION
     -   INTERACTIVE_MODE
     -   OFF
+-   ```getHeadPos```, get the current position of the head in degrees with 90 being straight forward.
+-   ```getNeckPos```, get the current position of the neck in degrees with 90 being straight forward.
 
 ### Setters
 Set if timed functions are active or not:

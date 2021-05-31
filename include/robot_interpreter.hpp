@@ -244,6 +244,47 @@ public:
 };
 
 /**
+ * @brief ErrorNode class, derived from Node
+ * 
+ */
+class IfNode: public Node{
+private:
+    String original_string;
+    String condition;
+    DoubleLinkedList<Node> body;
+public:
+    /**
+     * @brief Construct a new Error Node object
+     * 
+     * @param original_string : String
+     * @param error_message : String
+     * @param type : NODE_TYPES
+     */
+    IfNode(String original_string, String condition,  NODE_TYPES type = NODE_TYPES::IFNODE):
+    Node(original_string, type){}
+
+    /**
+     * @brief Add command to the body of the if node
+     * 
+     * @param command 
+     */
+    void addCommand(std::shared_ptr<Node> command);
+
+    /**
+     * @brief Print the error message in this node
+     * 
+     * @param robot : Robot &
+     */
+    void execute(Robot & robot) override;
+
+    /**
+     * @brief print the infromation of the node
+     * 
+     */
+    void print() override;
+};
+
+/**
  * @brief Interpreter class
  * 
  */
@@ -260,6 +301,14 @@ private:
      * @return std::shared_ptr<Node> 
      */
     std::shared_ptr<Node> parseCommand(String command);
+
+    /**
+     * @brief Create a Possible IfNode object otherwise return error.
+     * 
+     * @param command 
+     * @return std::shared_ptr<Node> 
+     */
+    std::shared_ptr<IfNode> createPossibleIf(String command);
 
     /**
      * @brief REPL functionality
