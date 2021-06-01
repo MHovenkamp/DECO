@@ -81,9 +81,29 @@ test LOOP
 SETUP:
     STATE = IDLE
     IF(getState){
-        move_head 10
+        move_head 1
+        WAIT 10 SECOND
+        move_head 1
+        WAIT 10 SECOND
     }
+LOOP:
+    IF(getState){
+        move_head 2
+        WAIT 10 SECOND
+        move_head 2
+        WAIT 10 SECOND
+    }
+EOF:
+
+SETUP:
+    STATE = IDLE
     
 LOOP:
+    IF(getState){
+        move_head 10
+        WAIT 10 SECOND
+        move_head 90
+        WAIT 10 SECOND
+    }
     WAIT 10 SECOND
 EOF:

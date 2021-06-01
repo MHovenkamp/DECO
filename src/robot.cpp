@@ -11,7 +11,7 @@ void Robot::setup(){
     rtos::ThisThread::sleep_for(MS(1000)); // give time for i2C to get ready
     head_servo.setup();
     neck_servo.setup();
-    returnToStartPos();
+    // returnToStartPos();
     rtos::ThisThread::sleep_for(MS(2000)); // give time for servo's to move to strat position
     // play startup sound
     Songs songs;

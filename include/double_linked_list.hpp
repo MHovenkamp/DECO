@@ -114,7 +114,6 @@ class DoubleLinkedList  {
     void append(std::shared_ptr<T> object){
         std::shared_ptr<ListNode<T>> node = std::make_shared<ListNode<T>>(object, tail_node, nullptr);
         if(length == 0){
-            Serial.println("first item added");
             head_node = std::move(node);
             current_node = head_node;
             tail_node = head_node;

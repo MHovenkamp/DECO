@@ -94,6 +94,7 @@ String Interpreter::readFileFromSerial(){
 
 void Interpreter::file(String file_text){
     DoubleLinkedList<Node> file_loop_list;
+    DoubleLinkedList<Node> file_setup_list;
     String line = "";
     String current_word="";
     String setup = "";
@@ -132,49 +133,22 @@ void Interpreter::file(String file_text){
 
     // Process setup
     if(setup.length() > 0){
-        std::shared_ptr<IfNode> possible_if_node;
-        bool in_if_node = false;
-        for(unsigned int i = 0; i < setup.length(); i++ ){
-            line += setup[i];
-            if(setup[i] == '\n' || i == setup.length()-1){
-                line.trim();
-                if(in_if_node){
-                    if(setup[i] != '}'){
-                        possible_if_node->addCommand(parseCommand(line));
-                    } else{
-                        Serial.println("End of possible int");
-                        possible_if_node->execute(robot);
-                        possible_if_node->print();
-                        in_if_node = false;
-                    }
-                    // add commands to if node
-                } else{
-                    possible_if_node = createPossibleIf(line);
-                    possible_if_node->print();
-                    if(possible_if_node->getType() == NODE_TYPES::ERROR){
-                        std::shared_ptr<Node> node_ptr = parseCommand(line);
-                        node_ptr->execute(robot);
-                        node_ptr.reset();
-                        line = "";
-                    } else{
-                        in_if_node = true;
-                    }
-                }
+        file_setup_list = CreateCommandList(setup);
+        if(file_setup_list.getLength() > 0){
+            file_setup_list.setToStart();
+            std::shared_ptr<Node> temp = file_setup_list.getCurrentNode();
+            temp->execute(robot);
+            temp.reset();
+            while(file_setup_list.gotToNextNode()){
+                temp = file_setup_list.getCurrentNode();
+                temp->execute(robot);
+                temp.reset();
             }
         }
     }
     // Process loop
     if(loop.length() > 0){
-        line = "";
-        for(unsigned int i = 0; i < loop.length(); i++ ){
-            line += loop[i];
-            if(loop[i] == '\n' || i == loop.length()-1){
-                line.trim();
-                std::shared_ptr<Node> node_ptr = parseCommand(line);
-                file_loop_list.append(node_ptr);
-                line = "";
-            }
-        }
+        file_loop_list = CreateCommandList(loop);
     }
     // Keep processing loop until serial input is reached
     if(file_loop_list.getLength() > 0){
@@ -193,9 +167,42 @@ void Interpreter::file(String file_text){
             }
             temp = file_loop_list.getCurrentNode();
             temp->execute(robot);
+            rtos::ThisThread::sleep_for(MS(1000));
             temp.reset();
         }
     }
+}
+
+DoubleLinkedList<Node> Interpreter::CreateCommandList(String text){
+    std::shared_ptr<IfNode> possible_if_node;
+    DoubleLinkedList<Node> linked_list;
+    bool in_if_node = false;
+    String line = "";
+    for(unsigned int i = 0; i < text.length(); i++ ){
+        line += text[i];
+        if(text[i] == '\n' || i == text.length()-1){
+            line.trim();
+            if(in_if_node){
+                if(line.indexOf('}') == -1){
+                    possible_if_node->addCommand(parseCommand(line));
+                } else if (line.indexOf('}') != -1){ // ifnode finished
+                    linked_list.append(possible_if_node);
+                    in_if_node = false;
+                }
+            } else{
+                possible_if_node = createPossibleIf(line);
+                if(possible_if_node->getType() == NODE_TYPES::ERROR){
+                    std::shared_ptr<Node> node_ptr = parseCommand(line);
+                    linked_list.append(node_ptr);
+                    node_ptr.reset();
+                } else{
+                    in_if_node = true;
+                }
+            }
+            line = "";
+        }
+    }
+    return linked_list;
 }
 
 //TODO repl no longer functional, probably null character in serial read. also head servo prob broken, test tomorrow.
@@ -357,16 +364,12 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command){
     return std::shared_ptr<Node> (new ErrorNode(command, "unknown command"));
 }
 
-//TODO last symbol weird, comment in body instantly executed.
 std::shared_ptr<IfNode> Interpreter::createPossibleIf(String command){
-    Serial.println("In create if command");
-    Serial.println(String("<") + command + String(">"));
-    char char_array[255];
+    command.trim();
+    const int array_size = 265;
+    char char_array[array_size];
     String condition_line = "";     
-    command.toCharArray(char_array, command.length());
-    for(unsigned int i = 0; i < command.length(); i++){
-        Serial.println(String("<") + String(char_array[i]) + String(">") + " "+ String(i));
-    }
+    command.toCharArray(char_array, array_size);
     int index = 3;
     if(char_array[0] == 'I' && char_array[1] == 'F'){
         if(char_array[2] == '('){
@@ -379,10 +382,9 @@ std::shared_ptr<IfNode> Interpreter::createPossibleIf(String command){
         }
     }
     if(char_array[index] == '{'){
-        Serial.println("Start of possible int");
         return std::shared_ptr<IfNode>( new IfNode(command, condition_line));        
     }
-    Serial.println("NON VIABLE");
+    // If no if statement is found an IfNode is returned with the node type set to error
     return std::shared_ptr<IfNode>( new IfNode("NON_VIABLE", condition_line, NODE_TYPES::ERROR));        
 }
 
@@ -614,7 +616,26 @@ void WaitNode::execute(Robot & robot){
 }
 
 void IfNode::execute(Robot & robot){
-    Serial.println("in execute");
+    Serial.println("===========IN EXECUTE===========");
+    if(CheckIfConditionTrue()){
+        body.setToStart();
+        std::shared_ptr<Node> body_command = body.getCurrentNode();
+        body_command->print();
+        // body_command->execute(robot);
+        body_command.reset();
+        while(body.gotToNextNode()){
+            body_command = body.getCurrentNode();
+            // body_command->execute(robot);
+            body_command->print();
+            body_command.reset();
+        }
+        Serial.println("==========END EXECUTE===========");
+    }
+}
+
+bool IfNode::CheckIfConditionTrue(){
+    // check if condition is true or false
+    return true;
 }
 
 void IfNode::addCommand(std::shared_ptr<Node> command){

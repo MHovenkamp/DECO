@@ -103,8 +103,6 @@ void setup(){
   osStatus error;
   error = pir_task.start(pirTask);
   if(error){Serial.println(error);}
-  error = servo_task.start(servoTask);
-  if(error){Serial.println(error);}
 
   error = robot_control_task.start(robotControlTask);
   if(error){Serial.println(error);}
@@ -113,6 +111,11 @@ void setup(){
   error = i2c_task.start(i2cTask);
   if(error){Serial.println(error);}
   error = animation_task.start(animationTask);
+  if(error){Serial.println(error);}
+  
+  //wait till servos are at 90 degrees before starting the task
+  while(neck_servo.getCurrentDegree() != 90 && head_servo.getCurrentDegree() != 90){}
+  error = servo_task.start(servoTask);
   if(error){Serial.println(error);}
 };
 

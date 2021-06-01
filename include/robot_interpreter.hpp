@@ -252,6 +252,13 @@ private:
     String original_string;
     String condition;
     DoubleLinkedList<Node> body;
+    /**
+     * @brief Check if the condition of the if statement is true or false
+     * 
+     * @return true 
+     * @return false 
+     */
+    bool CheckIfConditionTrue();
 public:
     /**
      * @brief Construct a new Error Node object
@@ -321,6 +328,15 @@ private:
      * 
      */
     void file(String file_text);
+
+    /**
+     * @brief Create a Command List of the given text
+     * 
+     * @param text 
+     * @return DoubleLinkedList 
+     */
+    DoubleLinkedList<Node> CreateCommandList(String text);
+
 public:
     /**
      * @brief Construct a new Interpreter object
