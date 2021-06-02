@@ -80,14 +80,14 @@ test LOOP
 
 SETUP:
     STATE = IDLE
-    IF(getState){
+    IF(getState = IDLE){
         move_head 1
         WAIT 10 SECOND
         move_head 1
         WAIT 10 SECOND
     }
 LOOP:
-    IF(getState){
+    IF(getState = IDLE){
         move_head 2
         WAIT 10 SECOND
         move_head 2

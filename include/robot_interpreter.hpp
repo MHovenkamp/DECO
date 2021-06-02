@@ -258,17 +258,18 @@ private:
      * @return true 
      * @return false 
      */
-    bool CheckIfConditionTrue();
+    bool CheckIfConditionTrue(Robot & robot);
 public:
     /**
      * @brief Construct a new Error Node object
      * 
      * @param original_string : String
-     * @param error_message : String
+     * @param condition : String
      * @param type : NODE_TYPES
      */
     IfNode(String original_string, String condition,  NODE_TYPES type = NODE_TYPES::IFNODE):
-    Node(original_string, type){}
+    Node(original_string, type),
+    condition(condition){}
 
     /**
      * @brief Add command to the body of the if node

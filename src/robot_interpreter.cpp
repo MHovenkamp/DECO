@@ -186,6 +186,7 @@ DoubleLinkedList<Node> Interpreter::CreateCommandList(String text){
                 if(line.indexOf('}') == -1){
                     possible_if_node->addCommand(parseCommand(line));
                 } else if (line.indexOf('}') != -1){ // ifnode finished
+                    possible_if_node->print();
                     linked_list.append(possible_if_node);
                     in_if_node = false;
                 }
@@ -194,8 +195,8 @@ DoubleLinkedList<Node> Interpreter::CreateCommandList(String text){
                 if(possible_if_node->getType() == NODE_TYPES::ERROR){
                     std::shared_ptr<Node> node_ptr = parseCommand(line);
                     linked_list.append(node_ptr);
-                    node_ptr.reset();
-                } else{
+                } else if(possible_if_node->getType() == NODE_TYPES::IFNODE){
+                    possible_if_node->print();
                     in_if_node = true;
                 }
             }
@@ -234,6 +235,29 @@ void Interpreter::repl(){
         command = "";
         character_temp = ' ';
     }
+}
+
+std::shared_ptr<IfNode> Interpreter::createPossibleIf(String command){
+    command.trim();
+    String condition_line = "";     
+    int index = 3;
+    if(command[0] == 'I' && command[1] == 'F'){
+        if(command[2] == '('){
+            while( command[index] != ')'){
+                condition_line += command[index];
+                index++;
+            }
+            Serial.println(condition_line);
+            if(command[index+1] == '{'){
+                return std::shared_ptr<IfNode>( new IfNode(command, condition_line));        
+            } else {
+                ErrorNode node = ErrorNode(command, "No { found");
+                node.execute(robot);
+            }
+        }
+    }
+    // If no if statement is found an IfNode is returned with the node type set to error
+    return std::shared_ptr<IfNode>( new IfNode("NON_VIABLE", condition_line, NODE_TYPES::ERROR));        
 }
 
 std::shared_ptr<Node> Interpreter::parseCommand(String command){
@@ -364,29 +388,6 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command){
     return std::shared_ptr<Node> (new ErrorNode(command, "unknown command"));
 }
 
-std::shared_ptr<IfNode> Interpreter::createPossibleIf(String command){
-    command.trim();
-    const int array_size = 265;
-    char char_array[array_size];
-    String condition_line = "";     
-    command.toCharArray(char_array, array_size);
-    int index = 3;
-    if(char_array[0] == 'I' && char_array[1] == 'F'){
-        if(char_array[2] == '('){
-            char temp_char = ' ';
-            while( temp_char != ')'){
-                temp_char = char_array[index];
-                condition_line += temp_char;
-                index++;
-            }
-        }
-    }
-    if(char_array[index] == '{'){
-        return std::shared_ptr<IfNode>( new IfNode(command, condition_line));        
-    }
-    // If no if statement is found an IfNode is returned with the node type set to error
-    return std::shared_ptr<IfNode>( new IfNode("NON_VIABLE", condition_line, NODE_TYPES::ERROR));        
-}
 
 void Node::execute(Robot & robot){
     Serial.println(original_string);
@@ -617,25 +618,129 @@ void WaitNode::execute(Robot & robot){
 
 void IfNode::execute(Robot & robot){
     Serial.println("===========IN EXECUTE===========");
-    if(CheckIfConditionTrue()){
+    if(CheckIfConditionTrue(robot)){
         body.setToStart();
         std::shared_ptr<Node> body_command = body.getCurrentNode();
         body_command->print();
-        // body_command->execute(robot);
+        body_command->execute(robot);
         body_command.reset();
         while(body.gotToNextNode()){
             body_command = body.getCurrentNode();
-            // body_command->execute(robot);
             body_command->print();
+            body_command->execute(robot);
             body_command.reset();
         }
-        Serial.println("==========END EXECUTE===========");
     }
+    Serial.println("==========END EXECUTE===========");
 }
 
-bool IfNode::CheckIfConditionTrue(){
+bool IfNode::CheckIfConditionTrue(Robot & robot){
+    Serial.println("start of check condition: " + condition);
+    String string_array[3] = {};
+    int current_array_index = 0;
+    int start_index = 0;
+    for(unsigned int i = 0; i < condition.length(); i++){
+        if( condition[i] == ' '){
+            string_array[current_array_index] = condition.substring(start_index,i);
+            current_array_index++;
+            start_index = i+1;
+        }
+        if( i == condition.length()-1){
+            string_array[current_array_index] = condition.substring(start_index,i+1);
+        }
+    }
+    for(unsigned int i = 0; i < 3; i++){
+        Serial.print(string_array[i]);
+    }
+    //getState =/!= STATE
+    if( string_array[0] == parse_words.getState){
+        ROBOT_STATES lhs = robot.getState();
+        ROBOT_STATES rhs = ROBOT_STATES::IDLE;
+        if(string_array[2] == parse_words.IDLE){
+            rhs = ROBOT_STATES::IDLE;
+        } else if(string_array[2] == parse_words.REMINDER_BREAK){
+            rhs = ROBOT_STATES::REMINDER_BREAK;
+        }else if(string_array[2] == parse_words.REMINDER_WATER){
+            rhs = ROBOT_STATES::REMINDER_WATER;
+        }else if(string_array[2] == parse_words.REMINDER_WALK){
+            rhs = ROBOT_STATES::REMINDER_WALK;
+        }else if(string_array[2] == parse_words.WEATHER_STATION){
+            rhs = ROBOT_STATES::WEATHER_STATION;
+        }else if(string_array[2] == parse_words.INTERACTIVE_MODE){
+            rhs = ROBOT_STATES::INTERACTIVE_MODE;
+        }else if(string_array[2] == parse_words.OFF){
+            rhs = ROBOT_STATES::OFF;
+        } else{
+            ErrorNode error = ErrorNode(condition, "Condition not recognised: Unknown rhs state ");
+            error.execute(robot);
+            return false;
+        }
+        if(string_array[1] == "="){
+            return lhs == rhs;
+        } else if (string_array[1] == "!="){
+            return lhs != rhs;
+        } else{
+            ErrorNode error = ErrorNode(condition, "Condition not recognised: Unknown operator ");
+            error.execute(robot);
+            return false;
+        }
+    }
+    //getHeadPos >/</<=/>=/==/!= int
+    //getNeckPos >/</<=/>=/==/!= int
+    //getLastMovementDetected >/</<=/>=/==/!= int
+    if( string_array[0] == parse_words.getHeadPos || 
+        string_array[0] == parse_words.getNeckPos ||
+        string_array[0] == parse_words.getLastMovementDetected){
+        int lhs, rhs;
+        if(string_array[0] == parse_words.getHeadPos){
+            lhs = robot.getHeadPos();
+        } else if(string_array[0] == parse_words.getNeckPos){
+            lhs = robot.getNeckPos();
+        } else if(string_array[0] == parse_words.getLastMovementDetected){
+            lhs = robot.getLastMovementDetected();
+        } else{
+            ErrorNode error = ErrorNode(condition, "Condition not recognised: lhs function call not recognized ");
+            error.execute(robot);
+            return false;
+        }
+        char letter;
+        bool is_digit = true;
+        for(unsigned int i =0 ; i < string_array[2].length()-1; i++){
+            letter = string_array[2][i];
+            if(!isDigit(letter)){
+                is_digit = false;
+                break;
+            }
+        }
+        if(is_digit){
+            rhs = string_array[2].toInt();
+        } else{
+            ErrorNode error = ErrorNode(condition, "Condition not recognised: rhs is not an integer ");
+            error.execute(robot);
+            return false;
+        }
+        if(string_array[1] == ">"){
+            return lhs > rhs;
+        } else if(string_array[1] == "<"){
+            return lhs < rhs;
+        } else if(string_array[1] == "<="){
+            return lhs <= rhs;
+        } else if(string_array[1] == ">="){
+            return lhs >= rhs;
+        } else if(string_array[1] == "=="){
+            return lhs == rhs;
+        } else if(string_array[1] == "!="){
+            return lhs != rhs;
+        } else{
+            ErrorNode error = ErrorNode(condition, "Condition not recognised: Unknown operator");
+            error.execute(robot);
+            return false;
+        }
+    }
     // check if condition is true or false
-    return true;
+    ErrorNode error = ErrorNode(condition, "Condition not recognised: global error");
+    error.execute(robot);
+    return false;
 }
 
 void IfNode::addCommand(std::shared_ptr<Node> command){
