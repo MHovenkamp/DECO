@@ -26,15 +26,17 @@ public:
     const PARSE_WORDS parse_words;
     String original_string;
     NODE_TYPES type;
+    int line_number;
     /**
      * @brief Construct a new Node object
      * 
      * @param original_string : String
      * @param type : NODE_TYPES
      */
-    Node(String original_string, NODE_TYPES type):
+    Node(String original_string, int line_number, NODE_TYPES type):
         original_string(original_string),
-        type(type){}
+        type(type),
+        line_number(line_number){}
     virtual ~Node(){};
 
     /**
@@ -74,8 +76,8 @@ public:
      * @param time_measurement String
      * @param type : NODE TYPES
      */
-    SetterNode(String original_string, String to_set ,String setter_type, int time_period, String time_measurement, NODE_TYPES type = NODE_TYPES::SETTER):
-    Node(original_string, type),
+    SetterNode(String original_string, String to_set ,String setter_type, int time_period, String time_measurement, int line_number, NODE_TYPES type = NODE_TYPES::SETTER):
+    Node(original_string, line_number, type),
     to_set(to_set),
     setter_type(setter_type),
     time_period(time_period),
@@ -118,8 +120,8 @@ public:
      * @param state : String
      * @param type : NODE_TYPES
      */
-    SetStateNode(String original_string, String state, NODE_TYPES type = NODE_TYPES::STATE_SETTER):
-    Node(original_string, type),
+    SetStateNode(String original_string, String state, int line_number, NODE_TYPES type = NODE_TYPES::STATE_SETTER):
+    Node(original_string, line_number, type),
     state(state){}
 
     /**
@@ -155,8 +157,8 @@ public:
      * @param has_param : bool
      * @param type : NODE_TYPES
      */
-    CommandNode(String original_string, String command, String param, bool has_param = false, NODE_TYPES type = NODE_TYPES::COMMAND):
-    Node(original_string, type),
+    CommandNode(String original_string, String command, String param, int line_number, bool has_param = false, NODE_TYPES type = NODE_TYPES::COMMAND):
+    Node(original_string, line_number, type),
     command(command),
     param(param){}
 
@@ -191,8 +193,8 @@ public:
      * @param time_measurements : String
      * @param type : NODE_TYPES
      */
-    WaitNode(String original_string, int time_period, String time_measurements, NODE_TYPES type = NODE_TYPES::WAIT):
-    Node(original_string, type),
+    WaitNode(String original_string, int time_period, String time_measurements, int line_number, NODE_TYPES type = NODE_TYPES::WAIT):
+    Node(original_string, line_number, type),
     time_period(time_period),
     time_measurements(time_measurements){}
 
@@ -225,8 +227,8 @@ public:
      * @param error_message : String
      * @param type : NODE_TYPES
      */
-    ErrorNode(String original_string, String error_message,  NODE_TYPES type = NODE_TYPES::ERROR):
-    Node(original_string, type),
+    ErrorNode(String original_string, String error_message, int line_number, NODE_TYPES type = NODE_TYPES::ERROR):
+    Node(original_string, line_number, type),
     error_message( error_message){}
 
     /**
@@ -249,9 +251,9 @@ public:
  */
 class IfNode: public Node{
 private:
-    String original_string;
     String condition;
     DoubleLinkedList<Node> body;
+    bool viable;
     /**
      * @brief Check if the condition of the if statement is true or false
      * 
@@ -267,9 +269,10 @@ public:
      * @param condition : String
      * @param type : NODE_TYPES
      */
-    IfNode(String original_string, String condition,  NODE_TYPES type = NODE_TYPES::IFNODE):
-    Node(original_string, type),
-    condition(condition){}
+    IfNode(String original_string, String condition, bool viable, int line_number, NODE_TYPES type = NODE_TYPES::IFNODE):
+    Node(original_string, line_number, type),
+    condition(condition),
+    viable(viable){}
 
     /**
      * @brief Add command to the body of the if node
@@ -290,6 +293,14 @@ public:
      * 
      */
     void print() override;
+
+    /**
+     * @brief return if the created ifnode is usable, used by createIfNode function.
+     * 
+     * @return true 
+     * @return false 
+     */
+    bool isViable();
 };
 
 /**
@@ -308,7 +319,7 @@ private:
      * @param command : String
      * @return std::shared_ptr<Node> 
      */
-    std::shared_ptr<Node> parseCommand(String command);
+    std::shared_ptr<Node> parseCommand(String command, int* line_number);
 
     /**
      * @brief Create a Possible IfNode object otherwise return error.
@@ -316,7 +327,7 @@ private:
      * @param command 
      * @return std::shared_ptr<Node> 
      */
-    std::shared_ptr<IfNode> createPossibleIf(String command);
+    std::shared_ptr<IfNode> createPossibleIf(String command, int * line_number);
 
     /**
      * @brief REPL functionality
@@ -336,8 +347,14 @@ private:
      * @param text 
      * @return DoubleLinkedList 
      */
-    DoubleLinkedList<Node> CreateCommandList(String text);
+    DoubleLinkedList<Node> createCommandList(String text, int* line_number);
 
+    /**
+     * @brief Read the given file information from serial monitor
+     * 
+     * @return String 
+     */
+    String readFileFromSerial();
 public:
     /**
      * @brief Construct a new Interpreter object
@@ -353,12 +370,6 @@ public:
      */
     void run();
 
-    /**
-     * @brief Read the given file information from serial monitor
-     * 
-     * @return String 
-     */
-    String readFileFromSerial();
 
 };
 

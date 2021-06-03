@@ -81,16 +81,18 @@ test LOOP
 SETUP:
     STATE = IDLE
     IF(getState = IDLE){
-        move_head 1
+        move_head 100
         WAIT 10 SECOND
-        move_head 1
+    }
+    IF(getHeadPos >= 90){
+        move_head 10
         WAIT 10 SECOND
     }
 LOOP:
     IF(getState = IDLE){
-        move_head 2
+        move_head 100
         WAIT 10 SECOND
-        move_head 2
+        move_head 10
         WAIT 10 SECOND
     }
 EOF:

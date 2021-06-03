@@ -4,11 +4,19 @@
 struct code{
     String program_code = R"(
     SETUP:
-        weatherstation PERIOD = 10 SECOND
-        STATE = IDLE 
+        STATE = IDLE
+        rng_movement
+        WAIT 3 SECOND
+        return_to_start_pos
+        playSound notification
     LOOP:
-        IF()
-        WAIT 5 SECOND
+        IF(getState = IDLE){
+            move_head 100
+            WAIT 10 SECOND
+            move_head 10
+            WAIT 10 SECOND
+        }
+        interactive_mode
     EOF:
 
     )";

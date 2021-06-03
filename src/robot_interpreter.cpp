@@ -75,7 +75,7 @@ void Interpreter::run(){
 };
 
 String Interpreter::readFileFromSerial(){
-    String allowed_symbols = "_=: (){}";
+    String allowed_symbols = "_=: (){}<>";
     char temp_char;
     String file_text = "";
     Serial.println("Enter file text.");
@@ -101,19 +101,17 @@ void Interpreter::file(String file_text){
     String loop = "";
     bool setup_trigger = false;
     bool loop_trigger = false;
+    // Find and split the code block into the setup and loop partitions.
     for(unsigned int i = 0; i < file_text.length(); i++ ){
         if(file_text[i] == ' ' || file_text[i] == '\n'){
             current_word.trim();
             if(current_word == "SETUP:"){
-                Serial.println("SETUP: found");
                 setup_trigger = true;
             } else if(current_word == "LOOP:"){
-                Serial.println("LOOP: found");
                 setup = setup.substring(0,setup.length()-5);
                 setup_trigger = false;
                 loop_trigger = true;
             } else if(current_word == "EOF:"){
-                Serial.println("EOF: found");
                 setup_trigger = false;
                 loop_trigger = false;
             }
@@ -130,10 +128,11 @@ void Interpreter::file(String file_text){
 
     setup.trim();
     loop.trim();
-
+    int line_number = 1;
     // Process setup
     if(setup.length() > 0){
-        file_setup_list = CreateCommandList(setup);
+        line_number++; // count increase to count the SETUP: tag
+        file_setup_list = createCommandList(setup, &line_number);
         if(file_setup_list.getLength() > 0){
             file_setup_list.setToStart();
             std::shared_ptr<Node> temp = file_setup_list.getCurrentNode();
@@ -141,6 +140,11 @@ void Interpreter::file(String file_text){
             temp.reset();
             while(file_setup_list.gotToNextNode()){
                 temp = file_setup_list.getCurrentNode();
+                if(temp->getType() == NODE_TYPES::ERROR){
+                    temp->execute(robot);
+                    return;
+                }
+                temp->print();
                 temp->execute(robot);
                 temp.reset();
             }
@@ -148,8 +152,9 @@ void Interpreter::file(String file_text){
     }
     // Process loop
     if(loop.length() > 0){
-        file_loop_list = CreateCommandList(loop);
-    }
+        line_number++; // count increase to count the LOOP: tag
+        file_loop_list = createCommandList(loop, &line_number);
+    } 
     // Keep processing loop until serial input is reached
     if(file_loop_list.getLength() > 0){
         file_loop_list.setToStart();
@@ -166,14 +171,17 @@ void Interpreter::file(String file_text){
                 file_loop_list.setToStart();
             }
             temp = file_loop_list.getCurrentNode();
+            if(temp->getType() == NODE_TYPES::ERROR){
+                temp->execute(robot);
+                return;
+            }
             temp->execute(robot);
-            rtos::ThisThread::sleep_for(MS(1000));
             temp.reset();
         }
     }
 }
 
-DoubleLinkedList<Node> Interpreter::CreateCommandList(String text){
+DoubleLinkedList<Node> Interpreter::createCommandList(String text, int* line_number){
     std::shared_ptr<IfNode> possible_if_node;
     DoubleLinkedList<Node> linked_list;
     bool in_if_node = false;
@@ -184,23 +192,22 @@ DoubleLinkedList<Node> Interpreter::CreateCommandList(String text){
             line.trim();
             if(in_if_node){
                 if(line.indexOf('}') == -1){
-                    possible_if_node->addCommand(parseCommand(line));
+                    possible_if_node->addCommand(parseCommand(line, line_number));
                 } else if (line.indexOf('}') != -1){ // ifnode finished
-                    possible_if_node->print();
                     linked_list.append(possible_if_node);
                     in_if_node = false;
                 }
             } else{
-                possible_if_node = createPossibleIf(line);
-                if(possible_if_node->getType() == NODE_TYPES::ERROR){
-                    std::shared_ptr<Node> node_ptr = parseCommand(line);
+                possible_if_node = createPossibleIf(line, line_number);
+                if(possible_if_node->isViable() == false){
+                    std::shared_ptr<Node> node_ptr = parseCommand(line, line_number);
                     linked_list.append(node_ptr);
                 } else if(possible_if_node->getType() == NODE_TYPES::IFNODE){
-                    possible_if_node->print();
                     in_if_node = true;
                 }
             }
             line = "";
+            *line_number = *line_number+1;
         }
     }
     return linked_list;
@@ -210,6 +217,7 @@ DoubleLinkedList<Node> Interpreter::CreateCommandList(String text){
 void Interpreter::repl(){
     String command = "";
     char character_temp = ' ';
+    int line_number = 0;
     while(command != "4"){
         Serial.println("---Enter command. Or 4 to quit---");
         while(Serial.available()<=0){
@@ -229,7 +237,7 @@ void Interpreter::repl(){
             break;
         }
         Serial.println("given input: " + command);
-        std::shared_ptr<Node> node_ptr = parseCommand(command);
+        std::shared_ptr<Node> node_ptr = parseCommand(command, &line_number);
         node_ptr->execute(robot);
         node_ptr.reset();
         command = "";
@@ -237,7 +245,7 @@ void Interpreter::repl(){
     }
 }
 
-std::shared_ptr<IfNode> Interpreter::createPossibleIf(String command){
+std::shared_ptr<IfNode> Interpreter::createPossibleIf(String command, int* line_number){
     command.trim();
     String condition_line = "";     
     int index = 3;
@@ -245,29 +253,29 @@ std::shared_ptr<IfNode> Interpreter::createPossibleIf(String command){
         if(command[2] == '('){
             while( command[index] != ')'){
                 condition_line += command[index];
-                index++;
+           index++;
             }
-            Serial.println(condition_line);
             if(command[index+1] == '{'){
-                return std::shared_ptr<IfNode>( new IfNode(command, condition_line));        
+                return std::shared_ptr<IfNode>( new IfNode(command, condition_line, true, *line_number));        
             } else {
-                ErrorNode node = ErrorNode(command, "No { found");
+                ErrorNode node = ErrorNode(command, "No { found",*line_number);
                 node.execute(robot);
             }
         }
     }
     // If no if statement is found an IfNode is returned with the node type set to error
-    return std::shared_ptr<IfNode>( new IfNode("NON_VIABLE", condition_line, NODE_TYPES::ERROR));        
+    return std::shared_ptr<IfNode>( new IfNode("NON_VIABLE", condition_line, false, *line_number));        
 }
 
-std::shared_ptr<Node> Interpreter::parseCommand(String command){
+std::shared_ptr<Node> Interpreter::parseCommand(String command, int * line_number){
     int amount_of_spaces = 0;
     for(unsigned int i = 0; i < command.length(); i++){
         if( command[i] == ' '){
             amount_of_spaces++;
         }
     }
-    String string_array[amount_of_spaces+1] = {};
+    // max words in sentence set to 10, no command should go over 5 words but we double it just in case.
+    String string_array[10] = {};
     int current_array_index = 0;
     int start_index = 0;
     for(unsigned int i = 0; i < command.length(); i++){
@@ -281,6 +289,7 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command){
         }
     }
 
+    // start lexing and parsing the commands based on the lenght of the sentence
     switch (amount_of_spaces+1)
     {
     case 1:
@@ -296,27 +305,30 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command){
             // STATE = IDLE
             if( string_array[0] == parse_words.STATE && string_array[1] == "="){
                 if(string_array[2] == parse_words.IDLE){
-                    return std::shared_ptr<Node> (new SetStateNode(command, parse_words.IDLE));
+                    return std::shared_ptr<Node> (new SetStateNode(command, parse_words.IDLE, *line_number));
                 } else if(string_array[2] == parse_words.REMINDER_BREAK){
-                    return std::shared_ptr<Node> (new SetStateNode(command, parse_words.REMINDER_BREAK));
+                    return std::shared_ptr<Node> (new SetStateNode(command, parse_words.REMINDER_BREAK, *line_number));
                 } else if(string_array[2] == parse_words.REMINDER_WATER){
-                    return std::shared_ptr<Node> (new SetStateNode(command, parse_words.REMINDER_WATER));
+                    return std::shared_ptr<Node> (new SetStateNode(command, parse_words.REMINDER_WATER, *line_number));
                 } else if(string_array[2] == parse_words.REMINDER_WALK){
-                    return std::shared_ptr<Node> (new SetStateNode(command, parse_words.REMINDER_WALK));
+                    return std::shared_ptr<Node> (new SetStateNode(command, parse_words.REMINDER_WALK, *line_number));
                 } else if(string_array[2] == parse_words.WEATHER_STATION){
-                    return std::shared_ptr<Node> (new SetStateNode(command, parse_words.WEATHER_STATION));
+                    return std::shared_ptr<Node> (new SetStateNode(command, parse_words.WEATHER_STATION, *line_number));
                 } else if(string_array[2] == parse_words.INTERACTIVE_MODE){
-                    return std::shared_ptr<Node> (new SetStateNode(command, parse_words.INTERACTIVE_MODE));
+                    return std::shared_ptr<Node> (new SetStateNode(command, parse_words.INTERACTIVE_MODE, *line_number));
                 } else {
-                    return std::shared_ptr<Node> (new ErrorNode(command, "unknown state"));
+                    return std::shared_ptr<Node> (new ErrorNode(command, "unknown state", *line_number));
                 }
             }
             // weatherstation = ACTIVE
             if(string_array[2] == parse_words.ACTIVE){
-                return std::shared_ptr<Node> (new SetterNode(command, string_array[0],parse_words.ACTIVE, 0 ,parse_words.MILLI_SECOND_ ));
+                return std::shared_ptr<Node> (new SetterNode(command, string_array[0],parse_words.ACTIVE, 0 ,parse_words.MILLI_SECOND_, *line_number ));
             } else if(string_array[2] == parse_words.NON_ACTIVE){
-                return std::shared_ptr<Node> (new SetterNode(command, string_array[0],parse_words.NON_ACTIVE, 0 , parse_words.MILLI_SECOND_ ));
+                return std::shared_ptr<Node> (new SetterNode(command, string_array[0],parse_words.NON_ACTIVE, 0 , parse_words.MILLI_SECOND_, *line_number ));
+            } else{
+                return std::shared_ptr<Node> (new ErrorNode(command, "unknown choice: Not ACTIVE or NON_ACTIVE", *line_number));
             }
+        return std::shared_ptr<Node> (new ErrorNode(command, "unknown command of lenght 3", *line_number));
         } else { 
             // WAIT 10 MINUTES
             if(string_array[0] == parse_words.WAIT){
@@ -324,24 +336,26 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command){
                 for(unsigned int i =0 ; i < string_array[1].length()-1; i++){
                     letter = string_array[1][i];
                     if(!isDigit(letter)){
-                        return std::shared_ptr<Node> (new ErrorNode(command, "time value not a digit"));
+                        return std::shared_ptr<Node> (new ErrorNode(command, "time value not a digit", *line_number));
                         break;
                     }
                 }
                 if(string_array[2] == parse_words.MINUTE_){
-                    return std::shared_ptr<Node> (new WaitNode(command, string_array[1].toInt(), parse_words.MINUTE_));
+                    return std::shared_ptr<Node> (new WaitNode(command, string_array[1].toInt(), parse_words.MINUTE_, *line_number));
                 } else if(string_array[2] == parse_words.HOUR_){
-                    return std::shared_ptr<Node> (new WaitNode(command, string_array[1].toInt(), parse_words.HOUR_));
+                    return std::shared_ptr<Node> (new WaitNode(command, string_array[1].toInt(), parse_words.HOUR_, *line_number));
                 } else if (string_array[2] == parse_words.SECOND_){
-                    return std::shared_ptr<Node> (new WaitNode(command, string_array[1].toInt(), parse_words.SECOND_));
+                    return std::shared_ptr<Node> (new WaitNode(command, string_array[1].toInt(), parse_words.SECOND_, *line_number));
                 } else if (string_array[2] == parse_words.MILLI_SECOND_){
-                    return std::shared_ptr<Node> (new WaitNode(command, string_array[1].toInt(), parse_words.MILLI_SECOND_));
+                    return std::shared_ptr<Node> (new WaitNode(command, string_array[1].toInt(), parse_words.MILLI_SECOND_, *line_number));
                 } else {
-                    return std::shared_ptr<Node> (new ErrorNode(command, "Unknown time measurement type"));
+                    return std::shared_ptr<Node> (new ErrorNode(command, "Unknown time measurement type", *line_number));
                 }
+            } else{
+                return std::shared_ptr<Node> (new ErrorNode(command, "unknow command of lenght 3", *line_number));
             }
         }
-        return std::shared_ptr<Node> (new ErrorNode(command, "unknown command"));
+        return std::shared_ptr<Node> (new ErrorNode(command, "unknown command of lenght 3", *line_number));
     case 4:
         //shut_down_after = 10 MINUTE
         if(string_array[0] == parse_words.shut_down_after && string_array[1] == "="){
@@ -349,23 +363,23 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command){
             for(unsigned int i =0 ; i < string_array[2].length()-1; i++){
                 letter = string_array[2][i];
                 if(!isDigit(letter)){
-                    return std::shared_ptr<Node> (new ErrorNode(command, "time value not a digit"));
+                    return std::shared_ptr<Node> (new ErrorNode(command, "time value not a digit", *line_number));
                     break;
                 }
             }
             if(string_array[3] == parse_words.MINUTE_){
-                    return std::shared_ptr<Node> (new SetterNode(command, string_array[0] , parse_words.shut_down_after, string_array[2].toInt(), parse_words.MINUTE_));
+                    return std::shared_ptr<Node> (new SetterNode(command, string_array[0] , parse_words.shut_down_after, string_array[2].toInt(), parse_words.MINUTE_, *line_number));
                 } else if(string_array[3] == parse_words.HOUR_){
-                    return std::shared_ptr<Node> (new SetterNode(command, string_array[0] , parse_words.shut_down_after, string_array[2].toInt(), parse_words.HOUR_));
+                    return std::shared_ptr<Node> (new SetterNode(command, string_array[0] , parse_words.shut_down_after, string_array[2].toInt(), parse_words.HOUR_, *line_number));
                 } else if (string_array[3] == parse_words.SECOND_){
-                    return std::shared_ptr<Node> (new SetterNode(command, string_array[0] , parse_words.shut_down_after, string_array[2].toInt(), parse_words.SECOND_));
+                    return std::shared_ptr<Node> (new SetterNode(command, string_array[0] , parse_words.shut_down_after, string_array[2].toInt(), parse_words.SECOND_, *line_number));
                 } else if (string_array[3] == parse_words.MILLI_SECOND_){
-                    return std::shared_ptr<Node> (new SetterNode(command, string_array[0] , parse_words.shut_down_after, string_array[2].toInt(), parse_words.MILLI_SECOND_));
+                    return std::shared_ptr<Node> (new SetterNode(command, string_array[0] , parse_words.shut_down_after, string_array[2].toInt(), parse_words.MILLI_SECOND_, *line_number));
                 } else {
-                    return std::shared_ptr<Node> (new ErrorNode(command, "Unknown time measurement type"));
+                    return std::shared_ptr<Node> (new ErrorNode(command, "Unknown time measurement type", *line_number));
                 }
         }
-        return std::shared_ptr<Node> (new ErrorNode(command, "unknown command"));
+        return std::shared_ptr<Node> (new ErrorNode(command, "unknown command of length 4", *line_number));
     case 5:
         // weatherstation PERIOD = 10 MINUTE
         if((string_array[1] == parse_words.PERIOD || string_array[1] == parse_words.DURATION) && string_array[2] == "="){
@@ -373,19 +387,19 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command){
             for(unsigned int i =0 ; i < string_array[3].length()-1; i++){
                 letter = string_array[3][i];
                 if(!isDigit(letter)){
-                    return std::shared_ptr<Node> (new ErrorNode(command, "time value not a digit"));
+                    return std::shared_ptr<Node> (new ErrorNode(command, "time value not a digit", *line_number));
                     break;
                 }
             }
-            return std::shared_ptr<Node> (new SetterNode(command, string_array[0] , string_array[1], string_array[3].toInt(), string_array[4]));
+            return std::shared_ptr<Node> (new SetterNode(command, string_array[0] , string_array[1], string_array[3].toInt(), string_array[4], *line_number));
         }
-        return std::shared_ptr<Node> (new ErrorNode(command, "unknown command"));
+        return std::shared_ptr<Node> (new ErrorNode(command, "unknown command", *line_number));
     default:
-        return std::shared_ptr<Node> (new ErrorNode(command, "unknown command"));   
+        return std::shared_ptr<Node> (new ErrorNode(command, "unknown command", *line_number));   
         Serial.println("Unknown command: " + command);
         break;
     }
-    return std::shared_ptr<Node> (new ErrorNode(command, "unknown command"));
+    return std::shared_ptr<Node> (new ErrorNode(command, "unknown command", *line_number));
 }
 
 
@@ -591,12 +605,16 @@ void CommandNode::execute(Robot & robot){
                 robot.playSound<songs.shut_down.size()>(songs.shut_down);
             } else if(param == parse_words.notification){
                 robot.playSound<songs.notification.size()>(songs.notification);
+            } else{
+                ErrorNode error("Unknown command: ", original_string, line_number);
+                error.execute(robot);
             }
         }
     } else{
-        if(command == parse_words.EOF_){return;}
-        ErrorNode error("Unknown command: ", original_string);
-        error.execute(robot);
+        if(command == parse_words.EOF_){
+            ErrorNode error("Unknown command: ", original_string, line_number);
+            error.execute(robot);
+        }
     }
 }
 
@@ -617,8 +635,8 @@ void WaitNode::execute(Robot & robot){
 }
 
 void IfNode::execute(Robot & robot){
-    Serial.println("===========IN EXECUTE===========");
     if(CheckIfConditionTrue(robot)){
+        Serial.println(condition+" == true");
         body.setToStart();
         std::shared_ptr<Node> body_command = body.getCurrentNode();
         body_command->print();
@@ -631,11 +649,9 @@ void IfNode::execute(Robot & robot){
             body_command.reset();
         }
     }
-    Serial.println("==========END EXECUTE===========");
 }
 
 bool IfNode::CheckIfConditionTrue(Robot & robot){
-    Serial.println("start of check condition: " + condition);
     String string_array[3] = {};
     int current_array_index = 0;
     int start_index = 0;
@@ -648,9 +664,6 @@ bool IfNode::CheckIfConditionTrue(Robot & robot){
         if( i == condition.length()-1){
             string_array[current_array_index] = condition.substring(start_index,i+1);
         }
-    }
-    for(unsigned int i = 0; i < 3; i++){
-        Serial.print(string_array[i]);
     }
     //getState =/!= STATE
     if( string_array[0] == parse_words.getState){
@@ -671,7 +684,7 @@ bool IfNode::CheckIfConditionTrue(Robot & robot){
         }else if(string_array[2] == parse_words.OFF){
             rhs = ROBOT_STATES::OFF;
         } else{
-            ErrorNode error = ErrorNode(condition, "Condition not recognised: Unknown rhs state ");
+            ErrorNode error = ErrorNode(condition, "Condition not recognised: Unknown rhs state ", line_number);
             error.execute(robot);
             return false;
         }
@@ -680,7 +693,7 @@ bool IfNode::CheckIfConditionTrue(Robot & robot){
         } else if (string_array[1] == "!="){
             return lhs != rhs;
         } else{
-            ErrorNode error = ErrorNode(condition, "Condition not recognised: Unknown operator ");
+            ErrorNode error = ErrorNode(condition, "Condition not recognised: Unknown operator ", line_number);
             error.execute(robot);
             return false;
         }
@@ -699,7 +712,7 @@ bool IfNode::CheckIfConditionTrue(Robot & robot){
         } else if(string_array[0] == parse_words.getLastMovementDetected){
             lhs = robot.getLastMovementDetected();
         } else{
-            ErrorNode error = ErrorNode(condition, "Condition not recognised: lhs function call not recognized ");
+            ErrorNode error = ErrorNode(condition, "Condition not recognised: lhs function call not recognized ", line_number);
             error.execute(robot);
             return false;
         }
@@ -715,7 +728,7 @@ bool IfNode::CheckIfConditionTrue(Robot & robot){
         if(is_digit){
             rhs = string_array[2].toInt();
         } else{
-            ErrorNode error = ErrorNode(condition, "Condition not recognised: rhs is not an integer ");
+            ErrorNode error = ErrorNode(condition, "Condition not recognised: rhs is not an integer ", line_number);
             error.execute(robot);
             return false;
         }
@@ -732,13 +745,13 @@ bool IfNode::CheckIfConditionTrue(Robot & robot){
         } else if(string_array[1] == "!="){
             return lhs != rhs;
         } else{
-            ErrorNode error = ErrorNode(condition, "Condition not recognised: Unknown operator");
+            ErrorNode error = ErrorNode(condition, "Condition not recognised: Unknown operator", line_number);
             error.execute(robot);
             return false;
         }
     }
     // check if condition is true or false
-    ErrorNode error = ErrorNode(condition, "Condition not recognised: global error");
+    ErrorNode error = ErrorNode(condition, "Condition not recognised: global error", line_number);
     error.execute(robot);
     return false;
 }
@@ -747,34 +760,38 @@ void IfNode::addCommand(std::shared_ptr<Node> command){
     body.append(command);
 }
 
+bool IfNode::isViable(){
+    return viable;
+}
+
 void ErrorNode::execute(Robot & robot){
-    Serial.println("ERROR: " + original_string + " -> " + error_message);
+    Serial.println("["+String(line_number)+"]ERROR: " + original_string + " -> " + error_message);
 }
 
 void Node::print(){
-    Serial.println("Node -> " + original_string);
+    Serial.println("["+String(line_number)+"]Node -> " + original_string);
 }
 
 void SetterNode::print(){
-    Serial.println("SetterNode -> " +  to_set + " " + setter_type + " " + String(time_period) + " " + time_measurements);
+    Serial.println("["+String(line_number)+"]SetterNode -> " +  to_set + " " + setter_type + " " + String(time_period) + " " + time_measurements);
 }
 
 void SetStateNode::print(){
-    Serial.println("SetStateNode -> set state to " + state);
+    Serial.println("["+String(line_number)+"]SetStateNode -> set state to " + state);
 }
 
 void CommandNode::print(){
-    Serial.println("CommandNode -> "+ command + "(" + param + ")");
+    Serial.println("["+String(line_number)+"]CommandNode -> "+ command + "(" + param + ")");
 }
 
 void WaitNode::print(){
-    Serial.println("WaitNode -> wait for "+ String(time_period) + " " + time_measurements);
+    Serial.println("["+String(line_number)+"]WaitNode -> wait for "+ String(time_period) + " " + time_measurements);
 }
 
 void ErrorNode::print(){
-    Serial.println("ErrorNode -> " + error_message);
+    Serial.println("["+String(line_number)+"]ErrorNode -> " + error_message);
 }
 
 void IfNode::print(){
-    Serial.println("IfNode - > IF(" + condition + "){" + body.getLength() + "}");
+    Serial.println("["+String(line_number)+"]IfNode - > IF(" + condition + "){" + body.getLength() + "}");
 }
