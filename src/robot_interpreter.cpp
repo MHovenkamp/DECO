@@ -75,7 +75,7 @@ void Interpreter::run(){
 };
 
 String Interpreter::readFileFromSerial(){
-    String allowed_symbols = "_=: (){}<>";
+    String allowed_symbols = "_=: (){}<>+-/*";
     char temp_char;
     String file_text = "";
     Serial.println("Enter file text.");
@@ -128,6 +128,12 @@ void Interpreter::file(String file_text){
 
     setup.trim();
     loop.trim();
+
+    Serial.println("===========SETUP==========");
+    Serial.println(setup);
+    Serial.println("===========LOOP===========");
+    Serial.println(loop);
+    Serial.println("==========================");
     int line_number = 1;
     // Process setup
     if(setup.length() > 0){
@@ -160,6 +166,7 @@ void Interpreter::file(String file_text){
         file_loop_list.setToStart();
         std::shared_ptr<Node> temp = file_loop_list.getCurrentNode();
         temp = file_loop_list.getCurrentNode();
+        temp->print();
         temp->execute(robot);
         temp.reset();
         while(Serial.available()>0){
@@ -175,6 +182,7 @@ void Interpreter::file(String file_text){
                 temp->execute(robot);
                 return;
             }
+            temp->print();
             temp->execute(robot);
             temp.reset();
         }
@@ -183,8 +191,12 @@ void Interpreter::file(String file_text){
 
 DoubleLinkedList<Node> Interpreter::createCommandList(String text, int* line_number){
     std::shared_ptr<IfNode> possible_if_node;
+    std::shared_ptr<WhileNode> possible_while_node;
+    std::shared_ptr<IntegerNode> all_created_nodes[50]; // max of 50 integers.
+    int current_index = 0;
     DoubleLinkedList<Node> linked_list;
     bool in_if_node = false;
+    bool in_while_node = false;
     String line = "";
     for(unsigned int i = 0; i < text.length(); i++ ){
         line += text[i];
@@ -192,18 +204,28 @@ DoubleLinkedList<Node> Interpreter::createCommandList(String text, int* line_num
             line.trim();
             if(in_if_node){
                 if(line.indexOf('}') == -1){
-                    possible_if_node->addCommand(parseCommand(line, line_number));
+                    possible_if_node->addCommand(parseCommand(line, line_number,all_created_nodes, &current_index));
                 } else if (line.indexOf('}') != -1){ // ifnode finished
                     linked_list.append(possible_if_node);
                     in_if_node = false;
                 }
+            } else if(in_while_node){
+                if(line.indexOf('}') == -1){
+                    possible_while_node->addCommand(parseCommand(line, line_number, all_created_nodes, &current_index));
+                } else if (line.indexOf('}') != -1){ // ifnode finished
+                    linked_list.append(possible_while_node);
+                    in_while_node = false;
+                }
             } else{
-                possible_if_node = createPossibleIf(line, line_number);
-                if(possible_if_node->isViable() == false){
-                    std::shared_ptr<Node> node_ptr = parseCommand(line, line_number);
+                possible_if_node = createPossibleIf(line, line_number,all_created_nodes, &current_index);
+                possible_while_node = createPossibleWhile(line, line_number,all_created_nodes, &current_index);
+                if(possible_while_node->isViable() == false && possible_if_node->isViable() == false){
+                    std::shared_ptr<Node> node_ptr = parseCommand(line, line_number, all_created_nodes, &current_index);
                     linked_list.append(node_ptr);
-                } else if(possible_if_node->getType() == NODE_TYPES::IFNODE){
+                } else if(possible_if_node->isViable() == true){
                     in_if_node = true;
+                } else if(possible_while_node->isViable() == true){
+                    in_while_node = true;
                 }
             }
             line = "";
@@ -215,6 +237,8 @@ DoubleLinkedList<Node> Interpreter::createCommandList(String text, int* line_num
 
 //TODO repl no longer functional, probably null character in serial read. also head servo prob broken, test tomorrow.
 void Interpreter::repl(){
+    std::shared_ptr<IntegerNode> all_created_nodes[1]; // max of 50 integers.
+    int current_index = 0;
     String command = "";
     char character_temp = ' ';
     int line_number = 0;
@@ -237,15 +261,15 @@ void Interpreter::repl(){
             break;
         }
         Serial.println("given input: " + command);
-        std::shared_ptr<Node> node_ptr = parseCommand(command, &line_number);
+        std::shared_ptr<Node> node_ptr = parseCommand(command, &line_number, all_created_nodes, &current_index);
         node_ptr->execute(robot);
         node_ptr.reset();
         command = "";
         character_temp = ' ';
     }
 }
-
-std::shared_ptr<IfNode> Interpreter::createPossibleIf(String command, int* line_number){
+// give it the node lsits check if it is an integer node then pass just the int, do this for any instance of an int
+std::shared_ptr<IfNode> Interpreter::createPossibleIf(String command, int* line_number, std::shared_ptr<IntegerNode> * all_created_nodes, int * current_index){
     command.trim();
     String condition_line = "";     
     int index = 3;
@@ -253,10 +277,33 @@ std::shared_ptr<IfNode> Interpreter::createPossibleIf(String command, int* line_
         if(command[2] == '('){
             while( command[index] != ')'){
                 condition_line += command[index];
-           index++;
+                index++;
+            }
+            String string_array[10] = {};
+            int current_array_index = 0;
+            int start_index = 0;
+            for(unsigned int i = 0; i < condition_line.length(); i++){
+                if( condition_line[i] == ' '){
+                    string_array[current_array_index] = condition_line.substring(start_index,i);
+                    current_array_index++;
+                    start_index = i+1;
+                }
+                if( i == condition_line.length()-1){
+                    string_array[current_array_index] = condition_line.substring(start_index,i+1);
+                }
+            }
+            String new_condition_line = "";
+            for(unsigned int i = 0; i < 10; i++){
+                for(int j = 0; j < *current_index; j++){
+                    if(string_array[i] == all_created_nodes[j]->getName()){
+                        Serial.println("Existing node found");
+                        string_array[i] = String(all_created_nodes[j]->getValue());
+                    }
+                }
+                new_condition_line += string_array[i] + " ";
             }
             if(command[index+1] == '{'){
-                return std::shared_ptr<IfNode>( new IfNode(command, condition_line, true, *line_number));        
+                return std::shared_ptr<IfNode>( new IfNode(command, new_condition_line, true, *line_number));        
             } else {
                 ErrorNode node = ErrorNode(command, "No { found",*line_number);
                 node.execute(robot);
@@ -267,7 +314,50 @@ std::shared_ptr<IfNode> Interpreter::createPossibleIf(String command, int* line_
     return std::shared_ptr<IfNode>( new IfNode("NON_VIABLE", condition_line, false, *line_number));        
 }
 
-std::shared_ptr<Node> Interpreter::parseCommand(String command, int * line_number){
+std::shared_ptr<WhileNode> Interpreter::createPossibleWhile(String command, int* line_number, std::shared_ptr<IntegerNode> * all_created_nodes, int * current_index){
+    command.trim();
+    String condition_line = "";    
+    String possible_while = command.substring(0,5);
+    int index = 6;
+    if(possible_while == parse_words.WHILE && command[5] == '('){
+        while( command[index] != ')'){
+            condition_line += command[index];
+            index++;
+        } 
+        String string_array[10] = {};
+        int current_array_index = 0;
+        int start_index = 0;
+        for(unsigned int i = 0; i < condition_line.length(); i++){
+            if( condition_line[i] == ' '){
+                string_array[current_array_index] = condition_line.substring(start_index,i);
+                current_array_index++;
+                start_index = i+1;
+            }
+            if( i == condition_line.length()-1){
+                string_array[current_array_index] = condition_line.substring(start_index,i+1);
+            }
+        }
+        String new_condition_line = "";
+        for(unsigned int i = 0; i < 10; i++){
+            for(int j = 0; j < *current_index; j++){
+                if(string_array[i] == all_created_nodes[j]->getName()){
+                    string_array[i] = String(all_created_nodes[j]->getValue());
+                }
+            }
+            new_condition_line += string_array[i];
+        }
+        if(command[index+1] == '{'){
+            return std::shared_ptr<WhileNode>( new WhileNode(command, new_condition_line, true, *line_number));        
+        } else {
+            ErrorNode node = ErrorNode(command, "No { found",*line_number);
+            node.execute(robot);
+        }
+    }
+    // // If no if statement is found an IfNode is returned with the node type set to error
+    return std::shared_ptr<WhileNode>( new WhileNode("NON_VIABLE", condition_line, false, *line_number));         
+}
+
+std::shared_ptr<Node> Interpreter::parseCommand(String command, int * line_number, std::shared_ptr<IntegerNode> * all_created_nodes, int * current_index){
     int amount_of_spaces = 0;
     for(unsigned int i = 0; i < command.length(); i++){
         if( command[i] == ' '){
@@ -297,11 +387,37 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command, int * line_numbe
         break;
     case 2:
         if(string_array[0] != parse_words.EOF_){
+            for( int i = 0; i < *current_index; i++){
+                if(string_array[0] == all_created_nodes[i]->getName()){
+                    return std::shared_ptr<Node> (new CommandNode(command, string_array[0], String(all_created_nodes[i]->getValue()), true));
+                }
+            }
             return std::shared_ptr<Node> (new CommandNode(command, string_array[0], string_array[1], true));
         }
         break;
     case 3:
         if(string_array[1] == "="){
+            char letter;
+            bool is_int = true;
+            for(unsigned int i =0 ; i < string_array[2].length()-1; i++){
+                letter = string_array[2][i];
+                if(!isDigit(letter)){
+                    is_int = false;
+                }
+            }
+            if(is_int){
+                // create new integer node
+                Serial.println(*current_index);
+                if(*current_index < 50){
+                    std::shared_ptr<IntegerNode> pointer = std::make_shared<IntegerNode>(command, string_array[0], string_array[2].toInt(),*line_number);
+                    all_created_nodes[*current_index] = pointer;
+                    all_created_nodes[*current_index]->print();
+                    *current_index = *current_index+1;
+                    return pointer;
+                } else{
+                    return std::shared_ptr<Node> (new ErrorNode(command, "Max number of integers reached", *line_number));
+                }
+            }
             // STATE = IDLE
             if( string_array[0] == parse_words.STATE && string_array[1] == "="){
                 if(string_array[2] == parse_words.IDLE){
@@ -328,8 +444,42 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command, int * line_numbe
             } else{
                 return std::shared_ptr<Node> (new ErrorNode(command, "unknown choice: Not ACTIVE or NON_ACTIVE", *line_number));
             }
-        return std::shared_ptr<Node> (new ErrorNode(command, "unknown command of lenght 3", *line_number));
-        } else { 
+            return std::shared_ptr<Node> (new ErrorNode(command, "unknown command of lenght 3", *line_number));
+        } else if(string_array[1] == "+" || string_array[1] == "-" || string_array[1] == "/" ||string_array[1] == "*"){
+            std::shared_ptr<IntegerNode> lhs;
+            for(int i = 0; i < *current_index; i++){
+                if(all_created_nodes[i]->getName() == string_array[0]){
+                    lhs = all_created_nodes[i];
+                }
+            } 
+            char letter;
+            bool is_int = true;
+            for(unsigned int i =0 ; i < string_array[2].length()-1; i++){
+                letter = string_array[2][i];
+                if(!isDigit(letter)){
+                    is_int = false;
+                }
+            }
+            int rhs = 0;
+            if(is_int){
+                rhs = string_array[2].toInt();
+            } else{
+                return std::shared_ptr<Node> (new ErrorNode(command, "rhs value of mathnode not integer", *line_number));
+            }
+            Serial.println("lhs=");
+            lhs->print();
+            if(string_array[1] == "+"){
+                return std::shared_ptr<Node>(new MathNode(command, lhs, rhs, MATH_TYPES::PLUS, *line_number));
+            }else if(string_array[1] == "-"){
+                return std::shared_ptr<Node>(new MathNode(command, lhs, rhs, MATH_TYPES::MINUS, *line_number));
+            }else if(string_array[1] == "/"){
+                return std::shared_ptr<Node>(new MathNode(command, lhs, rhs, MATH_TYPES::DIVIDE, *line_number));
+            }else if(string_array[1] == "*"){
+                return std::shared_ptr<Node>(new MathNode(command, lhs, rhs, MATH_TYPES::MULTIPLY, *line_number));
+            } else{
+                return std::shared_ptr<Node> (new ErrorNode(command, "unknown operator", *line_number));
+            }
+        }else { 
             // WAIT 10 MINUTES
             if(string_array[0] == parse_words.WAIT){
                 char letter;
@@ -652,6 +802,7 @@ void IfNode::execute(Robot & robot){
 }
 
 bool IfNode::CheckIfConditionTrue(Robot & robot){
+    condition.trim();
     String string_array[3] = {};
     int current_array_index = 0;
     int start_index = 0;
@@ -664,6 +815,196 @@ bool IfNode::CheckIfConditionTrue(Robot & robot){
         if( i == condition.length()-1){
             string_array[current_array_index] = condition.substring(start_index,i+1);
         }
+    }
+    //getState =/!= STATE
+    if( string_array[0] == parse_words.getState){
+        ROBOT_STATES lhs = robot.getState();
+        ROBOT_STATES rhs = ROBOT_STATES::IDLE;
+        if(string_array[2] == parse_words.IDLE){
+            rhs = ROBOT_STATES::IDLE;
+        } else if(string_array[2] == parse_words.REMINDER_BREAK){
+            rhs = ROBOT_STATES::REMINDER_BREAK;
+        }else if(string_array[2] == parse_words.REMINDER_WATER){
+            rhs = ROBOT_STATES::REMINDER_WATER;
+        }else if(string_array[2] == parse_words.REMINDER_WALK){
+            rhs = ROBOT_STATES::REMINDER_WALK;
+        }else if(string_array[2] == parse_words.WEATHER_STATION){
+            rhs = ROBOT_STATES::WEATHER_STATION;
+        }else if(string_array[2] == parse_words.INTERACTIVE_MODE){
+            rhs = ROBOT_STATES::INTERACTIVE_MODE;
+        }else if(string_array[2] == parse_words.OFF){
+            rhs = ROBOT_STATES::OFF;
+        } else{
+            ErrorNode error = ErrorNode(condition, "Condition not recognised: Unknown rhs state ", line_number);
+            error.execute(robot);
+            return false;
+        }
+        if(string_array[1] == "=="){
+            return lhs == rhs;
+        } else if (string_array[1] == "!="){
+            return lhs != rhs;
+        } else{
+            ErrorNode error = ErrorNode(condition, "Condition not recognised: Unknown operator ", line_number);
+            error.execute(robot);
+            return false;
+        }
+    }
+    //getHeadPos >/</<=/>=/==/!= int
+    //getNeckPos >/</<=/>=/==/!= int
+    //getLastMovementDetected >/</<=/>=/==/!= int
+    //x == y
+    int lhs, rhs;
+    lhs = 0;
+    if(string_array[0] == parse_words.getHeadPos){
+        lhs = robot.getHeadPos();
+    } else if(string_array[0] == parse_words.getNeckPos){
+        lhs = robot.getNeckPos();
+    } else if(string_array[0] == parse_words.getLastMovementDetected){
+        lhs = robot.getLastMovementDetected();
+    }// else{
+    //     ErrorNode error = ErrorNode(condition, "Condition not recognised: lhs function call not recognized ", line_number);
+    //     error.execute(robot);
+    //     return false;
+    // }
+    char letter_rhs;
+    char letter_lhs;
+    bool is_digit_rhs = true;
+    bool is_digit_lhs = true;
+    for(unsigned int i =0 ; i < string_array[2].length()-1; i++){
+        letter_rhs = string_array[2][i];
+        if(!isDigit(letter_rhs)){
+            is_digit_rhs = false;
+        }
+    }
+    for(unsigned int i =0 ; i < string_array[0].length()-1; i++){
+        letter_lhs = string_array[0][i];
+        if(!isDigit(letter_lhs)){
+            is_digit_lhs = false;
+        }
+    }
+    if(is_digit_lhs){
+        lhs = string_array[0].toInt();
+    }
+    if(is_digit_rhs){
+        rhs = string_array[2].toInt();
+    } else{
+        ErrorNode error = ErrorNode(condition, "Condition not recognised: rhs is not an integer ", line_number);
+        error.execute(robot);
+        return false;
+    }
+    if(string_array[1] == ">"){
+        return lhs > rhs;
+    } else if(string_array[1] == "<"){
+        return lhs < rhs;
+    } else if(string_array[1] == "<="){
+        return lhs <= rhs;
+    } else if(string_array[1] == ">="){
+        return lhs >= rhs;
+    } else if(string_array[1] == "=="){
+        return lhs == rhs;
+    } else if(string_array[1] == "!="){
+        return lhs != rhs;
+    } else{
+        ErrorNode error = ErrorNode(condition, "Condition not recognised: Unknown operator", line_number);
+        error.execute(robot);
+        return false;
+    }
+    // check if condition is true or false
+    ErrorNode error = ErrorNode(condition, "Condition not recognised: global error", line_number);
+    error.execute(robot);
+    return false;
+}
+
+void IfNode::addCommand(std::shared_ptr<Node> command){
+    body.append(command);
+}
+
+bool IfNode::isViable(){
+    return viable;
+}
+
+void WhileNode::execute(Robot & robot){
+    std::shared_ptr<Node> body_command;
+    Serial.println("set condition_true");
+    int condition_true = CheckIfConditionTrue(robot);
+    if(condition_true == 1){
+        Serial.println(condition+" == true");
+        body.setToStart();
+        body_command = body.getCurrentNode();
+        body_command->print();
+        body_command->execute(robot);
+        body_command.reset();
+        while(CheckIfConditionTrue(robot)){
+            if(!body.gotToNextNode()){
+                body.setToStart();
+            }
+                body_command = body.getCurrentNode();
+                if(body_command->getType() == NODE_TYPES::ERROR){
+                    body_command->execute(robot);
+                    return;
+                }
+                body_command->print();
+                body_command->execute(robot);
+                body_command.reset();
+        }
+    } else if(condition_true > 1){
+        Serial.println(condition+" == true");
+        if(body.getLength() == 1){
+            condition_true--;
+        }
+        body.setToStart();
+        body_command = body.getCurrentNode();
+        body_command->print();
+        body_command->execute(robot);
+        body_command.reset();
+        while(condition_true > 0){
+            if(!body.gotToNextNode()){
+                body.setToStart();
+                if(condition_true <= 0 ){
+                    break;
+                }
+                condition_true--;
+            }
+            body_command = body.getCurrentNode();
+            if(body_command->getType() == NODE_TYPES::ERROR){
+                body_command->execute(robot);
+                return;
+            }
+            body_command->print();
+            body_command->execute(robot);
+            body_command.reset();
+        }
+    }
+}
+
+int WhileNode::CheckIfConditionTrue(Robot & robot){
+    Serial.println(condition);
+    String string_array[3] = {};
+    int current_array_index = 0;
+    int start_index = 0;
+    // turn String condition into array of string for each seperate word
+    for(unsigned int i = 0; i < condition.length(); i++){
+        if( condition[i] == ' '){
+            string_array[current_array_index] = condition.substring(start_index,i);
+            current_array_index++;
+            start_index = i+1;
+        }
+        if( i == condition.length()-1){
+            string_array[current_array_index] = condition.substring(start_index,i+1);
+        }
+    }
+    char letter;
+    bool is_digit = true;
+    for(unsigned int i =0 ; i < string_array[0].length()-1; i++){
+        letter = string_array[0][i];
+        if(!isDigit(letter)){
+            is_digit = false;
+            break;
+        }
+    }
+    // condition is a number
+    if(is_digit){
+        return string_array[0].toInt();
     }
     //getState =/!= STATE
     if( string_array[0] == parse_words.getState){
@@ -756,12 +1097,43 @@ bool IfNode::CheckIfConditionTrue(Robot & robot){
     return false;
 }
 
-void IfNode::addCommand(std::shared_ptr<Node> command){
+void WhileNode::addCommand(std::shared_ptr<Node> command){
     body.append(command);
 }
 
-bool IfNode::isViable(){
+bool WhileNode::isViable(){
     return viable;
+}
+
+void IntegerNode::execute(Robot & robot){
+    return;
+}
+
+int IntegerNode::getValue(){
+    return current_value;
+}
+
+void IntegerNode::changeValue(int new_value){
+    current_value = new_value;
+}
+
+String IntegerNode::getName(){
+    return value_name;
+}
+
+void MathNode::execute(Robot & robot){
+    Serial.println("In math execute");
+    Serial.println("Old value of lhs = " + String(lhs->getValue()));
+    if(math_operator == MATH_TYPES::PLUS){
+        lhs->changeValue(lhs->getValue() + rhs);
+    } else if(math_operator == MATH_TYPES::MINUS){
+        lhs->changeValue(lhs->getValue() - rhs);
+    } else if(math_operator == MATH_TYPES::MULTIPLY){
+        lhs->changeValue(lhs->getValue() * rhs);
+    } else if(math_operator == MATH_TYPES::DIVIDE){
+        lhs->changeValue(lhs->getValue() / rhs);
+    }
+    Serial.println("New value of lhs = " + String(lhs->getValue()));
 }
 
 void ErrorNode::execute(Robot & robot){
@@ -794,4 +1166,24 @@ void ErrorNode::print(){
 
 void IfNode::print(){
     Serial.println("["+String(line_number)+"]IfNode - > IF(" + condition + "){" + body.getLength() + "}");
+}
+
+void WhileNode::print(){
+    Serial.println("["+String(line_number)+"]WhileNode - > WHILE(" + condition + "){" + body.getLength() + "}");
+}
+
+void IntegerNode::print(){
+    Serial.println("["+String(line_number)+"]" + String(value_name) + " = " + String(current_value));
+}
+
+void MathNode::print(){
+    if(math_operator == MATH_TYPES::PLUS){
+        Serial.println("["+String(line_number)+"]MathNode" + lhs->getName() + "+" + String(rhs));
+    } else if(math_operator == MATH_TYPES::MINUS){
+        Serial.println("["+String(line_number)+"]MathNode" + lhs->getName() + "-" + String(rhs));
+    } else if(math_operator == MATH_TYPES::MULTIPLY){
+        Serial.println("["+String(line_number)+"]MathNode" + lhs->getName() + "*" + String(rhs));
+    } else if(math_operator == MATH_TYPES::DIVIDE){
+        Serial.println("["+String(line_number)+"]MathNode" + lhs->getName() + "/" + String(rhs));
+    }
 }

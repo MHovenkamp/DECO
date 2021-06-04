@@ -384,6 +384,7 @@ bool Robot::interactiveMode(){
         rtos::ThisThread::sleep_for(MS(100));
         setState(ROBOT_STATES::IDLE);
         Serial.println("interactive loop finished");
+        returnToStartPos();
         return succesfull_object_detect;
     }
     setState(ROBOT_STATES::IDLE);
@@ -432,9 +433,9 @@ bool Robot::followClosestObject(){
 
                     //The spiral takes very short steps in the beginning so we speed up the timing when small steps are taken.
                     if(abs(prev_x - X) > 5 || abs(prev_y - Y) > 5){
-                        rtos::ThisThread::sleep_for(MS(80));
+                        rtos::ThisThread::sleep_for(MS(120));
                     } else{
-                        rtos::ThisThread::sleep_for(MS(60));
+                        rtos::ThisThread::sleep_for(MS(100));
                     }
                     sensor_data = lidar.getDistanceMM();
                     if( sensor_data > 0 && sensor_data <= max_range && sensor_data >= min_range){

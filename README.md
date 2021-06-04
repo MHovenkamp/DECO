@@ -131,17 +131,34 @@ EOF:
     -   MIllI_SECOND 
 
 ### if conditions
-You can maken if statement using some of the getters describe in the next paragraph.
+You can maken if statement using some of the getters describe in the next paragraph. You can not place one if statement in another if statement. 
 ```
 IF(getState = IDLE){
     // Code to execute if statement is true.
 }
 ```
 Possible commands:
--   getState = STATE
+-   getState == STATE
 -   getHeadPos >/</<=/>=/==/!= int
 -   getNeckPos >/</<=/>=/==/!= int
 -   getLastMovementDetected >/</<=/>=/==/!= int
+
+you can use an int variable for every int mentioned above.
+
+### while loops
+You can make a small part of your code loop for as long as a given ocndition is true
+```
+WHILE(getState = IDLE){
+    // Code to loop execute if statement is true.
+}
+```
+possible conditions1
+-   x : X can be any number, The loop wil continue for x iterations.
+-   getState == STATE
+-   getHeadPos >/</<=/>=/==/!= int
+-   getNeckPos >/</<=/>=/==/!= int
+-   getLastMovementDetected >/</<=/>=/==/!= int
+IMPORTANT: if you change the value of an integer value used in the condition this change will not affect the x used in the condition. You can not use getHeadPos > x and then change x in the while loop to shorten or lenghten the loop. 
 
 ### Getters
 - ```getBreakTime```, Get the duration of the break time reminder.

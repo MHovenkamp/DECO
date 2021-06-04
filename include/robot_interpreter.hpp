@@ -56,6 +56,101 @@ public:
 };
 
 /**
+ * @brief IntegerNode class holding an integer
+ * 
+ */
+class IntegerNode: public Node{
+private:
+    int current_value;
+    String value_name;
+public:
+    /**
+     * @brief Construct a new Integer Node object
+     * 
+     * @param original_string : String
+     * @param current_value : int
+     * @param line_number : int
+     * @param type : NODE_TYPES
+     */
+    IntegerNode(String original_string, String value_name, int current_value, int line_number, NODE_TYPES type = NODE_TYPES::INTEGER_NODE):
+        Node(original_string, line_number, type),
+        current_value(current_value),
+        value_name(value_name){}
+
+    /**
+     * @brief execute the integer node
+     * 
+     * @param robot 
+     */
+    void execute(Robot & robot);
+
+    /**
+     * @brief print the integer node
+     * 
+     */
+    void print();
+
+    /**
+     * @brief Get the Value of the integerNode
+     * 
+     * @return int 
+     */
+    int getValue();
+
+    /**
+     * @brief change the value of the int
+     * 
+     */
+    void changeValue(int new_value);
+
+    /**
+     * @brief Get the name of the integer
+     * 
+     * @return String 
+     */
+    String getName();
+};
+
+/**
+ * @brief MathNode to be executed on an integer node
+ * 
+ */
+class MathNode: public Node{
+private:
+    std::shared_ptr<IntegerNode> lhs;
+    int rhs;
+    MATH_TYPES math_operator;
+public:
+    /**
+     * @brief Construct a new Math Node object
+     * 
+     * @param original_string : string
+     * @param lhs : IntegerNode
+     * @param rhs : int
+     * @param line_number : int 
+     * @param type : NODE_TYPES
+     */
+    MathNode(String original_string, std::shared_ptr<IntegerNode> lhs, int rhs, MATH_TYPES math_operator, int line_number, NODE_TYPES type = NODE_TYPES::MATH_NODE):
+        Node(original_string, line_number, type),
+        lhs(lhs),
+        rhs(rhs)
+        {math_operator = math_operator;}
+
+    /**
+     * @brief execute the math node
+     * 
+     * @param robot 
+     */
+    void execute(Robot & robot);
+
+    /**
+     * @brief print the math node values
+     * 
+     */
+    void print();
+};
+
+/**
  * @brief SetterNode class, derived from Node.
  * 
  */
@@ -303,6 +398,60 @@ public:
     bool isViable();
 };
 
+class WhileNode: public Node{
+private:
+    String condition;
+    DoubleLinkedList<Node> body;
+    bool viable;
+    /**
+     * @brief Check if the condition of the if statement is true or false
+     * 
+     * @return true 
+     * @return false 
+     */
+    int CheckIfConditionTrue(Robot & robot);
+public:
+    /**
+     * @brief Construct a new Error Node object
+     * 
+     * @param original_string : String
+     * @param condition : String
+     * @param type : NODE_TYPES
+     */
+    WhileNode(String original_string, String condition, bool viable, int line_number, NODE_TYPES type = NODE_TYPES::IFNODE):
+    Node(original_string, line_number, type),
+    condition(condition),
+    viable(viable){}
+
+    /**
+     * @brief Add command to the body of the if node
+     * 
+     * @param command 
+     */
+    void addCommand(std::shared_ptr<Node> command);
+
+    /**
+     * @brief Print the error message in this node
+     * 
+     * @param robot : Robot &
+     */
+    void execute(Robot & robot) override;
+
+    /**
+     * @brief print the infromation of the node
+     * 
+     */
+    void print() override;
+
+    /**
+     * @brief return if the created WaitNode is usable, used by createWaitNode function.
+     * 
+     * @return true 
+     * @return false 
+     */
+    bool isViable();
+};
+
 /**
  * @brief Interpreter class
  * 
@@ -319,15 +468,23 @@ private:
      * @param command : String
      * @return std::shared_ptr<Node> 
      */
-    std::shared_ptr<Node> parseCommand(String command, int* line_number);
+    std::shared_ptr<Node> parseCommand(String command, int* line_number, std::shared_ptr<IntegerNode> * all_created_nodes, int *current_index);
 
     /**
      * @brief Create a Possible IfNode object otherwise return error.
      * 
      * @param command 
-     * @return std::shared_ptr<Node> 
+     * @return std::shared_ptr<IfNode> 
      */
-    std::shared_ptr<IfNode> createPossibleIf(String command, int * line_number);
+    std::shared_ptr<IfNode> createPossibleIf(String command, int * line_number, std::shared_ptr<IntegerNode> * all_created_nodes, int * current_index);
+
+    /**
+     * @brief Create a Possible WhileNode object otherwise return error.
+     * 
+     * @param command 
+     * @return std::shared_ptr<WhileNode> 
+     */
+    std::shared_ptr<WhileNode> createPossibleWhile(String command, int * line_number, std::shared_ptr<IntegerNode> * all_created_nodes, int * current_index);
 
     /**
      * @brief REPL functionality

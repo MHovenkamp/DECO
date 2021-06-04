@@ -51,6 +51,7 @@ struct PARSE_WORDS{
     String LOOP = "LOOP:";
     String EOF_ = "EOF:";
     String IF = "IF";
+    String WHILE = "WHILE";
 };
 
 /**
@@ -63,7 +64,16 @@ enum class NODE_TYPES{
     COMMAND,
     WAIT,
     ERROR,
-    IFNODE
+    IFNODE,
+    INTEGER_NODE,
+    MATH_NODE
+};
+
+enum class MATH_TYPES{
+    PLUS,
+    MINUS,
+    MULTIPLY,
+    DIVIDE
 };
 
 

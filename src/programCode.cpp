@@ -10,14 +10,17 @@ struct code{
         return_to_start_pos
         playSound notification
     LOOP:
-        IF(getState = IDLE){
-            move_head 100
+        WHILE(getState = IDLE){
+            rng_movement
+            WAIT 3 SECOND
+            return_to_start_pos
             WAIT 10 SECOND
-            move_head 10
-            WAIT 10 SECOND
+            rng_movement
+        }
+        IF(getState = WEATHER_STATION){
+            playSound notification
         }
         interactive_mode
     EOF:
-
     )";
 };

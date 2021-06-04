@@ -98,14 +98,22 @@ LOOP:
 EOF:
 
 SETUP:
-    STATE = IDLE
-    
 LOOP:
-    IF(getState){
-        move_head 10
-        WAIT 10 SECOND
-        move_head 90
-        WAIT 10 SECOND
+    x = 3
+    move_head x
+    IF( x == 3){
+        WAIT 1 SECOND;
     }
-    WAIT 10 SECOND
+    WHILE(x){
+        WAIT 10 SECOND;
+    }
 EOF:
+
+    SETUP:
+    LOOP:
+        WHILE(5){
+            WAIT 1 SECOND
+            WAIT 2 SECOND
+        }
+        WAIT 10 SECOND
+    EOF:
