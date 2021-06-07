@@ -205,7 +205,8 @@ Set the time duration after which the robot will shut down if there is no moveme
     -   MINUTE 
     -   SECOND 
     -   MIllI_SECOND 
-set the duration and the period of a timed event.
+
+Set the duration and the period of a timed event.
 a :
 -   weatherstation
 -   walk_reminder
