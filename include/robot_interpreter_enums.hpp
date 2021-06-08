@@ -66,7 +66,8 @@ enum class NODE_TYPES{
     ERROR,
     IFNODE,
     INTEGER_NODE,
-    MATH_NODE
+    MATH_NODE,
+    WHILENODE
 };
 
 enum class MATH_TYPES{

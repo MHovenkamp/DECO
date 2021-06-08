@@ -44,7 +44,10 @@ public:
      * 
      * @param robot : Robot &
      */
-    virtual void execute(Robot & robot);
+
+
+    // TODO execute maken die gerbuik maakt van de integer node mogelijk moeten casten.
+    virtual void execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index);
 
     /**
      * @brief print the infromation of the node
@@ -82,7 +85,7 @@ public:
      * 
      * @param robot 
      */
-    void execute(Robot & robot);
+    void execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index);
 
     /**
      * @brief print the integer node
@@ -141,7 +144,7 @@ public:
      * 
      * @param robot 
      */
-    void execute(Robot & robot);
+    void execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index);
 
     /**
      * @brief print the math node values
@@ -183,7 +186,7 @@ public:
      * 
      * @param robot : Robot &
      */
-    void execute(Robot & robot) override;
+    void execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index) override;
 
     /**
      * @brief print the infromation of the node
@@ -224,7 +227,7 @@ public:
      * 
      * @param robot : Robot &
      */
-    void execute(Robot & robot) override;
+    void execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index) override;
 
     /**
      * @brief print the infromation of the node
@@ -262,7 +265,7 @@ public:
      * 
      * @param robot : Robot &
      */
-    void execute(Robot & robot) override;
+    void execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index) override;
 
     /**
      * @brief print the infromation of the node
@@ -298,7 +301,7 @@ public:
      * 
      * @param robot : Robot &
      */
-    void execute(Robot & robot) override;
+    void execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index) override;
 
     /**
      * @brief print the infromation of the node
@@ -331,7 +334,7 @@ public:
      * 
      * @param robot : Robot &
      */
-    void execute(Robot & robot) override;
+    void execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index) override;
 
     /**
      * @brief print the infromation of the node
@@ -340,11 +343,37 @@ public:
     void print() override;
 };
 
+class ContainsBodyNode{
+private:
+    NODE_TYPES node_type;
+public:
+    ContainsBodyNode(NODE_TYPES node_type):
+        node_type(node_type){}
+
+    ContainsBodyNode(){}
+
+    virtual ~ContainsBodyNode(){};
+
+    virtual int CheckIfConditionTrue(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index);
+
+    virtual void addCommand(std::shared_ptr<Node> command);
+
+    virtual bool isViable();
+
+    /**
+     * @brief Get the onderlying derived object
+     * 
+     * @return NODE_TYPES 
+     */
+    NODE_TYPES getType();
+};
+
+
 /**
  * @brief ErrorNode class, derived from Node
  * 
  */
-class IfNode: public Node{
+class IfNode: public Node, public ContainsBodyNode{
 private:
     String condition;
     DoubleLinkedList<Node> body;
@@ -355,7 +384,8 @@ private:
      * @return true 
      * @return false 
      */
-    bool CheckIfConditionTrue(Robot & robot);
+    int CheckIfConditionTrue(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index) override;
+    
 public:
     /**
      * @brief Construct a new Error Node object
@@ -366,6 +396,7 @@ public:
      */
     IfNode(String original_string, String condition, bool viable, int line_number, NODE_TYPES type = NODE_TYPES::IFNODE):
     Node(original_string, line_number, type),
+    ContainsBodyNode(NODE_TYPES::IFNODE),
     condition(condition),
     viable(viable){}
 
@@ -374,14 +405,14 @@ public:
      * 
      * @param command 
      */
-    void addCommand(std::shared_ptr<Node> command);
+    void addCommand(std::shared_ptr<Node> command) override;
 
     /**
      * @brief Print the error message in this node
      * 
      * @param robot : Robot &
      */
-    void execute(Robot & robot) override;
+    void execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index) override;
 
     /**
      * @brief print the infromation of the node
@@ -395,10 +426,10 @@ public:
      * @return true 
      * @return false 
      */
-    bool isViable();
+    bool isViable() override;
 };
 
-class WhileNode: public Node{
+class WhileNode: public Node, public ContainsBodyNode{
 private:
     String condition;
     DoubleLinkedList<Node> body;
@@ -409,7 +440,7 @@ private:
      * @return true 
      * @return false 
      */
-    int CheckIfConditionTrue(Robot & robot);
+    int CheckIfConditionTrue(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index) override;
 public:
     /**
      * @brief Construct a new Error Node object
@@ -418,8 +449,9 @@ public:
      * @param condition : String
      * @param type : NODE_TYPES
      */
-    WhileNode(String original_string, String condition, bool viable, int line_number, NODE_TYPES type = NODE_TYPES::IFNODE):
+    WhileNode(String original_string, String condition, bool viable, int line_number, NODE_TYPES type = NODE_TYPES::WHILENODE):
     Node(original_string, line_number, type),
+    ContainsBodyNode(NODE_TYPES::WHILENODE),
     condition(condition),
     viable(viable){}
 
@@ -428,14 +460,14 @@ public:
      * 
      * @param command 
      */
-    void addCommand(std::shared_ptr<Node> command);
+    void addCommand(std::shared_ptr<Node> command) override;
 
     /**
      * @brief Print the error message in this node
      * 
      * @param robot : Robot &
      */
-    void execute(Robot & robot) override;
+    void execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index) override;
 
     /**
      * @brief print the infromation of the node
@@ -449,7 +481,7 @@ public:
      * @return true 
      * @return false 
      */
-    bool isViable();
+    bool isViable() override;
 };
 
 /**
@@ -468,7 +500,7 @@ private:
      * @param command : String
      * @return std::shared_ptr<Node> 
      */
-    std::shared_ptr<Node> parseCommand(String command, int* line_number, std::shared_ptr<IntegerNode> * all_created_nodes, int *current_index);
+    std::shared_ptr<Node> parseCommand(String command, int* line_number, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int *current_index);
 
     /**
      * @brief Create a Possible IfNode object otherwise return error.
@@ -476,7 +508,7 @@ private:
      * @param command 
      * @return std::shared_ptr<IfNode> 
      */
-    std::shared_ptr<IfNode> createPossibleIf(String command, int * line_number, std::shared_ptr<IntegerNode> * all_created_nodes, int * current_index);
+    std::shared_ptr<IfNode> createPossibleIf(String command, int * line_number, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index);
 
     /**
      * @brief Create a Possible WhileNode object otherwise return error.
@@ -484,7 +516,7 @@ private:
      * @param command 
      * @return std::shared_ptr<WhileNode> 
      */
-    std::shared_ptr<WhileNode> createPossibleWhile(String command, int * line_number, std::shared_ptr<IntegerNode> * all_created_nodes, int * current_index);
+    std::shared_ptr<WhileNode> createPossibleWhile(String command, int * line_number, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index);
 
     /**
      * @brief REPL functionality

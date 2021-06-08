@@ -109,11 +109,24 @@ LOOP:
     }
 EOF:
 
-    SETUP:
-    LOOP:
-        WHILE(5){
-            WAIT 1 SECOND
-            WAIT 2 SECOND
+SETUP:
+    x = 3
+    WHILE(5){
+        IF( x == 3 ){
+            WHILE(2){
+                WAIT 1 SECOND
+            }
         }
-        WAIT 10 SECOND
-    EOF:
+    }
+    WAIT 10 SECOND
+LOOP:
+EOF:
+
+SETUP:
+    x = 3
+    WHILE(5){
+        WAIT 1 SECOND
+    }
+    WAIT 10 SECOND
+LOOP:
+EOF:
