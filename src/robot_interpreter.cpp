@@ -134,24 +134,28 @@ void Interpreter::file(String file_text){
     Serial.println("===========LOOP===========");
     Serial.println(loop);
     Serial.println("==========================");
-    int line_number = 1;
     // Process setup
+
+    int line_number = 1;
+    std::shared_ptr<Node> all_created_integer_nodes[50];
+    unsigned int current_index = 0;
+
     if(setup.length() > 0){
         line_number++; // count increase to count the SETUP: tag
-        file_setup_list = createCommandList(setup, &line_number);
+        file_setup_list = createCommandList(setup, &line_number, all_created_integer_nodes, &current_index);
         if(file_setup_list.getLength() > 0){
             file_setup_list.setToStart();
             std::shared_ptr<Node> temp = file_setup_list.getCurrentNode();
-            temp->execute(robot);
+            temp->execute(robot, all_created_integer_nodes, &current_index);
             temp.reset();
             while(file_setup_list.gotToNextNode()){
                 temp = file_setup_list.getCurrentNode();
                 if(temp->getType() == NODE_TYPES::ERROR){
-                    temp->execute(robot);
+                    temp->execute(robot, all_created_integer_nodes, &current_index);
                     return;
                 }
                 temp->print();
-                temp->execute(robot);
+                temp->execute(robot, all_created_integer_nodes, &current_index);
                 temp.reset();
             }
         }
@@ -159,7 +163,7 @@ void Interpreter::file(String file_text){
     // Process loop
     if(loop.length() > 0){
         line_number++; // count increase to count the LOOP: tag
-        file_loop_list = createCommandList(loop, &line_number);
+        file_loop_list = createCommandList(loop, &line_number, all_created_integer_nodes, &current_index);
     } 
     // Keep processing loop until serial input is reached
     if(file_loop_list.getLength() > 0){
@@ -167,7 +171,7 @@ void Interpreter::file(String file_text){
         std::shared_ptr<Node> temp = file_loop_list.getCurrentNode();
         temp = file_loop_list.getCurrentNode();
         temp->print();
-        temp->execute(robot);
+        temp->execute(robot, all_created_integer_nodes, &current_index);
         temp.reset();
         while(Serial.available()>0){
             char temp = Serial.read();
@@ -179,17 +183,17 @@ void Interpreter::file(String file_text){
             }
             temp = file_loop_list.getCurrentNode();
             if(temp->getType() == NODE_TYPES::ERROR){
-                temp->execute(robot);
+                temp->execute(robot, all_created_integer_nodes, &current_index);
                 return;
             }
             temp->print();
-            temp->execute(robot);
+            temp->execute(robot, all_created_integer_nodes, &current_index);
             temp.reset();
         }
     }
 }
 
-DoubleLinkedList<Node> Interpreter::createCommandList(String text, int* line_number){
+DoubleLinkedList<Node> Interpreter::createCommandList(String text, int* line_number, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int* current_index_int){
     // TODO lijst bijhouden van alle if nodes en while nodes. als we in een ifnode zitten wordt de laatse als definitieve behandelt.
     // als de ifnode vol is wordt de if wergehaald uit de lijst en word deze if in de laatse if/while gezet. 
     // als de laatste node ene if is word de in_if_node op true gezet en en als while : in_while_node.
@@ -197,8 +201,6 @@ DoubleLinkedList<Node> Interpreter::createCommandList(String text, int* line_num
     std::shared_ptr<IfNode> possible_if_node;
     std::shared_ptr<WhileNode> possible_while_node;
 
-    std::shared_ptr<IntegerNode> all_created_integer_nodes[50]; // max of 50 integers.
-    int current_index_int = 0;
     // list filled with all open if and while nodes. empty when all nodes are filled and stored in linked_list
     std::shared_ptr<ContainsBodyNode> all_created_if_while_nodes[50];
     int current_amount_of_if_while = 0;
@@ -214,10 +216,10 @@ DoubleLinkedList<Node> Interpreter::createCommandList(String text, int* line_num
             // if the last node in the if/while node is an ifnode
             if(all_created_if_while_nodes[current_amount_of_if_while-1]->getType() == NODE_TYPES::IFNODE){
                 if(line.indexOf('}') == -1){ // no end line detected for ifnode yet
-                    possible_if_node = createPossibleIf(line, line_number,all_created_integer_nodes, &current_index_int);
-                    possible_while_node = createPossibleWhile(line, line_number,all_created_integer_nodes, &current_index_int);
+                    possible_if_node = createPossibleIf(line, line_number,all_created_integer_nodes, current_index_int);
+                    possible_while_node = createPossibleWhile(line, line_number,all_created_integer_nodes, current_index_int);
                     if(possible_while_node->isViable() == false && possible_if_node->isViable() == false){
-                        all_created_if_while_nodes[current_amount_of_if_while-1]->addCommand(parseCommand(line, line_number, all_created_integer_nodes, &current_index_int));
+                        all_created_if_while_nodes[current_amount_of_if_while-1]->addCommand(parseCommand(line, line_number, all_created_integer_nodes, current_index_int));
                     } else if(possible_if_node->isViable() == true){
                         all_created_if_while_nodes[current_amount_of_if_while] = possible_if_node;
                         current_amount_of_if_while++;
@@ -242,10 +244,10 @@ DoubleLinkedList<Node> Interpreter::createCommandList(String text, int* line_num
             continue;
             } else if(all_created_if_while_nodes[current_amount_of_if_while-1]->getType() == NODE_TYPES::WHILENODE){
                 if(line.indexOf('}') == -1){
-                    possible_if_node = createPossibleIf(line, line_number,all_created_integer_nodes, &current_index_int);
-                    possible_while_node = createPossibleWhile(line, line_number,all_created_integer_nodes, &current_index_int);
+                    possible_if_node = createPossibleIf(line, line_number,all_created_integer_nodes, current_index_int);
+                    possible_while_node = createPossibleWhile(line, line_number,all_created_integer_nodes, current_index_int);
                     if(possible_while_node->isViable() == false && possible_if_node->isViable() == false){
-                        all_created_if_while_nodes[current_amount_of_if_while-1]->addCommand(parseCommand(line, line_number, all_created_integer_nodes, &current_index_int));
+                        all_created_if_while_nodes[current_amount_of_if_while-1]->addCommand(parseCommand(line, line_number, all_created_integer_nodes, current_index_int));
                     } else if(possible_if_node->isViable() == true){
                         all_created_if_while_nodes[current_amount_of_if_while] = possible_if_node;
                         current_amount_of_if_while++;
@@ -269,10 +271,10 @@ DoubleLinkedList<Node> Interpreter::createCommandList(String text, int* line_num
             *line_number = *line_number+1;  
             continue;
             } else{
-                possible_if_node = createPossibleIf(line, line_number,all_created_integer_nodes, &current_index_int);
-                possible_while_node = createPossibleWhile(line, line_number,all_created_integer_nodes, &current_index_int);
+                possible_if_node = createPossibleIf(line, line_number,all_created_integer_nodes, current_index_int);
+                possible_while_node = createPossibleWhile(line, line_number,all_created_integer_nodes, current_index_int);
                 if(possible_while_node->isViable() == false && possible_if_node->isViable() == false){
-                    std::shared_ptr<Node> node_ptr = parseCommand(line, line_number, all_created_integer_nodes, &current_index_int);
+                    std::shared_ptr<Node> node_ptr = parseCommand(line, line_number, all_created_integer_nodes, current_index_int);
                     linked_list.append(node_ptr);
                 } else if(possible_if_node->isViable() == true){
                     all_created_if_while_nodes[current_amount_of_if_while] = possible_if_node;
@@ -290,8 +292,8 @@ DoubleLinkedList<Node> Interpreter::createCommandList(String text, int* line_num
 }
 
 void Interpreter::repl(){
-    std::shared_ptr<IntegerNode> all_created_integer_nodes[1]; // max of 50 integers.
-    int current_index = 0;
+    std::shared_ptr<Node> *all_created_integer_nodes; // max of 50 integers.
+    unsigned int current_index = 0;
     String command = "";
     char character_temp = ' ';
     int line_number = 0;
@@ -322,7 +324,7 @@ void Interpreter::repl(){
     }
 }
 // give it the node lsits check if it is an integer node then pass just the int, do this for any instance of an int
-std::shared_ptr<IfNode> Interpreter::createPossibleIf(String command, int* line_number, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index){
+std::shared_ptr<IfNode> Interpreter::createPossibleIf(String command, int* line_number, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index){
     command.trim();
     String condition_line = "";     
     int index = 3;
@@ -332,28 +334,6 @@ std::shared_ptr<IfNode> Interpreter::createPossibleIf(String command, int* line_
                 condition_line += command[index];
                 index++;
             }
-            // String string_array[10] = {};
-            // int current_array_index = 0;
-            // int start_index = 0;
-            // for(unsigned int i = 0; i < condition_line.length(); i++){
-            //     if( condition_line[i] == ' '){
-            //         string_array[current_array_index] = condition_line.substring(start_index,i);
-            //         current_array_index++;
-            //         start_index = i+1;
-            //     }
-            //     if( i == condition_line.length()-1){
-            //         string_array[current_array_index] = condition_line.substring(start_index,i+1);
-            //     }
-            // }
-            // String new_condition_line = "";
-            // for(unsigned int i = 0; i < 10; i++){
-            //     for(int j = 0; j < *current_index; j++){
-            //         if(string_array[i] == all_created_integer_nodes[j]->getName()){
-            //             string_array[i] = String(all_created_integer_nodes[j]->getValue());
-            //         }
-            //     }
-            //     new_condition_line += string_array[i] + " ";
-            // }
             if(command[index+1] == '{'){
                 return std::shared_ptr<IfNode>( new IfNode(command, condition_line, true, *line_number));        
             } else {
@@ -366,7 +346,7 @@ std::shared_ptr<IfNode> Interpreter::createPossibleIf(String command, int* line_
     return std::shared_ptr<IfNode>( new IfNode("NON_VIABLE", condition_line, false, *line_number));        
 }
 
-std::shared_ptr<WhileNode> Interpreter::createPossibleWhile(String command, int* line_number, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index){
+std::shared_ptr<WhileNode> Interpreter::createPossibleWhile(String command, int* line_number, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index){
     command.trim();
     String condition_line = "";    
     String possible_while = command.substring(0,5);
@@ -376,28 +356,6 @@ std::shared_ptr<WhileNode> Interpreter::createPossibleWhile(String command, int*
             condition_line += command[index];
             index++;
         } 
-        // String string_array[10] = {};
-        // int current_array_index = 0;
-        // int start_index = 0;
-        // for(unsigned int i = 0; i < condition_line.length(); i++){
-        //     if( condition_line[i] == ' '){
-        //         string_array[current_array_index] = condition_line.substring(start_index,i);
-        //         current_array_index++;
-        //         start_index = i+1;
-        //     }
-        //     if( i == condition_line.length()-1){
-        //         string_array[current_array_index] = condition_line.substring(start_index,i+1);
-        //     }
-        // }
-        // String new_condition_line = "";
-        // for(unsigned int i = 0; i < 10; i++){
-        //     for(int j = 0; j < *current_index; j++){
-        //         if(string_array[i] == all_created_integer_nodes[j]->getName()){
-        //             string_array[i] = String(all_created_integer_nodes[j]->getValue());
-        //         }
-        //     }
-        //     new_condition_line += string_array[i];
-        // }
         if(command[index+1] == '{'){
             return std::shared_ptr<WhileNode>( new WhileNode(command, condition_line, true, *line_number));        
         } else {
@@ -409,7 +367,7 @@ std::shared_ptr<WhileNode> Interpreter::createPossibleWhile(String command, int*
     return std::shared_ptr<WhileNode>( new WhileNode("NON_VIABLE", condition_line, false, *line_number));         
 }
 
-std::shared_ptr<Node> Interpreter::parseCommand(String command, int * line_number, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index){
+std::shared_ptr<Node> Interpreter::parseCommand(String command, int * line_number, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index){
     int amount_of_spaces = 0;
     for(unsigned int i = 0; i < command.length(); i++){
         if( command[i] == ' '){
@@ -439,9 +397,10 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command, int * line_numbe
         break;
     case 2:
         if(string_array[0] != parse_words.EOF_){
-            for( int i = 0; i < *current_index; i++){
-                if(string_array[0] == all_created_integer_nodes[i]->getName()){
-                    return std::shared_ptr<Node> (new CommandNode(command, string_array[0], String(all_created_integer_nodes[i]->getValue()), true));
+            for(unsigned int i = 0; i < *current_index; i++){
+                IntegerNode* integer_node = static_cast<IntegerNode*>(all_created_integer_nodes[i].get());
+                if(string_array[0] == integer_node->getName()){
+                    return std::shared_ptr<Node> (new CommandNode(command, string_array[0], String(integer_node->getValue()), true));
                 }
             }
             return std::shared_ptr<Node> (new CommandNode(command, string_array[0], string_array[1], true));
@@ -459,12 +418,21 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command, int * line_numbe
             }
             if(is_int){
                 // create new integer node
-                Serial.println(*current_index);
                 if(*current_index < 50){
-                    std::shared_ptr<IntegerNode> pointer = std::make_shared<IntegerNode>(command, string_array[0], string_array[2].toInt(),*line_number);
-                    all_created_integer_nodes[*current_index] = pointer;
-                    all_created_integer_nodes[*current_index]->print();
-                    *current_index = *current_index+1;
+                    std::shared_ptr<IntegerNode> pointer;
+                    bool already_excisted = false;
+
+                    for(unsigned int i = 0; i < *current_index; i++){
+                        IntegerNode* integer_node = static_cast<IntegerNode*>(all_created_integer_nodes[i].get());
+                        if(string_array[0] == integer_node->getName()){
+                            already_excisted = true;
+                        }
+                    }
+                    pointer = std::make_shared<IntegerNode>(command, string_array[0], string_array[2].toInt(),*line_number);
+                    if(!already_excisted){
+                        all_created_integer_nodes[*current_index] = pointer;
+                        *current_index = *current_index+1;
+                    }
                     return pointer;
                 } else{
                     return std::shared_ptr<Node> (new ErrorNode(command, "Max number of integers reached", *line_number));
@@ -499,9 +467,10 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command, int * line_numbe
             return std::shared_ptr<Node> (new ErrorNode(command, "unknown command of lenght 3", *line_number));
         } else if(string_array[1] == "+" || string_array[1] == "-" || string_array[1] == "/" ||string_array[1] == "*"){
             std::shared_ptr<IntegerNode> lhs;
-            for(int i = 0; i < *current_index; i++){
-                if(all_created_integer_nodes[i]->getName() == string_array[0]){
-                    lhs = all_created_integer_nodes[i];
+            for(unsigned int i = 0; i < *current_index; i++){
+                IntegerNode* integer_node = static_cast<IntegerNode*>(all_created_integer_nodes[i].get());
+                if(integer_node->getName() == string_array[0]){
+                    lhs = std::make_shared<IntegerNode>(*integer_node);
                 }
             } 
             char letter;
@@ -518,8 +487,6 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command, int * line_numbe
             } else{
                 return std::shared_ptr<Node> (new ErrorNode(command, "rhs value of mathnode not integer", *line_number));
             }
-            Serial.println("lhs=");
-            lhs->print();
             if(string_array[1] == "+"){
                 return std::shared_ptr<Node>(new MathNode(command, lhs, rhs, MATH_TYPES::PLUS, *line_number));
             }else if(string_array[1] == "-"){
@@ -605,7 +572,7 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command, int * line_numbe
 }
 
 
-void Node::execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index){
+void Node::execute(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index){
     Serial.println(original_string);
 }
 
@@ -631,7 +598,7 @@ unsigned int SetterNode::getTime(){
     }
 }
 
-void SetterNode::execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index){
+void SetterNode::execute(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index){
     if(to_set == parse_words.weatherstation){
         if(setter_type == parse_words.ACTIVE){
             robot.setWeatherStationActive(true);
@@ -701,7 +668,7 @@ void SetterNode::execute(Robot & robot, std::shared_ptr<IntegerNode> * all_creat
     }
 }
 
-void SetStateNode::execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index){
+void SetStateNode::execute(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index){
     if(state == parse_words.IDLE){
         robot.setState(ROBOT_STATES::IDLE);
         Serial.println("robot state set to : IDLE");
@@ -728,7 +695,7 @@ void SetStateNode::execute(Robot & robot, std::shared_ptr<IntegerNode> * all_cre
     }
 }
 
-void CommandNode::execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index){
+void CommandNode::execute(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index){
     // TODO IMPLEMENT getter voor micro lidar en if en while statements.
     char letter;
     bool is_digit = true;
@@ -741,7 +708,8 @@ void CommandNode::execute(Robot & robot, std::shared_ptr<IntegerNode> * all_crea
         }
     }
     for(unsigned int i = 0; i < *current_index; i++){
-        if(param == all_created_integer_nodes[i]->getName()){
+        IntegerNode* Integer_node = static_cast<IntegerNode*>(all_created_integer_nodes[i].get());
+        if(param == Integer_node->getName()){
             is_digit = true;
             param_is_integer_node = true;
         }
@@ -808,14 +776,16 @@ void CommandNode::execute(Robot & robot, std::shared_ptr<IntegerNode> * all_crea
         if(param_is_integer_node){
             if(command == parse_words.move_head){
                 for(unsigned int i = 0; i < *current_index; i++){
-                    if(param == all_created_integer_nodes[i]->getName()){
-                        robot.moveHead(all_created_integer_nodes[i]->getValue());
+                    IntegerNode* integer_node = static_cast<IntegerNode*>(all_created_integer_nodes[i].get());
+                    if(param == integer_node->getName()){
+                        robot.moveHead(integer_node->getValue());
                     }
                 }
             } else if(command == parse_words.move_neck){
                 for(unsigned int i = 0; i < *current_index; i++){
-                    if(param == all_created_integer_nodes[i]->getName()){
-                        robot.moveNeck(all_created_integer_nodes[i]->getValue());
+                    IntegerNode* integer_node = static_cast<IntegerNode*>(all_created_integer_nodes[i].get());
+                    if(param == integer_node->getName()){
+                        robot.moveNeck(integer_node->getValue());
                     }
                 }
             } 
@@ -848,7 +818,7 @@ void CommandNode::execute(Robot & robot, std::shared_ptr<IntegerNode> * all_crea
     }
 }
 
-void WaitNode::execute( Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index){
+void WaitNode::execute( Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index){
     if(time_measurements == parse_words.MINUTE_){
         rtos::ThisThread::sleep_for(MS( time_period * MINUTE ));
     } else if(time_measurements == parse_words.HOUR_){
@@ -864,9 +834,9 @@ void WaitNode::execute( Robot & robot, std::shared_ptr<IntegerNode> * all_create
     }
 }
 
-void IfNode::execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index){
+void IfNode::execute(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index){    
     if(CheckIfConditionTrue(robot, all_created_integer_nodes, current_index)){
-        Serial.println(condition+" == true");
+        Serial.println("("+condition+") == true");
         body.setToStart();
         std::shared_ptr<Node> body_command = body.getCurrentNode();
         body_command->print();
@@ -878,10 +848,12 @@ void IfNode::execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_i
             body_command->execute(robot, all_created_integer_nodes, current_index);
             body_command.reset();
         }
+    }else{
+        Serial.println("("+condition+") == false");
     }
 }
 
-int IfNode::CheckIfConditionTrue(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index){
+int IfNode::CheckIfConditionTrue(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index){
     condition.trim();
     String string_array[3] = {};
     int current_array_index = 0;
@@ -952,6 +924,7 @@ int IfNode::CheckIfConditionTrue(Robot & robot, std::shared_ptr<IntegerNode> * a
     bool is_digit_lhs = true;
     bool lhs_set = false;
     bool rhs_set = false;
+
     for(unsigned int i =0 ; i < string_array[2].length()-1; i++){
         letter_rhs = string_array[2][i];
         if(!isDigit(letter_rhs)){
@@ -965,16 +938,18 @@ int IfNode::CheckIfConditionTrue(Robot & robot, std::shared_ptr<IntegerNode> * a
         }
     }
     for(unsigned int i = 0; i < *current_index; i++){
-        if(string_array[0] == all_created_integer_nodes[i]->getName()){
+        IntegerNode* integer_node = static_cast<IntegerNode*>(all_created_integer_nodes[i].get());
+        if(string_array[0] == integer_node->getName()){
             is_digit_lhs = true;
-            lhs = all_created_integer_nodes[i]->getValue();
+            lhs = integer_node->getValue();
             lhs_set = true;
         }
     }
     for(unsigned int i = 0; i < *current_index; i++){
-        if(string_array[2] == all_created_integer_nodes[i]->getName()){
+        IntegerNode* integer_node = static_cast<IntegerNode*>(all_created_integer_nodes[i].get());
+        if(string_array[2] == integer_node->getName()){
             is_digit_rhs = true;
-            rhs = all_created_integer_nodes[i]->getValue();
+            rhs = integer_node->getValue();
             rhs_set = true;
         }
     }
@@ -1019,7 +994,8 @@ bool IfNode::isViable(){
     return viable;
 }
 
-void WhileNode::execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index){
+// TODO loop sudden stop.
+void WhileNode::execute(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index){
     std::shared_ptr<Node> body_command;
     int condition_true = CheckIfConditionTrue(robot, all_created_integer_nodes, current_index);
     if(condition_true == 1){
@@ -1072,7 +1048,7 @@ void WhileNode::execute(Robot & robot, std::shared_ptr<IntegerNode> * all_create
     }
 }
 
-int WhileNode::CheckIfConditionTrue(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index){
+int WhileNode::CheckIfConditionTrue(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index){
     condition.trim();
     String string_array[3] = {};
     int current_array_index = 0;
@@ -1143,28 +1119,36 @@ int WhileNode::CheckIfConditionTrue(Robot & robot, std::shared_ptr<IntegerNode> 
     bool is_digit_lhs = true;
     bool lhs_set = false;
     bool rhs_set = false;
-    for(unsigned int i =0 ; i < string_array[2].length()-1; i++){
+    for(unsigned int i =0 ; i < string_array[2].length(); i++){
         letter_rhs = string_array[2][i];
         if(!isDigit(letter_rhs)){
             is_digit_rhs = false;
         }
     }
-    for(unsigned int i =0 ; i < string_array[0].length()-1; i++){
+    for(unsigned int i =0 ; i < string_array[0].length(); i++){
         letter_lhs = string_array[0][i];
         if(!isDigit(letter_lhs)){
             is_digit_lhs = false;
         }
     }
-    for(int i = 0; i < *current_index; i++){
-        if(string_array[0] == all_created_integer_nodes[i]->getName()){
+
+    // If lhs is an integer it will always be a case of WHILE(int)
+    if(is_digit_lhs){
+        return string_array[0].toInt();
+    }
+
+    for(unsigned int i = 0; i < *current_index; i++){
+        IntegerNode* integer_node = static_cast<IntegerNode*>(all_created_integer_nodes[i].get());
+        if(string_array[0] == integer_node->getName()){
             // when left is an integer node its always a case of WHILE(X)
-            return all_created_integer_nodes[i]->getValue();
+            return integer_node->getValue();
         }
     }
-    for(int i = 0; i < *current_index; i++){
-        if(string_array[2] == all_created_integer_nodes[i]->getName()){
+    for(unsigned int i = 0; i < *current_index; i++){
+        IntegerNode* integer_node = static_cast<IntegerNode*>(all_created_integer_nodes[i].get());
+        if(string_array[2] == integer_node->getName()){
             is_digit_rhs = true;
-            rhs = all_created_integer_nodes[i]->getValue();
+            rhs = integer_node->getValue();
             rhs_set = true;
         }
     }
@@ -1209,7 +1193,14 @@ bool WhileNode::isViable(){
     return viable;
 }
 
-void IntegerNode::execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index){
+void IntegerNode::execute(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index){
+    // If valuename already exists change this value to the value of this node.
+    for( unsigned int i = 0; i < *current_index; i++){
+        IntegerNode* integer_node = static_cast<IntegerNode*>(all_created_integer_nodes[i].get());
+        if(value_name == integer_node->getName()){
+            integer_node->changeValue(current_value);
+        }
+    }
     return;
 }
 
@@ -1225,32 +1216,28 @@ String IntegerNode::getName(){
     return value_name;
 }
 
-void MathNode::execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index){
-    Serial.println("In math execute");
-    Serial.println("Old value of lhs = " + String(lhs->getValue()));
-    int index = 0;
-    for(int i = 0; i < *current_index; i++){
-        if(lhs->getName() == all_created_integer_nodes[i]->getName()){
-            index = i;
+void MathNode::execute(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index){
+    IntegerNode * lhs_temp = lhs.get();
+    for(unsigned int i = 0; i < *current_index; i++){
+        IntegerNode* integer_node = static_cast<IntegerNode*>(all_created_integer_nodes[i].get());
+        if(lhs->getName() == integer_node->getName()){
+            lhs_temp = integer_node;
         }
     }
+    Serial.println("Old value of lhs = " + String(lhs_temp->getValue()));
     if(math_operator == MATH_TYPES::PLUS){
-        lhs->changeValue(lhs->getValue() + rhs);
-        all_created_integer_nodes[index] = lhs;
+        lhs_temp->changeValue(lhs_temp->getValue() + rhs);
     } else if(math_operator == MATH_TYPES::MINUS){
-        lhs->changeValue(lhs->getValue() - rhs);
-        all_created_integer_nodes[index] = lhs;
+        lhs_temp->changeValue(lhs_temp->getValue() - rhs);
     } else if(math_operator == MATH_TYPES::MULTIPLY){
-        lhs->changeValue(lhs->getValue() * rhs);
-        all_created_integer_nodes[index] = lhs;
+        lhs_temp->changeValue(lhs_temp->getValue() * rhs);
     } else if(math_operator == MATH_TYPES::DIVIDE){
-        lhs->changeValue(lhs->getValue() / rhs);
-        all_created_integer_nodes[index] = lhs;
+        lhs_temp->changeValue(lhs_temp->getValue() / rhs);
     }
-    Serial.println("New value of lhs = " + String(lhs->getValue()));
+    Serial.println("New value of lhs = " + String(lhs_temp->getValue()));
 }
 
-void ErrorNode::execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index){
+void ErrorNode::execute(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index){
     Serial.println("["+String(line_number)+"]ERROR: " + original_string + " -> " + error_message);
 }
 

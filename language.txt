@@ -113,9 +113,26 @@ SETUP:
     x = 3
     WHILE(5){
         IF( x == 3 ){
+            x = 2
             WHILE(2){
                 WAIT 1 SECOND
             }
+        }
+    }
+    WAIT 10 SECOND
+LOOP:
+EOF:
+
+SETUP:
+    x = 3
+    y = 0
+    WHILE( x == 3){
+        IF( x == 3 ){
+            WAIT 1 SECOND
+            y + 1
+        }
+        IF( y == 6){
+            x = 4
         }
     }
     WAIT 10 SECOND

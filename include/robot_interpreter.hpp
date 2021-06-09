@@ -47,7 +47,7 @@ public:
 
 
     // TODO execute maken die gerbuik maakt van de integer node mogelijk moeten casten.
-    virtual void execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index);
+    virtual void execute(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index);
 
     /**
      * @brief print the infromation of the node
@@ -85,7 +85,7 @@ public:
      * 
      * @param robot 
      */
-    void execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index);
+    void execute(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index);
 
     /**
      * @brief print the integer node
@@ -136,15 +136,15 @@ public:
     MathNode(String original_string, std::shared_ptr<IntegerNode> lhs, int rhs, MATH_TYPES math_operator, int line_number, NODE_TYPES type = NODE_TYPES::MATH_NODE):
         Node(original_string, line_number, type),
         lhs(lhs),
-        rhs(rhs)
-        {math_operator = math_operator;}
+        rhs(rhs),
+        math_operator(math_operator){}
 
     /**
      * @brief execute the math node
      * 
      * @param robot 
      */
-    void execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index);
+    void execute(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index);
 
     /**
      * @brief print the math node values
@@ -186,7 +186,7 @@ public:
      * 
      * @param robot : Robot &
      */
-    void execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index) override;
+    void execute(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index) override;
 
     /**
      * @brief print the infromation of the node
@@ -227,7 +227,7 @@ public:
      * 
      * @param robot : Robot &
      */
-    void execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index) override;
+    void execute(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index) override;
 
     /**
      * @brief print the infromation of the node
@@ -265,7 +265,7 @@ public:
      * 
      * @param robot : Robot &
      */
-    void execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index) override;
+    void execute(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index) override;
 
     /**
      * @brief print the infromation of the node
@@ -301,7 +301,7 @@ public:
      * 
      * @param robot : Robot &
      */
-    void execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index) override;
+    void execute(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index) override;
 
     /**
      * @brief print the infromation of the node
@@ -334,7 +334,7 @@ public:
      * 
      * @param robot : Robot &
      */
-    void execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index) override;
+    void execute(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index) override;
 
     /**
      * @brief print the infromation of the node
@@ -354,7 +354,7 @@ public:
 
     virtual ~ContainsBodyNode(){};
 
-    virtual int CheckIfConditionTrue(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index);
+    virtual int CheckIfConditionTrue(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index);
 
     virtual void addCommand(std::shared_ptr<Node> command);
 
@@ -384,7 +384,7 @@ private:
      * @return true 
      * @return false 
      */
-    int CheckIfConditionTrue(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index) override;
+    int CheckIfConditionTrue(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned  * current_index) override;
     
 public:
     /**
@@ -412,7 +412,7 @@ public:
      * 
      * @param robot : Robot &
      */
-    void execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index) override;
+    void execute(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index) override;
 
     /**
      * @brief print the infromation of the node
@@ -440,7 +440,7 @@ private:
      * @return true 
      * @return false 
      */
-    int CheckIfConditionTrue(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index) override;
+    int CheckIfConditionTrue(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index) override;
 public:
     /**
      * @brief Construct a new Error Node object
@@ -467,7 +467,7 @@ public:
      * 
      * @param robot : Robot &
      */
-    void execute(Robot & robot, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index) override;
+    void execute(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index) override;
 
     /**
      * @brief print the infromation of the node
@@ -500,7 +500,7 @@ private:
      * @param command : String
      * @return std::shared_ptr<Node> 
      */
-    std::shared_ptr<Node> parseCommand(String command, int* line_number, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int *current_index);
+    std::shared_ptr<Node> parseCommand(String command, int* line_number, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int *current_index);
 
     /**
      * @brief Create a Possible IfNode object otherwise return error.
@@ -508,7 +508,7 @@ private:
      * @param command 
      * @return std::shared_ptr<IfNode> 
      */
-    std::shared_ptr<IfNode> createPossibleIf(String command, int * line_number, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index);
+    std::shared_ptr<IfNode> createPossibleIf(String command, int * line_number, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index);
 
     /**
      * @brief Create a Possible WhileNode object otherwise return error.
@@ -516,7 +516,7 @@ private:
      * @param command 
      * @return std::shared_ptr<WhileNode> 
      */
-    std::shared_ptr<WhileNode> createPossibleWhile(String command, int * line_number, std::shared_ptr<IntegerNode> * all_created_integer_nodes, int * current_index);
+    std::shared_ptr<WhileNode> createPossibleWhile(String command, int * line_number, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index);
 
     /**
      * @brief REPL functionality
@@ -536,7 +536,7 @@ private:
      * @param text 
      * @return DoubleLinkedList 
      */
-    DoubleLinkedList<Node> createCommandList(String text, int* line_number);
+    DoubleLinkedList<Node> createCommandList(String text, int* line_number, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int* current_index_int);
 
     /**
      * @brief Read the given file information from serial monitor
