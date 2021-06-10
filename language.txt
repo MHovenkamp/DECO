@@ -136,7 +136,6 @@ SETUP:
         }
     }
     WAIT 10 SECOND
-LOOP:
 EOF:
 
 SETUP:
@@ -145,5 +144,21 @@ SETUP:
         WAIT 1 SECOND
     }
     WAIT 10 SECOND
+LOOP:
+EOF:
+
+SETUP:
+    x = 2
+    x + 3
+
+    x = 2
+    x - 3
+
+    x = 2
+    x * 3
+
+    x = 6
+    x / 3
+
 LOOP:
 EOF:

@@ -194,10 +194,6 @@ void Interpreter::file(String file_text){
 }
 
 DoubleLinkedList<Node> Interpreter::createCommandList(String text, int* line_number, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int* current_index_int){
-    // TODO lijst bijhouden van alle if nodes en while nodes. als we in een ifnode zitten wordt de laatse als definitieve behandelt.
-    // als de ifnode vol is wordt de if wergehaald uit de lijst en word deze if in de laatse if/while gezet. 
-    // als de laatste node ene if is word de in_if_node op true gezet en en als while : in_while_node.
-
     std::shared_ptr<IfNode> possible_if_node;
     std::shared_ptr<WhileNode> possible_while_node;
 
@@ -292,7 +288,7 @@ DoubleLinkedList<Node> Interpreter::createCommandList(String text, int* line_num
 }
 
 void Interpreter::repl(){
-    std::shared_ptr<Node> *all_created_integer_nodes; // max of 50 integers.
+    std::shared_ptr<Node> all_created_integer_nodes[50]; // max of 50 integers.
     unsigned int current_index = 0;
     String command = "";
     char character_temp = ' ';
@@ -368,6 +364,7 @@ std::shared_ptr<WhileNode> Interpreter::createPossibleWhile(String command, int*
 }
 
 std::shared_ptr<Node> Interpreter::parseCommand(String command, int * line_number, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index){
+    command.trim();
     int amount_of_spaces = 0;
     for(unsigned int i = 0; i < command.length(); i++){
         if( command[i] == ' '){
@@ -400,7 +397,7 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command, int * line_numbe
             for(unsigned int i = 0; i < *current_index; i++){
                 IntegerNode* integer_node = static_cast<IntegerNode*>(all_created_integer_nodes[i].get());
                 if(string_array[0] == integer_node->getName()){
-                    return std::shared_ptr<Node> (new CommandNode(command, string_array[0], String(integer_node->getValue()), true));
+                    return std::shared_ptr<Node> (new CommandNode(command, string_array[0], String(integer_node->getName()), true));
                 }
             }
             return std::shared_ptr<Node> (new CommandNode(command, string_array[0], string_array[1], true));
@@ -410,13 +407,20 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command, int * line_numbe
         if(string_array[1] == "="){
             char letter;
             bool is_int = true;
-            for(unsigned int i =0 ; i < string_array[2].length()-1; i++){
+            for(unsigned int i =0 ; i < string_array[2].length(); i++){
                 letter = string_array[2][i];
                 if(!isDigit(letter)){
                     is_int = false;
                 }
             }
-            if(is_int){
+            bool is_integer_node = false;
+            for(unsigned int i = 0; i < *current_index; i++){
+                IntegerNode* integer_node = static_cast<IntegerNode*>(all_created_integer_nodes[i].get());
+                if(string_array[2] == integer_node->getName()){
+                    is_integer_node = true;
+                }
+            }
+            if(is_int || is_integer_node){
                 // create new integer node
                 if(*current_index < 50){
                     std::shared_ptr<IntegerNode> pointer;
@@ -428,7 +432,20 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command, int * line_numbe
                             already_excisted = true;
                         }
                     }
-                    pointer = std::make_shared<IntegerNode>(command, string_array[0], string_array[2].toInt(),*line_number);
+
+                    int current_value = 0;
+                    if(is_integer_node){
+                        for(unsigned int i = 0; i < *current_index; i++){
+                            IntegerNode* integer_node = static_cast<IntegerNode*>(all_created_integer_nodes[i].get());
+                            if(string_array[2] == integer_node->getName()){
+                                current_value = integer_node->getValue();
+                            }
+                        }
+                    } else{
+                        current_value = string_array[2].toInt();
+                    }
+
+                    pointer = std::make_shared<IntegerNode>(command, string_array[0], current_value,*line_number);
                     if(!already_excisted){
                         all_created_integer_nodes[*current_index] = pointer;
                         *current_index = *current_index+1;
@@ -467,26 +484,27 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command, int * line_numbe
             return std::shared_ptr<Node> (new ErrorNode(command, "unknown command of lenght 3", *line_number));
         } else if(string_array[1] == "+" || string_array[1] == "-" || string_array[1] == "/" ||string_array[1] == "*"){
             std::shared_ptr<IntegerNode> lhs;
+            std::shared_ptr<IntegerNode> rhs;
             for(unsigned int i = 0; i < *current_index; i++){
                 IntegerNode* integer_node = static_cast<IntegerNode*>(all_created_integer_nodes[i].get());
                 if(integer_node->getName() == string_array[0]){
                     lhs = std::make_shared<IntegerNode>(*integer_node);
                 }
+                if(integer_node->getName() == string_array[2]){
+                    rhs = std::make_shared<IntegerNode>(*integer_node);
+                }
             } 
             char letter;
             bool is_int = true;
-            for(unsigned int i =0 ; i < string_array[2].length()-1; i++){
+            for(unsigned int i = 0 ; i < string_array[2].length(); i++){
                 letter = string_array[2][i];
                 if(!isDigit(letter)){
                     is_int = false;
                 }
             }
-            int rhs = 0;
             if(is_int){
-                rhs = string_array[2].toInt();
-            } else{
-                return std::shared_ptr<Node> (new ErrorNode(command, "rhs value of mathnode not integer", *line_number));
-            }
+                rhs = std::shared_ptr<IntegerNode> (new IntegerNode(command, "NONVALUE", string_array[2].toInt(), *line_number));
+            } 
             if(string_array[1] == "+"){
                 return std::shared_ptr<Node>(new MathNode(command, lhs, rhs, MATH_TYPES::PLUS, *line_number));
             }else if(string_array[1] == "-"){
@@ -502,7 +520,7 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command, int * line_numbe
             // WAIT 10 MINUTES
             if(string_array[0] == parse_words.WAIT){
                 char letter;
-                for(unsigned int i =0 ; i < string_array[1].length()-1; i++){
+                for(unsigned int i =0 ; i < string_array[1].length(); i++){
                     letter = string_array[1][i];
                     if(!isDigit(letter)){
                         return std::shared_ptr<Node> (new ErrorNode(command, "time value not a digit", *line_number));
@@ -525,11 +543,12 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command, int * line_numbe
             }
         }
         return std::shared_ptr<Node> (new ErrorNode(command, "unknown command of lenght 3", *line_number));
+        break;
     case 4:
         //shut_down_after = 10 MINUTE
         if(string_array[0] == parse_words.shut_down_after && string_array[1] == "="){
             char letter;
-            for(unsigned int i =0 ; i < string_array[2].length()-1; i++){
+            for(unsigned int i =0 ; i < string_array[2].length(); i++){
                 letter = string_array[2][i];
                 if(!isDigit(letter)){
                     return std::shared_ptr<Node> (new ErrorNode(command, "time value not a digit", *line_number));
@@ -549,11 +568,12 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command, int * line_numbe
                 }
         }
         return std::shared_ptr<Node> (new ErrorNode(command, "unknown command of length 4", *line_number));
+        break;
     case 5:
         // weatherstation PERIOD = 10 MINUTE
         if((string_array[1] == parse_words.PERIOD || string_array[1] == parse_words.DURATION) && string_array[2] == "="){
             char letter;
-            for(unsigned int i =0 ; i < string_array[3].length()-1; i++){
+            for(unsigned int i =0 ; i < string_array[3].length(); i++){
                 letter = string_array[3][i];
                 if(!isDigit(letter)){
                     return std::shared_ptr<Node> (new ErrorNode(command, "time value not a digit", *line_number));
@@ -700,7 +720,7 @@ void CommandNode::execute(Robot & robot, std::shared_ptr<Node> *all_created_inte
     char letter;
     bool is_digit = true;
     bool param_is_integer_node = false;
-    for(unsigned int i =0 ; i < param.length()-1; i++){
+    for(unsigned int i =0 ; i < param.length(); i++){
         letter = param[i];
         if(!isDigit(letter)){
             is_digit = false;
@@ -925,13 +945,13 @@ int IfNode::CheckIfConditionTrue(Robot & robot, std::shared_ptr<Node> *all_creat
     bool lhs_set = false;
     bool rhs_set = false;
 
-    for(unsigned int i =0 ; i < string_array[2].length()-1; i++){
+    for(unsigned int i =0 ; i < string_array[2].length(); i++){
         letter_rhs = string_array[2][i];
         if(!isDigit(letter_rhs)){
             is_digit_rhs = false;
         }
     }
-    for(unsigned int i =0 ; i < string_array[0].length()-1; i++){
+    for(unsigned int i =0 ; i < string_array[0].length(); i++){
         letter_lhs = string_array[0][i];
         if(!isDigit(letter_lhs)){
             is_digit_lhs = false;
@@ -1005,7 +1025,8 @@ void WhileNode::execute(Robot & robot, std::shared_ptr<Node> *all_created_intege
         body_command->print();
         body_command->execute(robot, all_created_integer_nodes, current_index);
         body_command.reset();
-        while(CheckIfConditionTrue(robot, all_created_integer_nodes, current_index)){
+        int condition_true = CheckIfConditionTrue(robot, all_created_integer_nodes, current_index);
+        while(condition_true){
             if(!body.gotToNextNode()){
                 body.setToStart();
             }
@@ -1017,6 +1038,7 @@ void WhileNode::execute(Robot & robot, std::shared_ptr<Node> *all_created_intege
                 body_command->print();
                 body_command->execute(robot, all_created_integer_nodes, current_index);
                 body_command.reset();
+            condition_true = CheckIfConditionTrue(robot, all_created_integer_nodes, current_index);
         }
     } else if(condition_true > 1){
         Serial.println(condition+" == true");
@@ -1063,6 +1085,7 @@ int WhileNode::CheckIfConditionTrue(Robot & robot, std::shared_ptr<Node> *all_cr
             string_array[current_array_index] = condition.substring(start_index,i+1);
         }
     }
+
     //getState =/!= STATE
     if( string_array[0] == parse_words.getState){
         ROBOT_STATES lhs = robot.getState();
@@ -1108,40 +1131,36 @@ int WhileNode::CheckIfConditionTrue(Robot & robot, std::shared_ptr<Node> *all_cr
         lhs = robot.getNeckPos();
     } else if(string_array[0] == parse_words.getLastMovementDetected){
         lhs = robot.getLastMovementDetected();
-    }// else{
-    //     ErrorNode error = ErrorNode(condition, "Condition not recognised: lhs function call not recognized ", line_number);
-    //     error.execute(robot);
-    //     return false;
-    // }
+    }
     char letter_rhs;
     char letter_lhs;
     bool is_digit_rhs = true;
     bool is_digit_lhs = true;
     bool lhs_set = false;
     bool rhs_set = false;
-    for(unsigned int i =0 ; i < string_array[2].length(); i++){
-        letter_rhs = string_array[2][i];
-        if(!isDigit(letter_rhs)){
-            is_digit_rhs = false;
-        }
-    }
     for(unsigned int i =0 ; i < string_array[0].length(); i++){
         letter_lhs = string_array[0][i];
         if(!isDigit(letter_lhs)){
             is_digit_lhs = false;
         }
     }
+    for(unsigned int i =0 ; i < string_array[2].length(); i++){
+        letter_rhs = string_array[2][i];
+        if(!isDigit(letter_rhs)){
+            is_digit_rhs = false;
+        }
+    }
 
     // If lhs is an integer it will always be a case of WHILE(int)
     if(is_digit_lhs){
-        return string_array[0].toInt();
+        lhs =  string_array[0].toInt();
     }
 
     for(unsigned int i = 0; i < *current_index; i++){
         IntegerNode* integer_node = static_cast<IntegerNode*>(all_created_integer_nodes[i].get());
         if(string_array[0] == integer_node->getName()){
             // when left is an integer node its always a case of WHILE(X)
-            return integer_node->getValue();
+            lhs =  integer_node->getValue();
         }
     }
     for(unsigned int i = 0; i < *current_index; i++){
@@ -1162,6 +1181,11 @@ int WhileNode::CheckIfConditionTrue(Robot & robot, std::shared_ptr<Node> *all_cr
         error.execute(robot, all_created_integer_nodes, current_index);
         return false;
     }
+
+    if(condition.indexOf(' ') == -1){
+        return lhs;
+    }
+
     if(string_array[1] == ">"){
         return lhs > rhs;
     } else if(string_array[1] == "<"){
@@ -1218,23 +1242,26 @@ String IntegerNode::getName(){
 
 void MathNode::execute(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index){
     IntegerNode * lhs_temp = lhs.get();
+    IntegerNode * rhs_temp = rhs.get();
     for(unsigned int i = 0; i < *current_index; i++){
         IntegerNode* integer_node = static_cast<IntegerNode*>(all_created_integer_nodes[i].get());
         if(lhs->getName() == integer_node->getName()){
             lhs_temp = integer_node;
+        }  
+        if(rhs->getName() == integer_node->getName()){
+            rhs_temp = integer_node;
         }
     }
-    Serial.println("Old value of lhs = " + String(lhs_temp->getValue()));
     if(math_operator == MATH_TYPES::PLUS){
-        lhs_temp->changeValue(lhs_temp->getValue() + rhs);
+        lhs_temp->changeValue(lhs_temp->getValue() + rhs_temp->getValue());
     } else if(math_operator == MATH_TYPES::MINUS){
-        lhs_temp->changeValue(lhs_temp->getValue() - rhs);
+        lhs_temp->changeValue(lhs_temp->getValue() - rhs_temp->getValue());
     } else if(math_operator == MATH_TYPES::MULTIPLY){
-        lhs_temp->changeValue(lhs_temp->getValue() * rhs);
+        lhs_temp->changeValue(lhs_temp->getValue() * rhs_temp->getValue());
     } else if(math_operator == MATH_TYPES::DIVIDE){
-        lhs_temp->changeValue(lhs_temp->getValue() / rhs);
+        lhs_temp->changeValue(lhs_temp->getValue() / rhs_temp->getValue());
     }
-    Serial.println("New value of lhs = " + String(lhs_temp->getValue()));
+    Serial.println("New value of "+lhs->getName()+" = " + String(lhs_temp->getValue()));
 }
 
 void ErrorNode::execute(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index){
@@ -1279,12 +1306,12 @@ void IntegerNode::print(){
 
 void MathNode::print(){
     if(math_operator == MATH_TYPES::PLUS){
-        Serial.println("["+String(line_number)+"]MathNode" + lhs->getName() + "+" + String(rhs));
+        Serial.println("["+String(line_number)+"]MathNode ->" + lhs->getName() + "+" + String(rhs->getValue()));
     } else if(math_operator == MATH_TYPES::MINUS){
-        Serial.println("["+String(line_number)+"]MathNode" + lhs->getName() + "-" + String(rhs));
+        Serial.println("["+String(line_number)+"]MathNode ->" + lhs->getName() + "-" + String(rhs->getValue()));
     } else if(math_operator == MATH_TYPES::MULTIPLY){
-        Serial.println("["+String(line_number)+"]MathNode" + lhs->getName() + "*" + String(rhs));
+        Serial.println("["+String(line_number)+"]MathNode ->" + lhs->getName() + "*" + String(rhs->getValue()));
     } else if(math_operator == MATH_TYPES::DIVIDE){
-        Serial.println("["+String(line_number)+"]MathNode" + lhs->getName() + "/" + String(rhs));
+        Serial.println("["+String(line_number)+"]MathNode ->" + lhs->getName() + "/" + String(rhs->getValue()));
     }
 }

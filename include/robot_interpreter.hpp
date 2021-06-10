@@ -121,7 +121,7 @@ public:
 class MathNode: public Node{
 private:
     std::shared_ptr<IntegerNode> lhs;
-    int rhs;
+    std::shared_ptr<IntegerNode> rhs;
     MATH_TYPES math_operator;
 public:
     /**
@@ -133,7 +133,7 @@ public:
      * @param line_number : int 
      * @param type : NODE_TYPES
      */
-    MathNode(String original_string, std::shared_ptr<IntegerNode> lhs, int rhs, MATH_TYPES math_operator, int line_number, NODE_TYPES type = NODE_TYPES::MATH_NODE):
+    MathNode(String original_string, std::shared_ptr<IntegerNode> lhs, std::shared_ptr<IntegerNode> rhs, MATH_TYPES math_operator, int line_number, NODE_TYPES type = NODE_TYPES::MATH_NODE):
         Node(original_string, line_number, type),
         lhs(lhs),
         rhs(rhs),

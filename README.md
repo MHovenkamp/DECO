@@ -160,6 +160,53 @@ possible conditions1
 -   getLastMovementDetected >/</<=/>=/==/!= int
 IMPORTANT: if you change the value of an integer value used in the condition this change will not affect the x used in the condition. You can not use getHeadPos > x and then change x in the while loop to shorten or lenghten the loop. 
 
+### Integers and math
+The code for this robot contains a small amount of possible math. You can assign a number to a variable like this:
+```
+x = 6
+variable = 6
+variarble_number = 6
+```
+You can add, subtract, divide and multiply with integers. You can only change existing integers.
+```
+SETUP:
+    x = 2
+    y = 3
+    x + y # result = 5
+
+    x = 2
+    y = 3
+    x - y # result = -1
+
+    x = 2
+    y = 3
+    x * y # result = 6
+
+    x = 6
+    y = 3
+    x / y # result = 2
+EOF:
+```
+You can use numbers for the right side of any math operator
+```
+SETUP:
+    x = 2
+    x + 3  # result = 5
+
+    x = 2
+    x - 3 # result = -1
+
+    x = 2
+    x * 3 # result = 6
+
+    x = 6
+    x / 3 # result = 2
+EOF:
+```
+limitations
+You can not assign the output of a function to an integer variable
+
+
 ### Getters
 - ```getBreakTime```, Get the duration of the break time reminder.
 - ```getWalkTime```. Get the duration of the walk time reminder.

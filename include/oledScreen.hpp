@@ -127,8 +127,8 @@ public:
             showAnimationSubCall<1>(animation_presets.searching_up_right);
         } else if(animation_choice ==  ROBOT_FRAMES::SEARCHING_LEFT_DOWN){
             showAnimationSubCall<1>(animation_presets.searching_down_left);
-        } else if(animation_choice ==  ROBOT_FRAMES::SEARCHING_RIGHT_UP){
-            showAnimationSubCall<1>(animation_presets.searching_up_right);
+        } else if(animation_choice ==  ROBOT_FRAMES::SEARCHING_RIGHT_DOWN){
+            showAnimationSubCall<1>(animation_presets.searching_down_right);
         } else{
             showAnimationSubCall<2>(animation_presets.face_idle);
         }
