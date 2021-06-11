@@ -248,7 +248,7 @@ Set the state of the robot
     -   OFF
 Set the time duration after which the robot will shut down if there is no movement.
 - ```shut_down_after = x y```: x = integer, y = 
-    -   define HOUR 
+    -   HOUR 
     -   MINUTE 
     -   SECOND 
     -   MIllI_SECOND 
@@ -259,18 +259,18 @@ a :
 -   water_reminder
 -   break_reminder
 - ```a DURATION = x y```: x = integer, y = 
-    -   define HOUR 
+    -   HOUR 
     -   MINUTE 
     -   SECOND 
     -   MIllI_SECOND 
 - ```a PERIOD = 10 MINUTE```: x = integer, y = 
-    -   define HOUR 
+    -   HOUR 
     -   MINUTE 
     -   SECOND 
     -   MIllI_SECOND 
 set how long the robot i allowed to follow an object in interactive mode.
 - ```follow_object DURATION = x y```: x = integer, y = 
-    -   define HOUR 
+    -   HOUR 
     -   MINUTE 
     -   SECOND 
     -   MIllI_SECOND 

@@ -1,8 +1,31 @@
-#include <Arduino.h>
+test for IntegerNode and MAthNode:
+SETUP:
+    x = 3
+    y = 4
+    x + y 
 
+    x = 3
+    y = 4
+    x - y
 
-struct code{
-    String program_code = R"(
+    x = 3
+    y = 4
+    x * y
+
+    x = 3
+    y = 4
+    x / y
+
+    a = 3
+    b = a 
+
+    b + a
+EOF:
+results:
+7, -1, 12, 0, a = 3, b = 3, 6
+
+SetterNode tests:
+
 SETUP:
     weatherstation = NON_ACTIVE
     walk_reminder = NON_ACTIVE
@@ -42,5 +65,15 @@ SETUP:
     interactive_mode DURATION = 2 MINUTE
 LOOP:
 EOF:
-    )";
-};
+
+Test voor setters  
+SETUP:
+    getBreakTime
+    getWalkTime
+    getWaterTime
+    getWeatherStationTime
+    getState
+    getHeadPos
+    getNeckPos
+EOF:
+    

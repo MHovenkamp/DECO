@@ -80,12 +80,11 @@ String Interpreter::readFileFromSerial(){
     String file_text = "";
     Serial.println("Enter file text.");
     while(Serial.available()<=0){;}
-    while(file_text.indexOf("EOF:") == -1 && Serial.available() != 0){
+    rtos::ThisThread::sleep_for(MS(1000));
+    while(file_text.indexOf("EOF:") == -1 && Serial.available() > 0){
         temp_char = Serial.read();
-        if( allowed_symbols.indexOf(temp_char) != -1 || 
-            isAlphaNumeric(temp_char) ||
-            temp_char == ' ' ||
-            temp_char == '\n'){
+        if( allowed_symbols.indexOf(temp_char) != -1 || isAlphaNumeric(temp_char) ||
+            temp_char == ' ' || temp_char == '\n'){
             file_text += temp_char;
         }
     }
@@ -125,7 +124,19 @@ void Interpreter::file(String file_text){
         }
         current_word += file_text[i];
     }
-
+    int index = setup.indexOf("EOF:");
+    if(index != -1){
+        Serial.println("EOF: found");
+        setup.remove(index);
+    }
+    index = loop.indexOf("EOF:");
+    if(index != -1){
+        Serial.println("EOF: found");
+        loop.remove(index);
+    }
+    file_text = "";
+    current_word = "";
+    line = "";
     setup.trim();
     loop.trim();
 
@@ -146,6 +157,7 @@ void Interpreter::file(String file_text){
         if(file_setup_list.getLength() > 0){
             file_setup_list.setToStart();
             std::shared_ptr<Node> temp = file_setup_list.getCurrentNode();
+            temp->print();
             temp->execute(robot, all_created_integer_nodes, &current_index);
             temp.reset();
             while(file_setup_list.gotToNextNode()){
@@ -387,20 +399,23 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command, int * line_numbe
     }
 
     // start lexing and parsing the commands based on the lenght of the sentence
+    if(command == "" || command == "\n"|| command == "\t"){
+        return std::shared_ptr<Node> ( new Node(command, *line_number));
+    }
     switch (amount_of_spaces+1)
     {
     case 1:
-        return std::shared_ptr<Node> (new CommandNode(command, string_array[0], "", false));
+        return std::shared_ptr<Node> (new CommandNode(command, string_array[0], "", *line_number, false));
         break;
     case 2:
         if(string_array[0] != parse_words.EOF_){
             for(unsigned int i = 0; i < *current_index; i++){
                 IntegerNode* integer_node = static_cast<IntegerNode*>(all_created_integer_nodes[i].get());
                 if(string_array[0] == integer_node->getName()){
-                    return std::shared_ptr<Node> (new CommandNode(command, string_array[0], String(integer_node->getName()), true));
+                    return std::shared_ptr<Node> (new CommandNode(command, string_array[0], String(integer_node->getName()), *line_number, true));
                 }
             }
-            return std::shared_ptr<Node> (new CommandNode(command, string_array[0], string_array[1], true));
+            return std::shared_ptr<Node> (new CommandNode(command, string_array[0], string_array[1], *line_number, true));
         }
         break;
     case 3:
@@ -469,6 +484,8 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command, int * line_numbe
                     return std::shared_ptr<Node> (new SetStateNode(command, parse_words.WEATHER_STATION, *line_number));
                 } else if(string_array[2] == parse_words.INTERACTIVE_MODE){
                     return std::shared_ptr<Node> (new SetStateNode(command, parse_words.INTERACTIVE_MODE, *line_number));
+                }else if(string_array[2] == parse_words.OFF){
+                    return std::shared_ptr<Node> (new SetStateNode(command, parse_words.OFF, *line_number));
                 } else {
                     return std::shared_ptr<Node> (new ErrorNode(command, "unknown state", *line_number));
                 }
@@ -539,6 +556,7 @@ std::shared_ptr<Node> Interpreter::parseCommand(String command, int * line_numbe
                     return std::shared_ptr<Node> (new ErrorNode(command, "Unknown time measurement type", *line_number));
                 }
             } else{
+                Serial.println("actually in this int");
                 return std::shared_ptr<Node> (new ErrorNode(command, "unknow command of lenght 3", *line_number));
             }
         }
@@ -707,6 +725,7 @@ void SetStateNode::execute(Robot & robot, std::shared_ptr<Node> *all_created_int
     } else if(state == parse_words.INTERACTIVE_MODE){
         robot.setState(ROBOT_STATES::INTERACTIVE_MODE);
         Serial.println("robot state set to : INTERACTIVE_MODE");
+        Serial.println("command is funsihed does this string print");
     } else if(state == parse_words.OFF){
         robot.setState(ROBOT_STATES::OFF);
         Serial.println("robot state set to : OFF");
@@ -1293,11 +1312,11 @@ void ErrorNode::print(){
 }
 
 void IfNode::print(){
-    Serial.println("["+String(line_number)+"]IfNode -> IF(" + condition + ")("+body.getLength()+")");
+    Serial.println("["+String(line_number)+"]IfNode -> IF(" + condition + ")("+String(body.getLength())+")");
 }
 
 void WhileNode::print(){
-    Serial.println("["+String(line_number)+"]WhileNode -> WHILE(" + condition + ")("+body.getLength()+")");
+    Serial.println("["+String(line_number)+"]WhileNode -> WHILE(" + condition + ")("+String(body.getLength())+")");
 }
 
 void IntegerNode::print(){

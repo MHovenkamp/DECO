@@ -59,6 +59,7 @@ struct PARSE_WORDS{
  * 
  */
 enum class NODE_TYPES{
+    NODE,
     STATE_SETTER,
     SETTER,
     COMMAND,

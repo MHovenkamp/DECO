@@ -7,9 +7,9 @@ rtos::Thread robot_control_task;
 rtos::Thread i2c_task;
 rtos::Thread animation_task;
 
+PIRSensor pir_sensor(2);
 Servo neck_servo(3);
 Servo head_servo(4);
-PIRSensor pir_sensor(2);
 MicroLidar lidar;
 OledScreen screen;
 Robot robot_test(head_servo,neck_servo,pir_sensor,lidar,screen,5);

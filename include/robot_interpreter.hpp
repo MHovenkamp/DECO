@@ -33,7 +33,7 @@ public:
      * @param original_string : String
      * @param type : NODE_TYPES
      */
-    Node(String original_string, int line_number, NODE_TYPES type):
+    Node(String original_string, int line_number, NODE_TYPES type = NODE_TYPES::NODE):
         original_string(original_string),
         type(type),
         line_number(line_number){}
