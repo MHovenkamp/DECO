@@ -4,7 +4,7 @@
 #include "support.hpp"
 
 /**
- * @brief inInternalBLESensors class containing code for internal arduino nano 33 ble sense sensors: humidity, temperature, baro.
+ * @brief InternalBLESensors class containing code for internal arduino nano 33 ble sense sensors: humidity, temperature, baro.
  * 
  */
 class InternalBLESensors{

@@ -1,0 +1,87 @@
+Some of the run test scripts used to determine if the interpreter is functional
+
+test for IntegerNode and MAthNode:
+SETUP:
+    x = 3
+    y = 4
+    x + y 
+
+    x = 3
+    y = 4
+    x - y
+
+    x = 3
+    y = 4
+    x * y
+
+    x = 3
+    y = 4
+    x / y
+
+    a = 3
+    b = a 
+
+    b + a
+EOF:
+results:
+7, -1, 12, 0, a = 3, b = 3, 6
+
+SetterNode tests:
+
+SETUP:
+    weatherstation = NON_ACTIVE
+    walk_reminder = NON_ACTIVE
+    weatherstation = NON_ACTIVE
+    break_reminder = NON_ACTIVE
+
+    weatherstation = ACTIVE
+    walk_reminder = ACTIVE
+    weatherstation = ACTIVE
+    break_reminder = ACTIVE
+ 
+    STATE = IDLE
+    STATE = REMINDER_BREAK
+    STATE = REMINDER_WATER
+    STATE = REMINDER_WALK
+    STATE = WEATHER_STATION
+    STATE = INTERACTIVE_MODE
+    STATE = OFF  
+
+    STATE = IDLE
+
+    shut_down_after = 10 MILLI_SECOND
+    shut_down_after = 10 SECOND
+    shut_down_after = 1 MINUTE
+    shut_down_after = 1 HOUR
+
+    weatherstation DURATION = 1 MINUTE
+    walk_reminder DURATION = 1 MINUTE
+    weatherstation DURATION = 1 MINUTE
+    break_reminder DURATION = 1 MINUTE
+
+    weatherstation PERIOD = 1 MINUTE
+    walk_reminder PERIOD = 1 MINUTE
+    weatherstation PERIOD = 1 MINUTE
+    break_reminder PERIOD = 1 MINUTE
+
+    interactive_mode DURATION = 2 MINUTE
+LOOP:
+EOF:
+
+Test voor setters  
+SETUP:
+    getBreakTime
+    getWalkTime
+    getWaterTime
+    getWeatherStationTime
+    getState
+    getHeadPos
+    getNeckPos
+EOF:
+    
+
+SETUP:
+    x = 180
+    move_head x
+    move_neck x
+EOF:

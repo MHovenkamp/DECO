@@ -2,6 +2,10 @@
 #ifndef NOTES_HPP
 #define NOTES_HPP
 
+/**
+ * @brief struct Notes containing frequencies for piezo buzzer node
+ * 
+ */
 struct Notes {
     int NOTE_B0  =31;
     int NOTE_C1  =33;

@@ -1,1 +1,1 @@
-{"type": "library", "name": "Arduino_LPS22HB", "version": "1.0.0", "spec": {"owner": "arduino-libraries", "id": 6591, "name": "Arduino_LPS22HB", "requirements": null, "url": null}}
+{"type": "library", "name": "Arduino_LPS22HB", "version": "1.0.1", "spec": {"owner": "arduino-libraries", "id": 6591, "name": "Arduino_LPS22HB", "requirements": null, "url": null}}

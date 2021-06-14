@@ -6,6 +6,10 @@
 #include "rtos.h"
 #include <array>
 #include <time.h>
+#include <memory>
+
+//file reading
+#include <fstream>
 
 //Oled screen
 #include <SPI.h>
@@ -30,6 +34,5 @@
 #define MINUTE 60000
 #define SECOND 1000
 #define MIllI_SECOND 1
-
 
 #endif //SUPPORT_HPP

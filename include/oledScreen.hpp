@@ -116,7 +116,7 @@ public:
         } else if( animation_choice ==  ROBOT_FRAMES::FACE_BLINK){
             showAnimationSubCall<5>(animation_presets.face_blink);
         } else if( animation_choice ==  ROBOT_FRAMES::WALK_REMINDER){
-            showAnimationSubCall<5>(animation_presets.face_blink);
+            showAnimationSubCall<3>(animation_presets.walk);
         } else if(animation_choice ==  ROBOT_FRAMES::WATER_REMINDER){
             showAnimationSubCall<3>(animation_presets.water);
         } else if(animation_choice ==  ROBOT_FRAMES::BREAK_REMINDER){
@@ -127,8 +127,8 @@ public:
             showAnimationSubCall<1>(animation_presets.searching_up_right);
         } else if(animation_choice ==  ROBOT_FRAMES::SEARCHING_LEFT_DOWN){
             showAnimationSubCall<1>(animation_presets.searching_down_left);
-        } else if(animation_choice ==  ROBOT_FRAMES::SEARCHING_RIGHT_UP){
-            showAnimationSubCall<1>(animation_presets.searching_up_right);
+        } else if(animation_choice ==  ROBOT_FRAMES::SEARCHING_RIGHT_DOWN){
+            showAnimationSubCall<1>(animation_presets.searching_down_right);
         } else{
             showAnimationSubCall<2>(animation_presets.face_idle);
         }

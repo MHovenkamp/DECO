@@ -38,22 +38,30 @@ private:
 
     unsigned int break_time = 2 * HOUR;
     unsigned int walk_time = 30 * MINUTE;
-    unsigned int water_time = 1 * HOUR;
+    unsigned int water_time = 50 * HOUR;
     unsigned int shutdown_after = 5 * MINUTE;
+    unsigned int weather_station_time = 5 * MINUTE;
 
     unsigned int break_time_duration = 15 * MINUTE;
     unsigned int walk_time_duration = 5 * MINUTE;
     unsigned int water_time_duration = 30 * SECOND;
     unsigned int interactive_mode_duration = 20 * SECOND;
+    unsigned int weather_station_duration = 5 * SECOND;
 
     bool break_time_active = true;
     bool walk_time_active = true;
     bool water_time_active = true;
+    bool weather_time_active = true;
 
-    unsigned long start_time_timer;
+    unsigned long start_time_timer_water;
+    unsigned long start_time_timer_walk;
+    unsigned long start_time_timer_break;
+    unsigned long start_time_timer_weather;
     unsigned long current_time_difference;
 
-    ROBOT_STATES current_state = ROBOT_STATES::IDLE;
+    ROBOT_STATES current_state;
+    ROBOT_STATES prev_state;
+    ROBOT_STATES temp_state;
 
     unsigned int distance_found_object;
     unsigned int found_object_x;
@@ -61,35 +69,6 @@ private:
     unsigned int tmp_x_coordinate;
     unsigned int tmp_y_coordinate;
     
-    /**
-     * @brief Idle state of the robot; idle animation.
-     * 
-     */
-    void idleState();
-
-    /**
-     * @brief Break reminder state of the robot; attention movement, break animation
-     * 
-     */
-    void reminderBreak();
-
-    /**
-     * @brief Walk reminder state of the robot; attention movement, notification, walk animation
-     * 
-     */
-    void reminderWalk();
-
-    /**
-     * @brief Water reminder state of the robot; attention movement, notification, water animation
-     * 
-     */
-    void reminderWater();
-
-    /**
-     * @brief Weather station state of the robot; weatherStation animation
-     * 
-     */
-    void showWeatherStation();
 
     /**
      * @brief tries to follow a found object by making a spiraling motion when hand is removed. 
@@ -99,6 +78,38 @@ private:
      */
     bool followClosestObject();
 
+    /**
+     * @brief Idle state of the robot; idle animation.
+     * 
+     */
+    void idleState();
+    /**
+     * @brief Break reminder state of the robot; attention movement, break animation
+     * 
+     */
+    void reminderBreak();
+    /**
+     * @brief Walk reminder state of the robot; attention movement, notification, walk animation
+     * 
+     */
+    void reminderWalk();
+    /**
+     * @brief Water reminder state of the robot; attention movement, notification, water animation
+     * 
+     */
+    void reminderWater();
+    /**
+     * @brief Weather station state of the robot; weatherStation animation
+     * 
+     */
+    void showWeatherStation();
+    /**
+     * @brief Makes the robot search out the user and look at hiim/follow him, return true after succes.
+     * 
+     * @return true 
+     * @return false 
+     */
+    bool interactiveMode();
 public:
     /**
      * @brief Construct a new Robot object
@@ -134,6 +145,7 @@ public:
      */
     void run();
 
+
     /**
      * @brief Get the Break Time loop interval
      * 
@@ -152,34 +164,75 @@ public:
      * @return unsigned int 
      */
     unsigned int getWaterTime();
+    /**
+     * @brief Get the Weather Station Time object
+     * 
+     * @return unsigned int 
+     */
+    unsigned int getWeatherStationTime();
 
     /**
-     * @brief Set the Break Time loop interval and if break reminder is active
+     * @brief Get the distance measured from the micro lidar in the head in mm
+     * 
+     * @return unsigned int 
+     */
+    unsigned int getMicroLidarDistance();
+
+    /**
+     * @brief Set the Break Time Active object
+     * 
+     * @param active 
+     */
+    void setBreakTimeActive(bool active);
+    /**
+     * @brief Set the Walk Time Active object
+     * 
+     * @param active 
+     */
+    void setWalkTimeActive(bool active);
+    /**
+     * @brief Set the Water Time Active object
+     * 
+     * @param active 
+     */
+    void setWaterTimeActive(bool active);
+    /**
+     * @brief Set the Break Time Active object
+     * 
+     * @param active 
+     */
+    void setWeatherStationActive(bool active);
+
+    /**
+     * @brief Set the Break Time loop interval
      * 
      * @param time : unsigned long, loop interval
-     * @param active : bool
      */
-    void setBreakTime(unsigned long time, bool active);
+    void setBreakTime(unsigned long time);
     /**
-     * @brief Set the Walk Time loop interval and if walk reminder is active
+     * @brief Set the Walk Time loop interval
      * 
      * @param time : unsigned long, loop interval
-     * @param active : bool
      */
-    void setWalkTime(unsigned long time, bool active);
+    void setWalkTime(unsigned long time);
     /**
-     * @brief Set the Water Time loop interval and if water reminder is active
+     * @brief Set the Water Time loop interval
      * 
      * @param time : unsinged long, loop interal
-     * @param active : bool
      */
-    void setWaterTime(unsigned long time, bool active);
+    void setWaterTime(unsigned long time);
     /**
-     * @brief Set the Shutdown After loop interval and if water reminder is active
+     * @brief Set the Shutdown After loop interval
      * 
      * @param time : unsigned long, shut down after x time of inactivity. 
      */
     void setShutdownAfter(unsigned long time);
+    /**
+     * @brief Set the Weather station Time loop interval
+     * 
+     * @param time 
+     */
+    void setWeatherStationTime(unsigned long time);
 
     /**
      * @brief Set the Break Time Duration 
@@ -199,13 +252,18 @@ public:
      * @param time : unsigned long
      */
     void setWaterTimeDuration(unsigned long time);
-
     /**
      * @brief Set the Interactive Mode Duration 
      * 
      * @param time : unsigned long
      */
     void setInteractiveModeDuration(unsigned long time);
+    /**
+     * @brief Set the Weather Station Duration
+     * 
+     * @param time 
+     */
+    void setWeatherStationDuration(unsigned long time);
 
     /**
      * @brief Set the State of the robot
@@ -219,6 +277,12 @@ public:
      * @return ROBOT_STATES
      */
     ROBOT_STATES getState();
+    /**
+     * @brief print a given state to the Serial port
+     * 
+     * @param state_to_print 
+     */
+    void printState(ROBOT_STATES state_to_print);
 
     /**
      * @brief move the head servo, head up and down
@@ -234,6 +298,27 @@ public:
     void moveNeck( int pos );
 
     /**
+     * @brief Get the Head Position in degrees
+     * 
+     * @return int 
+     */
+    int getHeadPos();
+
+    /**
+     * @brief Get the Neck Position in degrees
+     * 
+     * @return int 
+     */
+    int getNeckPos();
+
+    /**
+     * @brief Get the Last movement detected in seconds
+     * 
+     * @return int 
+     */
+    int getLastMovementDetected();
+
+    /**
      * @brief move the robot randomly
      * 
      */
@@ -244,7 +329,6 @@ public:
      * 
      */
     void returnToStartPos();
-
 
     /**
      * @brief play preprogramed song on buzzer
@@ -262,13 +346,6 @@ public:
      * 
      */
     void shutDown();
-
-    /**
-     * @brief Makes the robot search out the user and look at hiim/follow him.
-     * 
-     */
-    void interactiveMode();
-
 };
 
 #endif
