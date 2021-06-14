@@ -78,6 +78,38 @@ private:
      */
     bool followClosestObject();
 
+    /**
+     * @brief Idle state of the robot; idle animation.
+     * 
+     */
+    void idleState();
+    /**
+     * @brief Break reminder state of the robot; attention movement, break animation
+     * 
+     */
+    void reminderBreak();
+    /**
+     * @brief Walk reminder state of the robot; attention movement, notification, walk animation
+     * 
+     */
+    void reminderWalk();
+    /**
+     * @brief Water reminder state of the robot; attention movement, notification, water animation
+     * 
+     */
+    void reminderWater();
+    /**
+     * @brief Weather station state of the robot; weatherStation animation
+     * 
+     */
+    void showWeatherStation();
+    /**
+     * @brief Makes the robot search out the user and look at hiim/follow him, return true after succes.
+     * 
+     * @return true 
+     * @return false 
+     */
+    bool interactiveMode();
 public:
     /**
      * @brief Construct a new Robot object
@@ -113,31 +145,6 @@ public:
      */
     void run();
 
-    /**
-     * @brief Idle state of the robot; idle animation.
-     * 
-     */
-    void idleState();
-    /**
-     * @brief Break reminder state of the robot; attention movement, break animation
-     * 
-     */
-    void reminderBreak();
-    /**
-     * @brief Walk reminder state of the robot; attention movement, notification, walk animation
-     * 
-     */
-    void reminderWalk();
-    /**
-     * @brief Water reminder state of the robot; attention movement, notification, water animation
-     * 
-     */
-    void reminderWater();
-    /**
-     * @brief Weather station state of the robot; weatherStation animation
-     * 
-     */
-    void showWeatherStation();
 
     /**
      * @brief Get the Break Time loop interval
@@ -163,6 +170,13 @@ public:
      * @return unsigned int 
      */
     unsigned int getWeatherStationTime();
+
+    /**
+     * @brief Get the distance measured from the micro lidar in the head in mm
+     * 
+     * @return unsigned int 
+     */
+    unsigned int getMicroLidarDistance();
 
     /**
      * @brief Set the Break Time Active object
@@ -316,7 +330,6 @@ public:
      */
     void returnToStartPos();
 
-
     /**
      * @brief play preprogramed song on buzzer
      * 
@@ -333,15 +346,6 @@ public:
      * 
      */
     void shutDown();
-
-    /**
-     * @brief Makes the robot search out the user and look at hiim/follow him, return true after succes.
-     * 
-     * @return true 
-     * @return false 
-     */
-    bool interactiveMode();
-
 };
 
 #endif

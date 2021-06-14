@@ -88,6 +88,11 @@ pio device list
 ```
 After flashing the robot will instantly start working. If the robot loses power and is then reconnected it will restart the program.
 
+To open a serial monitor to the robot use the command:
+```
+pio run -t monitor
+```
+
 ## Code layout
 To write the preprogrammed code or to upload a file the code given has to be in a certain structure:
 
@@ -107,6 +112,20 @@ EOF:
 
 ```
 
+## command line interface
+The command line inteface has 3 modusses to start code with.
+1. REPL
+2. FILE
+3. PREPROGRAMMED FILE
+
+### REPL 
+You can enter a single command in here to see the resutl instantly. You can not test with integers since they are not saved from previous commands
+### FILE
+Ctr+C plus Ctr+V a full file in to the terminal to instantly parse and run the code. Warning: TH eserial buffer for arduino is famously inreliable so bigger files will most likely be read wrong. For files bigger then 10 lines of code use the PREPROGRAMMED FILE function.
+### PREPROGRAMMED FILE
+Start the pregprogrammed file found in the programCode.cpp file. You have to recompile the robot everytime you change this file. This file will also be played if no serial monitor is started.
+
+
 ## Commands:
 
 ### Instant commando's
@@ -124,7 +143,7 @@ EOF:
     -   start_up
     -   shut_down
     -   notification
-- ```WAIT x y```. x: Integer, y:
+- ```WAIT x y```. x: Integer, y: cannot be an integer variable
     -   define HOUR 
     -   MINUTE 
     -   SECOND 
@@ -138,6 +157,7 @@ IF(getState = IDLE){
 }
 ```
 Possible commands:
+-   getDistance >/</<=/>=/==/!= int
 -   getState == STATE
 -   getHeadPos >/</<=/>=/==/!= int
 -   getNeckPos >/</<=/>=/==/!= int
@@ -154,6 +174,7 @@ WHILE(getState = IDLE){
 ```
 possible conditions1
 -   x : X can be any number, The loop wil continue for x iterations.
+-   getDistance >/</<=/>=/==/!= int
 -   getState == STATE
 -   getHeadPos >/</<=/>=/==/!= int
 -   getNeckPos >/</<=/>=/==/!= int
@@ -208,6 +229,7 @@ You can not assign the output of a function to an integer variable
 
 
 ### Getters
+- ```getDistance```, Get the distance currently measured by head lidat
 - ```getBreakTime```, Get the duration of the break time reminder.
 - ```getWalkTime```. Get the duration of the walk time reminder.
 - ```getWaterTime```, Get the duration of the water time reminder.
@@ -269,7 +291,7 @@ a :
     -   SECOND 
     -   MIllI_SECOND 
 set how long the robot i allowed to follow an object in interactive mode.
-- ```follow_object DURATION = x y```: x = integer, y = 
+- ```interactive_mode DURATION = x y```: x = integer, y = 
     -   HOUR 
     -   MINUTE 
     -   SECOND 

@@ -4,43 +4,43 @@
 struct code{
     String program_code = R"(
 SETUP:
-    weatherstation = NON_ACTIVE
-    walk_reminder = NON_ACTIVE
-    weatherstation = NON_ACTIVE
-    break_reminder = NON_ACTIVE
-
-    weatherstation = ACTIVE
-    walk_reminder = ACTIVE
-    weatherstation = ACTIVE
-    break_reminder = ACTIVE
- 
-    STATE = IDLE
-    STATE = REMINDER_BREAK
-    STATE = REMINDER_WATER
-    STATE = REMINDER_WALK
-    STATE = WEATHER_STATION
-    STATE = INTERACTIVE_MODE
-    STATE = OFF  
-
-    STATE = IDLE
-
-    shut_down_after = 10 MILLI_SECOND
-    shut_down_after = 10 SECOND
-    shut_down_after = 1 MINUTE
-    shut_down_after = 1 HOUR
-
-    weatherstation DURATION = 1 MINUTE
-    walk_reminder DURATION = 1 MINUTE
-    weatherstation DURATION = 1 MINUTE
-    break_reminder DURATION = 1 MINUTE
-
-    weatherstation PERIOD = 1 MINUTE
-    walk_reminder PERIOD = 1 MINUTE
-    weatherstation PERIOD = 1 MINUTE
-    break_reminder PERIOD = 1 MINUTE
-
-    interactive_mode DURATION = 2 MINUTE
+    move_head 0
+    move_neck 0
 LOOP:
+    done = 0
+    head = 0
+    neck = 0
+    WHILE(done == 0){
+        getDistance
+        IF(getDistance < 300){
+            done = 1
+        }
+        WHILE(neck < 180){
+            neck + 20
+            move_neck neck
+            WAIT 1 SECOND
+            IF(getDistance < 300){
+                getDistance
+                done = 1
+            }
+        }
+        neck = 0
+        IF(head < 180){
+            head + 20
+        }
+        move_head head
+        IF(head >= 180){
+            head = 0
+        }
+        WAIT 1 SECOND
+    }
+    IF(done == 1){
+        return_to_start_pos
+        playSound notification
+    }
+    WHILE(done == 1){
+        WAIT 1 SECOND
+    }
 EOF:
     )";
 };

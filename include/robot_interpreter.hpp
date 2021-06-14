@@ -55,6 +55,11 @@ public:
      */
     virtual void print();
 
+    /**
+     * @brief Get the type of the node
+     * 
+     * @return NODE_TYPES 
+     */
     NODE_TYPES getType();
 };
 
@@ -343,19 +348,49 @@ public:
     void print() override;
 };
 
+/**
+ * @brief COntainsBodyNode base class for nodes containing a boyd of commands.
+ * 
+ */
 class ContainsBodyNode{
 private:
     NODE_TYPES node_type;
 public:
+    /**
+     * @brief Construct a new Contains Body Node object
+     * 
+     * @param node_type 
+     */
     ContainsBodyNode(NODE_TYPES node_type):
         node_type(node_type){}
 
+    /**
+     * @brief Construct a new Contains Body Node object
+     * 
+     */
     ContainsBodyNode(){}
 
+    /**
+     * @brief Destroy the Contains Body Node object
+     * 
+     */
     virtual ~ContainsBodyNode(){};
 
+    /**
+     * @brief 
+     * 
+     * @param robot : & Robot
+     * @param all_created_integer_nodes : std::shared_ptr<Node> *
+     * @param current_index, unsigned int *
+     * @return int 
+     */
     virtual int CheckIfConditionTrue(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index);
 
+    /**
+     * @brief add command to body node
+     * 
+     * @param command : std::shared_ptr<Node>
+     */
     virtual void addCommand(std::shared_ptr<Node> command);
 
     virtual bool isViable();
@@ -384,7 +419,7 @@ private:
      * @return true 
      * @return false 
      */
-    int CheckIfConditionTrue(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned  * current_index) override;
+    int CheckIfConditionTrue(Robot & robot, std::shared_ptr<Node> *all_created_integer_nodes, unsigned int * current_index) override;
     
 public:
     /**

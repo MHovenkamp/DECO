@@ -40,6 +40,7 @@ struct PARSE_WORDS{
     String getState = "getState";
     String getHeadPos = "getHeadPos";
     String getNeckPos = "getNeckPos";
+    String getDistance = "getDistance";
     String getLastMovementDetected = "getLastMovementDetected";
     String rngMovement = "rng_movement";
     String returnToStartPos = "return_to_start_pos";

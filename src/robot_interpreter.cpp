@@ -126,12 +126,10 @@ void Interpreter::file(String file_text){
     }
     int index = setup.indexOf("EOF:");
     if(index != -1){
-        Serial.println("EOF: found");
         setup.remove(index);
     }
     index = loop.indexOf("EOF:");
     if(index != -1){
-        Serial.println("EOF: found");
         loop.remove(index);
     }
     file_text = "";
@@ -804,6 +802,13 @@ void CommandNode::execute(Robot & robot, std::shared_ptr<Node> *all_created_inte
         robot.rngMovement();
     } else if(command == parse_words.returnToStartPos){
         robot.returnToStartPos();  
+    } else if(command == parse_words.getDistance){
+        int result = robot.getMicroLidarDistance();
+        if(result == -1){
+            Serial.println("MicroLidar did not give a correct value");
+        } else{
+            Serial.println("Distance from head at: " + String(robot.getMicroLidarDistance()) + " MM");
+        }
     } else if(command == parse_words.getHeadPos){
         Serial.println("Head at: " + String(robot.getHeadPos()) + " degrees");
     } else if(command == parse_words.getNeckPos){
@@ -817,6 +822,7 @@ void CommandNode::execute(Robot & robot, std::shared_ptr<Node> *all_created_inte
                 for(unsigned int i = 0; i < *current_index; i++){
                     IntegerNode* integer_node = static_cast<IntegerNode*>(all_created_integer_nodes[i].get());
                     if(param == integer_node->getName()){
+                        Serial.println("Moving head to: "+ String(integer_node->getValue()));
                         robot.moveHead(integer_node->getValue());
                     }
                 }
@@ -824,14 +830,17 @@ void CommandNode::execute(Robot & robot, std::shared_ptr<Node> *all_created_inte
                 for(unsigned int i = 0; i < *current_index; i++){
                     IntegerNode* integer_node = static_cast<IntegerNode*>(all_created_integer_nodes[i].get());
                     if(param == integer_node->getName()){
+                        Serial.println("Moving neck to: "+ String(integer_node->getValue()));
                         robot.moveNeck(integer_node->getValue());
                     }
                 }
             } 
         }else{
             if(command == parse_words.move_head){
+                Serial.println("Moving head to: "+ String(param.toInt()));
                 robot.moveHead(param.toInt());
             } else if(command == parse_words.move_neck){
+                Serial.println("Moving neck to: "+ String(param.toInt()));
                 robot.moveNeck(param.toInt());
             } 
         }
@@ -863,9 +872,8 @@ void WaitNode::execute( Robot & robot, std::shared_ptr<Node> *all_created_intege
     } else if(time_measurements == parse_words.HOUR_){
         rtos::ThisThread::sleep_for(MS( time_period * HOUR ));
     } else if(time_measurements == parse_words.SECOND_){
-        Serial.println("started wait "+ String(time_period * SECOND));
+        Serial.println("started wait of "+ String(time_period * SECOND) + "Milli seconds");
         rtos::ThisThread::sleep_for(MS( time_period * SECOND ));
-        Serial.println("ended wait");
     } else if(time_measurements == parse_words.MILLI_SECOND_){
         rtos::ThisThread::sleep_for(MS( time_period * MIllI_SECOND ));
     } else {
@@ -952,11 +960,12 @@ int IfNode::CheckIfConditionTrue(Robot & robot, std::shared_ptr<Node> *all_creat
         lhs = robot.getNeckPos();
     } else if(string_array[0] == parse_words.getLastMovementDetected){
         lhs = robot.getLastMovementDetected();
-    }// else{
-    //     ErrorNode error = ErrorNode(condition, "Condition not recognised: lhs function call not recognized ", line_number);
-    //     error.execute(robot);
-    //     return false;
-    // }
+    } else if(string_array[0] == parse_words.getDistance){
+        lhs = robot.getMicroLidarDistance();
+        if(lhs == -1){
+            return false;
+        }
+    }
     char letter_rhs;
     char letter_lhs;
     bool is_digit_rhs = true;

@@ -98,15 +98,18 @@ void Robot::run(){ // TODO robot keeps starting up in walkreminder mode
 
 unsigned int Robot::getBreakTime(){
     return break_time;
-};
+}
 unsigned int Robot::getWalkTime(){
     return walk_time;
-};
+}
 unsigned int Robot::getWaterTime(){
     return water_time;
-};
+}
 unsigned int Robot::getWeatherStationTime(){
     return weather_station_time;
+}
+unsigned int Robot::getMicroLidarDistance(){
+    return lidar.getDistanceMM();
 }
 
 void Robot::setBreakTimeActive(bool active){
@@ -218,6 +221,8 @@ int Robot::getNeckPos(){
 int Robot::getLastMovementDetected(){
     return pir_sensor.getLastMovement();
 }
+
+
 
 void Robot::shutDown(){
     returnToStartPos();

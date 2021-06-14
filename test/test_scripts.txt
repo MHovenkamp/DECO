@@ -1,3 +1,5 @@
+Some of the run test scripts used to determine if the interpreter is functional
+
 test for IntegerNode and MAthNode:
 SETUP:
     x = 3
@@ -77,3 +79,9 @@ SETUP:
     getNeckPos
 EOF:
     
+
+SETUP:
+    x = 180
+    move_head x
+    move_neck x
+EOF:
