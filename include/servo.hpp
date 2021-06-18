@@ -44,6 +44,8 @@ struct ServoPositions{
 class Servo{
 private:
     const int servo_pin;
+    unsigned int current_rotation = 0;
+    unsigned int rotation_speed = 2;
     unsigned int speed = 1;
     unsigned int current_degree_wait;
     unsigned int current_degree_goal = 90;

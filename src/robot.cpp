@@ -422,7 +422,6 @@ bool Robot::followClosestObject(){
                     //because loop starts from center neck and ead coordinates have to be calculated using the middle and the spiral results.
                     tmp_x_coordinate = found_object_x+X;
                     tmp_y_coordinate = found_object_y+Y;
-                    Serial.println("searching at: "+ String(tmp_x_coordinate) + " " + String(tmp_y_coordinate));
                     moveNeck(tmp_x_coordinate);
                     moveHead(tmp_y_coordinate);
 
@@ -439,9 +438,9 @@ bool Robot::followClosestObject(){
 
                     //The spiral takes very short steps in the beginning so we speed up the timing when small steps are taken.
                     if(abs(prev_x - X) > 5 || abs(prev_y - Y) > 5){
-                        rtos::ThisThread::sleep_for(MS(120));
+                        rtos::ThisThread::sleep_for(MS(300));
                     } else{
-                        rtos::ThisThread::sleep_for(MS(100));
+                        rtos::ThisThread::sleep_for(MS(250));
                     }
                     sensor_data = lidar.getDistanceMM();
                     if( sensor_data > 0 && sensor_data <= max_range && sensor_data >= min_range){
