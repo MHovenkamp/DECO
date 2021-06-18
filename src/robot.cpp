@@ -399,7 +399,7 @@ bool Robot::interactiveMode(){
 
 bool Robot::followClosestObject(){
     int min_range = 50;
-    int max_range = 300; // max distance in millimeters
+    int max_range = 150; // max distance in millimeters
     bool found_objects;
     int sensor_data = lidar.getDistanceMM();
     if( sensor_data > 0 && sensor_data <= max_range){ // -1 default result when error occured in reading data
@@ -438,9 +438,9 @@ bool Robot::followClosestObject(){
 
                     //The spiral takes very short steps in the beginning so we speed up the timing when small steps are taken.
                     if(abs(prev_x - X) > 5 || abs(prev_y - Y) > 5){
-                        rtos::ThisThread::sleep_for(MS(120));
+                        rtos::ThisThread::sleep_for(MS(300));
                     } else{
-                        rtos::ThisThread::sleep_for(MS(100));
+                        rtos::ThisThread::sleep_for(MS(250));
                     }
                     sensor_data = lidar.getDistanceMM();
                     if( sensor_data > 0 && sensor_data <= max_range && sensor_data >= min_range){
