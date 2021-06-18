@@ -29,6 +29,8 @@ Connect the upper head to the lower head with some glue making sure the head loo
 Slide the two neck pieces to each other attaching the robot together, make sure al the wires can get to the arduino with some space for movement. glue the lower and upper body together after connecting the usb cable into the arduino making sure the PIR sensor looks forward.
 
 Voila! Robot. 
+
+
 ![DECO](https://github.com/MHovenkamp/DECO/blob/interface_development/images/DECO.jpg)
 
 
@@ -56,7 +58,7 @@ Voila! Robot.
 total cost from amazon +- 63,18, You can probably get cheaper components from your local stores.  
 
 ## Documentation
-For documentation run 
+For documentation run this command in the github directory
 ```
 doxygen Doxyfile
 ```
@@ -121,7 +123,7 @@ The command line inteface has 3 modusses to start code with.
 ### REPL 
 You can enter a single command in here to see the resutl instantly. You can not test with integers since they are not saved from previous commands
 ### FILE
-Ctr+C plus Ctr+V a full file in to the terminal to instantly parse and run the code. Warning: TH eserial buffer for arduino is famously inreliable so bigger files will most likely be read wrong. For files bigger then 10 lines of code use the PREPROGRAMMED FILE function.
+Ctrl+C plus Ctrl+V a full file in to the terminal to instantly parse and run the code. Warning: TH eserial buffer for arduino is famously inreliable so bigger files will most likely be read wrong. For files bigger then 10 lines of code use the PREPROGRAMMED FILE function.
 ### PREPROGRAMMED FILE
 Start the pregprogrammed file found in the programCode.cpp file. You have to recompile the robot everytime you change this file. This file will also be played if no serial monitor is started.
 
@@ -149,7 +151,7 @@ Start the pregprogrammed file found in the programCode.cpp file. You have to rec
     -   SECOND 
     -   MIllI_SECOND 
 
-### if conditions
+### IF conditions
 You can maken if statement using some of the getters describe in the next paragraph. You can not place one if statement in another if statement. 
 ```
 IF(getState = IDLE){
@@ -165,7 +167,7 @@ Possible commands:
 
 you can use an int variable for every int mentioned above.
 
-### while loops
+### WHILE loops
 You can make a small part of your code loop for as long as a given ocndition is true
 ```
 WHILE(getState = IDLE){
@@ -225,7 +227,7 @@ SETUP:
 EOF:
 ```
 limitations
-You can not assign the output of a function to an integer variable
+You can not assign the output of a function to an integer variable.
 
 
 ### Getters
