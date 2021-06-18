@@ -399,7 +399,7 @@ bool Robot::interactiveMode(){
 
 bool Robot::followClosestObject(){
     int min_range = 50;
-    int max_range = 300; // max distance in millimeters
+    int max_range = 150; // max distance in millimeters
     bool found_objects;
     int sensor_data = lidar.getDistanceMM();
     if( sensor_data > 0 && sensor_data <= max_range){ // -1 default result when error occured in reading data
@@ -422,6 +422,7 @@ bool Robot::followClosestObject(){
                     //because loop starts from center neck and ead coordinates have to be calculated using the middle and the spiral results.
                     tmp_x_coordinate = found_object_x+X;
                     tmp_y_coordinate = found_object_y+Y;
+                    Serial.println("searching at: "+ String(tmp_x_coordinate) + " " + String(tmp_y_coordinate));
                     moveNeck(tmp_x_coordinate);
                     moveHead(tmp_y_coordinate);
 

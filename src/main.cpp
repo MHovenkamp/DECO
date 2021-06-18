@@ -1,3 +1,18 @@
+// Copyright (C) 2021  Maaike Hovenkamp
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #include "robot_interpreter.hpp"
 
 rtos::Thread servo_task;
@@ -96,9 +111,17 @@ void robotControlTask(){
  * 
  */
 void setup(){
+
+
   Serial.begin(9600);
   delay(2000);
   robot_test.setup();
+  
+  Serial.println("==========================================================================");
+  Serial.println("DECO  Copyright (C) 2021  Maaike Hovenkamp");
+  Serial.println("This program comes with ABSOLUTELY NO WARRANTY; for details type");
+  Serial.println("This is free software, and you are welcome to redistribute it");
+  Serial.println("==========================================================================");
 
   osStatus error;
   error = pir_task.start(pirTask);
