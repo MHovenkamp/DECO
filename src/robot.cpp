@@ -28,7 +28,7 @@ void Robot::setup(){
     Serial.println("---finished setup robot---");
 };
 
-void Robot::run(){ // TODO robot keeps starting up in walkreminder mode
+void Robot::run(){
     if( pir_sensor.getLastMovement() >= 1200){ //after 20 minutes of no activity shut down.
         setState(ROBOT_STATES::OFF);
     }

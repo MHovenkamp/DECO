@@ -71,7 +71,7 @@ doxygen Doxyfile
 Al other models can be found by opening software_models.html.
 
 ## Building and running
-This robot is compiled and flashed by [PlatformIO](https://platformio.org/). Install platformIO core to work with this project. Then run the folowing commands in a terminal in the directory. The directory will build the robot and flash to your arduino. PlatformIO will install all libraries and updates by itself. If something does not work try updating the libraries through platformIO trough the commando 
+This robot is compiled and flashed by [PlatformIO](https://platformio.org/). Install platformIO core to work with this project. Then run the following commands in a terminal in the directory. The directory will build the robot and flash to your arduino. PlatformIO will install all libraries and updates by itself. If something does not work try updating the libraries through platformIO trough the commando 
 ```
 platformio update
 ```
@@ -92,13 +92,13 @@ After flashing the robot will instantly start working. If the robot loses power 
 
 To open a serial monitor to the robot use the command:
 ```
-pio run -t monitor
+pio device monitor
 ```
 
 ## Code layout
 To write the preprogrammed code or to upload a file the code given has to be in a certain structure:
 
-The setup wil run once and can be used to place som e setters before you start your program. Th eloop section will do exactly that: loop until the robot dies or power is removed.
+The setup wil run once and can be used to place som e setters before you start your program. The loop section will do exactly that: loop until the robot dies or power is removed.
 
 ```
 SETUP:
@@ -115,17 +115,17 @@ EOF:
 ```
 
 ## command line interface
-The command line inteface has 3 modusses to start code with.
+The command line interface has 3 ways to start code with.
 1. REPL
 2. FILE
 3. PREPROGRAMMED FILE
 
 ### REPL 
-You can enter a single command in here to see the resutl instantly. You can not test with integers since they are not saved from previous commands
+You can enter a single command in here to see the result instantly. You can not test with integers since they are not saved from previous commands
 ### FILE
-Ctrl+C plus Ctrl+V a full file in to the terminal to instantly parse and run the code. Warning: TH eserial buffer for arduino is famously inreliable so bigger files will most likely be read wrong. For files bigger then 10 lines of code use the PREPROGRAMMED FILE function.
+Ctrl+C plus Ctrl+V a full file in to the terminal to instantly parse and run the code. Warning: The serial buffer for arduino is famously unreliable so bigger files will most likely be read wrong. For files bigger then 10 lines of code use the PREPROGRAMMED FILE function.
 ### PREPROGRAMMED FILE
-Start the pregprogrammed file found in the programCode.cpp file. You have to recompile the robot everytime you change this file. This file will also be played if no serial monitor is started.
+Start the preprogrammed file found in the programCode.cpp file. You have to recompile the robot every time you change this file. This file will also be played if no serial monitor is started.
 
 
 ## Commands:
@@ -136,7 +136,7 @@ Start the pregprogrammed file found in the programCode.cpp file. You have to rec
 - ```break_reminder```, Show the break reminder on the screen for the set duration. 
 - ```walk_reminder```, Show the walk reminder on the screen for the set duration.
 - ```water_reminder```. Show the water reminder on the screen for the set duration.
-- ```show_weather_station```,show the weatherstation on the screen for the set duration. NOTE: The temperatures, baro and humidity are measured inside the robot and can be inaccurate. 
+- ```show_weather_station```,show the weatherstation on the screen for the set duration. NOTE: The temperatures, BARO and humidity are measured inside the robot and can be inaccurate. 
 - ```rng_movement```, move the robot once to a random position.
 - ```return_to_start_pos```, Return the robot to the start position of 90 by 90 degrees. 
 - ```move_head x```, move the head to x degrees. 40 <= x => 140
@@ -168,7 +168,7 @@ Possible commands:
 you can use an int variable for every int mentioned above.
 
 ### WHILE loops
-You can make a small part of your code loop for as long as a given ocndition is true
+You can make a small part of your code loop for as long as a given condition is true
 ```
 WHILE(getState = IDLE){
     // Code to loop execute if statement is true.
@@ -181,14 +181,14 @@ possible conditions1
 -   getHeadPos >/</<=/>=/==/!= int
 -   getNeckPos >/</<=/>=/==/!= int
 -   getLastMovementDetected >/</<=/>=/==/!= int
-IMPORTANT: if you change the value of an integer value used in the condition this change will not affect the x used in the condition. You can not use getHeadPos > x and then change x in the while loop to shorten or lenghten the loop. 
+IMPORTANT: if you change the value of an integer value used in the condition this change will not affect the x used in the condition. You can not use getHeadPos > x and then change x in the while loop to shorten or lengthen the loop. 
 
 ### Integers and math
 The code for this robot contains a small amount of possible math. You can assign a number to a variable like this:
 ```
 x = 6
 variable = 6
-variarble_number = 6
+variable_number = 6
 ```
 You can add, subtract, divide and multiply with integers. You can only change existing integers.
 ```
